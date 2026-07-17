@@ -22,7 +22,7 @@ The audience selector drives which criteria are required vs. optional. A researc
 
 | Pathway | Tier | Use case |
 |---|---|---|
-| **A — Accessible** | L1 | Publishing on Figshare, an institutional repository, GitHub, or as paper supplementary material. DOI + basic metadata. No Croissant required. |
+| **A — Accessible** | L1 | Publishing on Figshare, an institutional repository, GitHub, or as paper supplementary material. DOI + basic metadata. Croissant descriptor **recommended** (not required) — including one at L1 makes the dataset trivially upgradable to L2 later and ML-loadable today. |
 | **B — Faithful** | L2 | Publishing on Hugging Face, Kaggle, OpenML, or Dataverse. ML-ready metadata expected; Croissant descriptor required. |
 | **C — Task-ready** | L3 | Dataset intended to support model training in regulated or sensitive domains (biomedical, clinical, institutional human-subjects). Full provenance, bias audit, ethics-as-metadata, model-card linkage. |
 
@@ -63,10 +63,10 @@ The review screen shows a 7×3 heatmap. A cell turns green only when all its req
 
 - **React** + **Vite** for the static bundle
 - **Tailwind CSS** for styling
-- **zod** for JSON-Schema validation of user inputs
+- **zod** for JSON-Schema validation of user inputs (also used to validate generated Croissant descriptors against the bundled MLCommons schema)
 - **HashRouter** for deep links on GitHub Pages without server-side rewrites
 - Plain-JS JSON-LD construction (no Node runtime required at load time)
-- In-memory state with optional file export/import (no `localStorage`)
+- **`localStorage`** for resumable in-progress assessments, plus **file export/import** for portability and sharing across browsers, devices, and sessions. `localStorage` is a prototype-grade choice (private-browsing tabs disable it, and it is per-origin/per-browser); the durable, shareable artifact is the exported JSON profile
 
 ## Repository structure
 

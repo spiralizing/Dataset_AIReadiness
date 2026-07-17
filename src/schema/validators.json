@@ -1,0 +1,96 @@
+{
+  "$comment": "Discipline-specific validator registry (app_design.md §7.4). The tool's core validation (Croissant structural+referential, SHACL for PROV-O, identifier grounding) is general; this registry catalogues field-specific validators surfaced by declared format / Pathway-C sub-domain. 'execution' controls integration: 'in-browser' validators can run in place and mark a criterion automated; 'cli'/'web-service' validators are referenced and their outcome recorded as attested evidence. 'applies_to' is open-world (free tags: format names and/or sub-domain ids), not validated against vocabularies.json. For disciplines outside this seeded set, the 'registries' below are the authoritative lookup.",
+  "version": "0.1.0",
+  "validators": [
+    {
+      "id": "bids-validator",
+      "discipline": "Neuroimaging",
+      "applies_to": ["BIDS", "NIfTI", "neuroimaging"],
+      "standard": "Brain Imaging Data Structure (BIDS)",
+      "standard_url": "https://bids.neuroimaging.io/",
+      "validator_name": "BIDS Validator",
+      "validator_url": "https://bids-standard.github.io/bids-validator/",
+      "reference_doi": "10.1038/sdata.2016.44",
+      "execution": "in-browser",
+      "note": "Deno/JS build runs in the browser; can execute in place and mark the criterion automated."
+    },
+    {
+      "id": "frictionless",
+      "discipline": "Tabular (general)",
+      "applies_to": ["CSV", "TSV", "Parquet", "Table Schema", "Data Package"],
+      "standard": "Frictionless Table Schema / Data Package",
+      "standard_url": "https://frictionlessdata.io/",
+      "validator_name": "Frictionless",
+      "validator_url": "https://framework.frictionlessdata.io/",
+      "execution": "in-browser",
+      "note": "JavaScript port available; can validate a tabular resource in place. General-purpose, not discipline-locked."
+    },
+    {
+      "id": "shacl",
+      "discipline": "Any RDF (general)",
+      "applies_to": ["JSON-LD", "Turtle", "RDF", "PROV-O"],
+      "standard": "Shapes Constraint Language (SHACL)",
+      "standard_url": "https://www.w3.org/TR/shacl/",
+      "validator_name": "rdf-validate-shacl",
+      "validator_url": "https://github.com/zazuko/rdf-validate-shacl",
+      "execution": "in-browser",
+      "note": "The tool's own engine for graph-level validation; used for the PROV-O record and any RDF release. Listed here to document the general RDF option."
+    },
+    {
+      "id": "cf-checker",
+      "discipline": "Climate / geoscience",
+      "applies_to": ["NetCDF", "CF", "climate"],
+      "standard": "Climate and Forecast (CF) Metadata Conventions",
+      "standard_url": "https://cfconventions.org/",
+      "validator_name": "CF-checker",
+      "validator_url": "https://github.com/cedadev/cf-checker",
+      "reference_doi": "10.5194/gmd-10-3947-2017",
+      "execution": "cli",
+      "note": "Python CLI; run externally and record the report as attested evidence."
+    },
+    {
+      "id": "ddi-validation",
+      "discipline": "Social sciences",
+      "applies_to": ["DDI", "SPSS", "Stata", "social-science"],
+      "standard": "Data Documentation Initiative (DDI-Codebook / DDI-Lifecycle)",
+      "standard_url": "https://ddialliance.org/",
+      "validator_name": "Colectica / DDI validation tools",
+      "validator_url": "https://www.colectica.com/",
+      "execution": "cli",
+      "note": "Desktop/CLI tooling; run externally and record the outcome as attested evidence."
+    },
+    {
+      "id": "gbif-validator",
+      "discipline": "Ecology / biodiversity",
+      "applies_to": ["Darwin Core", "DwC-A", "biodiversity"],
+      "standard": "Darwin Core",
+      "standard_url": "https://dwc.tdwg.org/",
+      "validator_name": "GBIF Data Validator",
+      "validator_url": "https://www.gbif.org/tools/data-validator",
+      "reference_doi": "10.1371/journal.pone.0029715",
+      "execution": "web-service",
+      "note": "Hosted web service; submit externally and record the validation summary as attested evidence."
+    }
+  ],
+  "registries": [
+    {
+      "id": "fairsharing",
+      "name": "FAIRsharing",
+      "url": "https://fairsharing.org/",
+      "reference_doi": "10.1038/s41587-019-0080-8",
+      "note": "Registry of standards, databases, and policies tagged by discipline; authoritative entry point for the long tail."
+    },
+    {
+      "id": "dcc-metadata",
+      "name": "DCC Disciplinary Metadata Catalogue",
+      "url": "https://www.dcc.ac.uk/guidance/standards/metadata",
+      "note": "Discipline-organised metadata standards with implementation tools and repository use cases."
+    },
+    {
+      "id": "rda-msc",
+      "name": "RDA Metadata Standards Catalog",
+      "url": "https://rdamsc.bath.ac.uk/",
+      "note": "Community-maintained successor to the DCC catalogue; versioned, open codebase."
+    }
+  ]
+}

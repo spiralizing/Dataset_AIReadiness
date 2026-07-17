@@ -1,0 +1,187 @@
+{
+  "$comment": "Controlled vocabularies referenced from matrix.json criteria via 'vocabulary_key'. Sourced from Tables 3, 5, 7, 12 of González-Espinoza (2026). 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
+  "version": "0.1.0",
+  "vocabularies": {
+    "licenses": {
+      "label": "License",
+      "source": "Section 2.5, paper",
+      "values": [
+        { "id": "CC-BY-4.0", "label": "Creative Commons Attribution 4.0", "url": "https://creativecommons.org/licenses/by/4.0/" },
+        { "id": "CC-BY-SA-4.0", "label": "Creative Commons Attribution-ShareAlike 4.0", "url": "https://creativecommons.org/licenses/by-sa/4.0/" },
+        { "id": "CC-BY-NC-4.0", "label": "Creative Commons Attribution-NonCommercial 4.0", "url": "https://creativecommons.org/licenses/by-nc/4.0/" },
+        { "id": "CC0-1.0", "label": "Creative Commons Zero (Public Domain)", "url": "https://creativecommons.org/publicdomain/zero/1.0/" },
+        { "id": "ODbL-1.0", "label": "Open Data Commons Open Database License", "url": "https://opendatacommons.org/licenses/odbl/1-0/" },
+        { "id": "MIT", "label": "MIT License (code)", "url": "https://opensource.org/license/mit" },
+        { "id": "Apache-2.0", "label": "Apache License 2.0 (code)", "url": "https://www.apache.org/licenses/LICENSE-2.0" },
+        { "id": "All-rights-reserved", "label": "All rights reserved (closed)" }
+      ]
+    },
+    "formats_tabular": {
+      "label": "Tabular formats",
+      "source": "Table 5, paper",
+      "values": [
+        { "id": "Parquet", "label": "Apache Parquet (columnar, compressed, typed)" },
+        { "id": "Arrow", "label": "Apache Arrow (in-memory columnar)" },
+        { "id": "CSV", "label": "CSV (lowest-common-denominator fallback)" },
+        { "id": "TSV", "label": "TSV" }
+      ]
+    },
+    "formats_array": {
+      "label": "Multidimensional / scientific-array formats",
+      "source": "Table 5, paper",
+      "values": [
+        { "id": "HDF5", "label": "HDF5" },
+        { "id": "NetCDF", "label": "NetCDF" },
+        { "id": "Zarr", "label": "Zarr" },
+        { "id": "ROOT", "label": "ROOT (high-energy physics)" }
+      ]
+    },
+    "formats_imaging": {
+      "label": "Imaging / volumetric formats",
+      "source": "Table 5, paper",
+      "values": [
+        { "id": "DICOM", "label": "DICOM" },
+        { "id": "NIfTI", "label": "NIfTI" },
+        { "id": "BIDS", "label": "BIDS-organized directory" }
+      ]
+    },
+    "formats_clinical": {
+      "label": "Laboratory / clinical controlled vocabularies",
+      "source": "Table 5, paper",
+      "values": [
+        { "id": "LOINC", "label": "LOINC (lab observations)" },
+        { "id": "SNOMED-CT", "label": "SNOMED CT (clinical terminology)" },
+        { "id": "UCUM", "label": "UCUM (units of measure)" },
+        { "id": "ICD-10", "label": "ICD-10 / ICD-11" },
+        { "id": "RxNorm", "label": "RxNorm (medications)" }
+      ]
+    },
+    "formats_other": {
+      "label": "Other formats",
+      "source": "Table 5, paper",
+      "values": [
+        { "id": "JSONL", "label": "JSONL (text / records)" },
+        { "id": "WAV", "label": "WAV (audio)" },
+        { "id": "FLAC", "label": "FLAC (audio)" },
+        { "id": "OGG", "label": "OGG (audio)" }
+      ]
+    },
+    "repositories_l1": {
+      "label": "L1 / Pathway A repositories",
+      "source": "Table 3 + Table 11, paper",
+      "values": [
+        { "id": "Figshare", "label": "Figshare" },
+        { "id": "Zenodo", "label": "Zenodo" },
+        { "id": "Dryad", "label": "Dryad" },
+        { "id": "OSF", "label": "OSF" },
+        { "id": "Institutional", "label": "Institutional repository" },
+        { "id": "GitHub", "label": "GitHub (with DOI minted via Zenodo)" }
+      ]
+    },
+    "repositories_l2": {
+      "label": "L2 / Pathway B repositories",
+      "source": "Table 3 + Table 11, paper",
+      "values": [
+        { "id": "HuggingFace", "label": "Hugging Face Datasets" },
+        { "id": "Kaggle", "label": "Kaggle" },
+        { "id": "OpenML", "label": "OpenML" },
+        { "id": "Dataverse", "label": "Dataverse" },
+        { "id": "Dryad", "label": "Dryad" },
+        { "id": "Zenodo", "label": "Zenodo (for larger datasets)" }
+      ]
+    },
+    "repositories_l3_general": {
+      "label": "L3 / Pathway C generic repositories",
+      "source": "Table 3 + paper Section 2.5",
+      "values": [
+        { "id": "PhysioNet", "label": "PhysioNet" },
+        { "id": "NIHDataCommons", "label": "NIH Data Commons" },
+        { "id": "dbGaP", "label": "dbGaP" },
+        { "id": "ICPSR", "label": "ICPSR" },
+        { "id": "GenBank", "label": "GenBank" },
+        { "id": "PDB", "label": "Protein Data Bank" },
+        { "id": "PANGAEA", "label": "PANGAEA" }
+      ]
+    },
+    "repositories_l3_bridge2ai": {
+      "label": "L3 / Pathway C Bridge2AI Grand Challenges",
+      "source": "Clark et al. 2026, named in [1]",
+      "values": [
+        { "id": "CHoRUS", "label": "CHoRUS — Bridge2AI Clinical Care Grand Challenge" },
+        { "id": "CM4AI", "label": "CM4AI — Bridge2AI Cell Maps for AI Grand Challenge" },
+        { "id": "Bridge2AIVoice", "label": "Bridge2AI-Voice — Voice as a Biomarker of Health Grand Challenge" },
+        { "id": "AIREADI", "label": "AI-READI — Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights Grand Challenge" }
+      ]
+    },
+    "consent_basis": {
+      "label": "Consent basis",
+      "source": "Table 7, paper",
+      "values": [
+        { "id": "documented_collection", "label": "Documented collection consent" },
+        { "id": "documented_secondary_use", "label": "Documented consent covering secondary use" },
+        { "id": "granular_per_use", "label": "Granular per-use consent" },
+        { "id": "broad_research_use", "label": "Broad consent for research use" },
+        { "id": "waiver_of_consent", "label": "IRB-approved waiver of consent" },
+        { "id": "NA_non_human_subjects", "label": "Not applicable — non-human-subjects data" },
+        { "id": "NA_public_data", "label": "Not applicable — already-public data" }
+      ]
+    },
+    "de_id_methods": {
+      "label": "De-identification methods",
+      "source": "Table 7 + paper Sections 4.3 / 6.4",
+      "values": [
+        { "id": "HIPAA-Safe-Harbor", "label": "HIPAA Safe Harbor" },
+        { "id": "HIPAA-Expert-Determination", "label": "HIPAA Expert Determination" },
+        { "id": "k-anonymity", "label": "k-anonymity" },
+        { "id": "l-diversity", "label": "l-diversity" },
+        { "id": "t-closeness", "label": "t-closeness" },
+        { "id": "differential-privacy", "label": "Differential privacy" },
+        { "id": "pseudonymization", "label": "Pseudonymization with key escrow" },
+        { "id": "none-needed", "label": "None needed (non-personal data)" }
+      ]
+    },
+    "access_governance": {
+      "label": "Access governance tier",
+      "source": "Table 7, paper",
+      "values": [
+        { "id": "open", "label": "Open access" },
+        { "id": "registered", "label": "Registered (account-gated, no review)" },
+        { "id": "restricted", "label": "Restricted (DUA required)" },
+        { "id": "controlled", "label": "Controlled (DAC review required)" },
+        { "id": "embargoed", "label": "Embargoed (open after a fixed date)" }
+      ]
+    },
+    "ethics_oversight": {
+      "label": "Ethics oversight",
+      "source": "Table 7, paper",
+      "values": [
+        { "id": "IRB-approved", "label": "IRB approved" },
+        { "id": "IRB-exempt", "label": "IRB exempt" },
+        { "id": "ethics-committee", "label": "Reviewed by equivalent ethics committee" },
+        { "id": "data-access-committee", "label": "Reviewed by data access committee (DAC)" },
+        { "id": "NA-non-human-subjects", "label": "Not applicable — non-human-subjects data" }
+      ]
+    },
+    "stakeholder_roles": {
+      "label": "Stakeholder roles (CRediT-style)",
+      "source": "Table 12, paper",
+      "values": [
+        { "id": "data_steward", "label": "Data steward — FAIRness, Computability" },
+        { "id": "domain_expert", "label": "Domain expert — Characterization, Ethics" },
+        { "id": "data_engineer", "label": "Data engineer — Provenance, Sustainability" },
+        { "id": "ml_practitioner", "label": "ML practitioner — Pre-model Explainability, downstream fit" },
+        { "id": "governance_officer", "label": "Governance officer — Ethics, ongoing oversight" }
+      ]
+    },
+    "data_centric_interventions": {
+      "label": "Data-centric green-AI interventions",
+      "source": "Table 9, paper",
+      "values": [
+        { "id": "curation", "label": "Curation (remove low-signal records)" },
+        { "id": "distillation", "label": "Distillation (compress while preserving coverage)" },
+        { "id": "active_learning", "label": "Active learning (prioritize informative samples)" },
+        { "id": "curriculum", "label": "Curriculum design (order examples easy → hard)" }
+      ]
+    }
+  }
+}

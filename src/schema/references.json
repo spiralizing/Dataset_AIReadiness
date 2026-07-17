@@ -1,0 +1,150 @@
+{
+  "$comment": "Citation registry for the assessment matrix and pathway descriptions. Keys here are the only valid values for any 'references' array in matrix.json or pathways.json. Mirrors the bibliography of González-Espinoza (2026); reference numbers in [brackets] match the source paper.",
+  "version": "0.1.0",
+  "citations": {
+    "Clark2026": {
+      "ref": 1,
+      "authors": "Clark, T. et al.",
+      "year": 2026,
+      "title": "AI-readiness Criteria for Biomedical Data",
+      "venue": "bioRxiv preprint",
+      "doi": "10.1101/2024.10.23.619844"
+    },
+    "Lawrence2017": {
+      "ref": 2,
+      "authors": "Lawrence, N. D.",
+      "year": 2017,
+      "title": "Data Readiness Levels",
+      "venue": "arXiv:1705.02245",
+      "doi": "10.48550/arXiv.1705.02245"
+    },
+    "Bahim2020": {
+      "ref": 3,
+      "authors": "Bahim, C. et al.",
+      "year": 2020,
+      "title": "The FAIR Data Maturity Model: An Approach to Harmonise FAIR Assessments",
+      "venue": "Data Science Journal 19:41",
+      "doi": "10.5334/dsj-2020-041"
+    },
+    "Wilkinson2016": {
+      "ref": 4,
+      "authors": "Wilkinson, M. D. et al.",
+      "year": 2016,
+      "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+      "venue": "Scientific Data 3:160018",
+      "doi": "10.1038/sdata.2016.18"
+    },
+    "KidwaiKhan2024": {
+      "ref": 5,
+      "authors": "Kidwai-Khan, F. et al.",
+      "year": 2024,
+      "title": "A roadmap to artificial intelligence (AI): Methods for designing and building AI ready data to promote fairness",
+      "venue": "Journal of Biomedical Informatics 154:104654",
+      "doi": "10.1016/j.jbi.2024.104654"
+    },
+    "SalehiSchmeink2024": {
+      "ref": 6,
+      "authors": "Salehi, S. and Schmeink, A.",
+      "year": 2024,
+      "title": "Data-Centric Green Artificial Intelligence: A Survey",
+      "venue": "IEEE Transactions on Artificial Intelligence 5(5):1973-1989",
+      "doi": "10.1109/TAI.2023.3315272"
+    },
+    "Aldoseri2023": {
+      "ref": 7,
+      "authors": "Aldoseri, A., Al-Khalifa, K. N., and Hamouda, A. M.",
+      "year": 2023,
+      "title": "Re-Thinking Data Strategy and Integration for Artificial Intelligence: Concepts, Opportunities, and Challenges",
+      "venue": "Applied Sciences 13(12):7082",
+      "doi": "10.3390/app13127082"
+    },
+    "LawrenceMontgomery2024": {
+      "ref": 8,
+      "authors": "Lawrence, N. D. and Montgomery, J.",
+      "year": 2024,
+      "title": "Accelerating AI for science: open data science for science",
+      "venue": "Royal Society Open Science 11(8):231130",
+      "doi": "10.1098/rsos.231130"
+    },
+    "W3CPROVO2013": {
+      "ref": 9,
+      "authors": "Lebo, T., Sahoo, S., and McGuinness, D. (eds.)",
+      "year": 2013,
+      "title": "PROV-O: The PROV Ontology",
+      "venue": "W3C Recommendation",
+      "url": "https://www.w3.org/TR/prov-o/"
+    },
+    "Akhtar2024": {
+      "ref": 10,
+      "authors": "Akhtar, M. et al.",
+      "year": 2024,
+      "title": "Croissant: A Metadata Format for ML-Ready Datasets",
+      "venue": "DEEM '24, ACM, pp. 1-6",
+      "doi": "10.1145/3650203.3663326"
+    },
+    "Gebru2021": {
+      "ref": 11,
+      "authors": "Gebru, T. et al.",
+      "year": 2021,
+      "title": "Datasheets for Datasets",
+      "venue": "Communications of the ACM 64(12):86-92",
+      "doi": "10.1145/3458723"
+    },
+    "DataCardsGoogle": {
+      "ref": 12,
+      "authors": "Google Research",
+      "year": null,
+      "title": "The Data Cards Playbook",
+      "venue": "Google Research",
+      "url": "https://sites.research.google/datacardsplaybook"
+    },
+    "Mitchell2019": {
+      "ref": 13,
+      "authors": "Mitchell, M. et al.",
+      "year": 2019,
+      "title": "Model Cards for Model Reporting",
+      "venue": "FAT* '19, ACM, pp. 220-229",
+      "doi": "10.1145/3287560.3287596"
+    },
+    "Rostamzadeh2022": {
+      "ref": 14,
+      "authors": "Rostamzadeh, N. et al.",
+      "year": 2022,
+      "title": "Healthsheet: Development of a Transparency Artifact for Health Datasets",
+      "venue": "FAccT '22, ACM, pp. 1943-1961",
+      "doi": "10.1145/3531146.3533239"
+    },
+    "OpenAIGPT55": {
+      "ref": 15,
+      "authors": "OpenAI",
+      "year": 2026,
+      "title": "GPT-5.5 System Card",
+      "venue": "OpenAI",
+      "url": "https://openai.com/index/gpt-5-5-system-card/"
+    },
+    "Ravi2022": {
+      "ref": 16,
+      "authors": "Ravi, N. et al.",
+      "year": 2022,
+      "title": "FAIR principles for AI models with a practical application for accelerated high energy diffraction microscopy",
+      "venue": "Scientific Data 9:657",
+      "doi": "10.1038/s41597-022-01712-9"
+    },
+    "Blatter2022": {
+      "ref": 17,
+      "authors": "Blatter, T. U., Witte, H., Nakas, C. T., and Leichtle, A. B.",
+      "year": 2022,
+      "title": "Big Data in Laboratory Medicine — FAIR Quality for AI?",
+      "venue": "Diagnostics 12(8):1923",
+      "doi": "10.3390/diagnostics12081923"
+    },
+    "Raza2024": {
+      "ref": 18,
+      "authors": "Raza, S., Ghuge, S., Ding, C., Dolatabadi, E., and Pandya, D.",
+      "year": 2024,
+      "title": "FAIR Enough: Develop and Assess a FAIR-Compliant Dataset for Large Language Model Training?",
+      "venue": "Data Intelligence 6(2):559-585",
+      "doi": "10.1162/dint_a_00255"
+    }
+  }
+}

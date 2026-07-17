@@ -1,0 +1,252 @@
+{
+  "$comment": "Pathway definitions for the audience selector. Three pathways A/B/C aligned to L1/L2/L3 with cumulative semantics: B requires every L1 + L2 criterion in matrix.json; C requires every L1 + L2 + L3 criterion. Pathway C has six sub-domains; each sub-domain may add or relabel criteria scoped strictly to the Ethics dimension at L3 via 'ethics_overlay'. Other dimensions are constant across sub-domains.",
+  "version": "0.1.0",
+  "pathways": [
+    {
+      "id": "A",
+      "name": "Accessible",
+      "level": "L1",
+      "drl_band": "C",
+      "tagline": "I want to publish this on Figshare, my institutional repository, GitHub, or as supplementary material to a paper.",
+      "deposition_targets_vocabulary": "repositories_l1",
+      "outputs": [
+        "assessment-report.json",
+        "datasheet.md",
+        "croissant.json (recommended, included by default)"
+      ],
+      "references": ["Clark2026", "Lawrence2017"]
+    },
+    {
+      "id": "B",
+      "name": "Faithful",
+      "level": "L2",
+      "drl_band": "B",
+      "tagline": "I want to publish this on Hugging Face, Kaggle, OpenML, or Dataverse — anywhere that expects ML-ready metadata.",
+      "deposition_targets_vocabulary": "repositories_l2",
+      "outputs": [
+        "assessment-report.json",
+        "datasheet.md",
+        "croissant.json",
+        "prov.jsonld (optional but recommended)"
+      ],
+      "references": ["Clark2026", "Akhtar2024", "Lawrence2017"]
+    },
+    {
+      "id": "C",
+      "name": "Task-ready",
+      "level": "L3",
+      "drl_band": "A",
+      "tagline": "I want this dataset to support model training in a regulated or sensitive domain — biomedical, clinical, or institutional human-subjects data.",
+      "default_sub_domain": "general",
+      "deposition_targets_vocabulary": "repositories_l3_general",
+      "outputs": [
+        "assessment-report.json",
+        "datasheet.md or healthsheet.md",
+        "croissant.json (with Responsible-AI annotations)",
+        "prov.jsonld"
+      ],
+      "references": ["Clark2026", "Akhtar2024", "W3CPROVO2013", "Lawrence2017"],
+      "sub_domains": [
+        {
+          "id": "general",
+          "name": "General",
+          "description": "Standard L3 ethics evidence as written in Table 11. Default datasheet template with an ethics-evidence section.",
+          "deposition_targets_vocabulary": "repositories_l3_general",
+          "template": "datasheet",
+          "ethics_overlay": []
+        },
+        {
+          "id": "clinical",
+          "name": "Clinical / health data",
+          "description": "Healthsheet template; surfaces IRB protocol ID, HIPAA de-identification method, and DUA reference.",
+          "deposition_targets_vocabulary": "repositories_l3_bridge2ai",
+          "deposition_targets_filter": ["CHoRUS", "PhysioNet"],
+          "template": "healthsheet",
+          "ethics_overlay": [
+            {
+              "id": "ethics.l3.clinical.irb_protocol_id",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "IRB protocol ID",
+              "evidence_type": "identifier",
+              "required_in_pathways": ["C"],
+              "references": ["Rostamzadeh2022", "Clark2026"],
+              "remediation": "The number assigned by your institution's IRB. Required so reviewers can verify the approval if needed."
+            },
+            {
+              "id": "ethics.l3.clinical.hipaa_method",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "HIPAA de-identification method (Safe Harbor or Expert Determination)",
+              "evidence_type": "controlled_vocabulary",
+              "vocabulary_key": "de_id_methods",
+              "required_in_pathways": ["C"],
+              "references": ["Rostamzadeh2022", "Clark2026"],
+              "remediation": "HIPAA recognises two methods. State which one applies; for Expert Determination, name the expert and the report date."
+            },
+            {
+              "id": "ethics.l3.clinical.dua_template",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Data-use agreement template URL",
+              "evidence_type": "uri",
+              "required_in_pathways": ["C"],
+              "references": ["Rostamzadeh2022", "Clark2026"],
+              "remediation": "PhysioNet, MIMIC, and CHoRUS provide template DUAs that can be reused."
+            }
+          ]
+        },
+        {
+          "id": "genomic",
+          "name": "Genomic / functional-genomics",
+          "description": "Surfaces consent type, dbGaP accession, and re-identification risk assessment.",
+          "deposition_targets_vocabulary": "repositories_l3_bridge2ai",
+          "deposition_targets_filter": ["CM4AI"],
+          "template": "datasheet",
+          "ethics_overlay": [
+            {
+              "id": "ethics.l3.genomic.consent_type",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Consent type (general research use vs. disease-specific)",
+              "evidence_type": "text",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026"],
+              "remediation": "Genomic consent commonly distinguishes 'general research use' from 'disease-specific use'. Record the exact wording from the consent form."
+            },
+            {
+              "id": "ethics.l3.genomic.dbgap_accession",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "dbGaP study accession (if applicable; mark N/A otherwise)",
+              "evidence_type": "identifier",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026"],
+              "remediation": "dbGaP accessions take the form `phs######.v#.p#`."
+            },
+            {
+              "id": "ethics.l3.genomic.reid_risk",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Re-identification risk assessment",
+              "evidence_type": "text",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026"],
+              "remediation": "Genomic data carries non-trivial re-identification risk even after standard de-identification. Document the method and threshold used."
+            }
+          ]
+        },
+        {
+          "id": "voice",
+          "name": "Voice / public-health biomarker",
+          "description": "Surfaces speaker consent, demographic representation audit, and accent / language coverage.",
+          "deposition_targets_vocabulary": "repositories_l3_bridge2ai",
+          "deposition_targets_filter": ["Bridge2AIVoice"],
+          "template": "datasheet",
+          "ethics_overlay": [
+            {
+              "id": "ethics.l3.voice.speaker_consent",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Speaker consent terms (collection, secondary use, voice-cloning restrictions)",
+              "evidence_type": "text",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026"],
+              "remediation": "Voice data implicates re-identification and impersonation risks; consent must explicitly cover or exclude voice cloning and biometric uses."
+            },
+            {
+              "id": "ethics.l3.voice.demographic_audit",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Demographic representation audit across speakers",
+              "evidence_type": "file",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026", "KidwaiKhan2024"],
+              "remediation": "Counts and proportions across age, sex, race/ethnicity, and primary language."
+            },
+            {
+              "id": "ethics.l3.voice.accent_language_coverage",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Accent and language coverage statement",
+              "evidence_type": "text",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026"],
+              "remediation": "Document the accents and languages represented and any that are absent. Coverage gaps constrain valid downstream uses."
+            }
+          ]
+        },
+        {
+          "id": "salutogenesis",
+          "name": "Salutogenesis / multi-modal precision health",
+          "description": "Surfaces multi-modal alignment provenance, longitudinal consent, and modality-specific de-identification.",
+          "deposition_targets_vocabulary": "repositories_l3_bridge2ai",
+          "deposition_targets_filter": ["AIREADI"],
+          "template": "healthsheet",
+          "ethics_overlay": [
+            {
+              "id": "ethics.l3.salutogenesis.modality_alignment",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Multi-modal alignment provenance (how participant identities are linked across modalities)",
+              "evidence_type": "text",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026"],
+              "remediation": "Linking labs to imaging to wearables produces re-identification surface area beyond any single modality. Document the linkage method and the identifier used."
+            },
+            {
+              "id": "ethics.l3.salutogenesis.longitudinal_consent",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Longitudinal consent terms (re-contact, withdrawal, data retention)",
+              "evidence_type": "text",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026"],
+              "remediation": "State whether participants may withdraw, what happens to already-collected data, and how re-contact is governed."
+            },
+            {
+              "id": "ethics.l3.salutogenesis.modality_specific_deid",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Modality-specific de-identification methods (imaging, wearable, lab)",
+              "evidence_type": "text",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026", "Rostamzadeh2022"],
+              "remediation": "Each modality has its own de-identification standards (DICOM tag stripping for imaging, accelerometer windowing for wearables). Document each."
+            }
+          ]
+        },
+        {
+          "id": "institutional",
+          "name": "Institutional / human-subjects (non-clinical)",
+          "description": "Surfaces IRB or equivalent committee approval and tiered-access policy. Targets institutional Dataverse with restricted-access tier and ICPSR for social-science data.",
+          "deposition_targets_vocabulary": "repositories_l3_general",
+          "deposition_targets_filter": ["ICPSR"],
+          "template": "datasheet",
+          "ethics_overlay": [
+            {
+              "id": "ethics.l3.institutional.review_body",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Reviewing body (IRB, ethics committee, or equivalent)",
+              "evidence_type": "text",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026"],
+              "remediation": "Name the institution and the committee. Required so reviewers can verify the review record if needed."
+            },
+            {
+              "id": "ethics.l3.institutional.tiered_access_policy",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Tiered-access policy URL",
+              "evidence_type": "uri",
+              "required_in_pathways": ["C"],
+              "references": ["Clark2026"],
+              "remediation": "Institutional Dataverse and ICPSR both publish tiered-access policies; link to the one that applies."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
