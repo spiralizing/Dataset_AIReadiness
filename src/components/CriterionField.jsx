@@ -7,11 +7,12 @@
 
 import { useState } from 'react';
 import vocabularies from '../schema/vocabularies.json';
+import { isLocked } from '../lib/stages.js';
 
 const VERIFICATION_BADGE = {
-  automated: { label: 'automated', cls: 'bg-emerald-100 text-emerald-800' },
-  attested: { label: 'attested', cls: 'bg-amber-100 text-amber-800' },
-  manual: { label: 'manual', cls: 'bg-slate-200 text-slate-700' },
+  automated: { label: 'automated', cls: 'bg-ok-bg text-ok' },
+  attested: { label: 'attested', cls: 'bg-warn-bg text-warn' },
+  manual: { label: 'manual', cls: 'bg-idle-bg text-idle' },
 };
 
 const vocabValues = (key) => vocabularies.vocabularies[key]?.values ?? [];
@@ -32,45 +33,51 @@ const DESCRIPTOR_DRIVEN = {
 function StatusPill({ pending, result }) {
   if (pending) {
     return (
-      <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+      <span className="rounded-none bg-idle-bg px-1.5 py-0.5 text-[10px] font-medium text-muted">
         validator pending
       </span>
     );
   }
   if (result?.ok) {
     return (
-      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800">
+      <span className="rounded-none bg-ok-bg px-1.5 py-0.5 text-[10px] font-medium text-ok">
         ✓ validated
       </span>
     );
   }
   return (
-    <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-medium text-rose-700">
+    <span className="rounded-none bg-bad-bg px-1.5 py-0.5 text-[10px] font-medium text-bad">
       × not valid
     </span>
   );
 }
 
-export default function CriterionField({ criterion, answer, onChange, requirement = 'required', result }) {
+export default function CriterionField({ criterion, answer, onChange, requirement = 'required', result, stage }) {
   const value = answer?.value ?? '';
   const notes = answer?.notes ?? '';
   const badge = VERIFICATION_BADGE[criterion.verification] ?? VERIFICATION_BADGE.manual;
   const automated = criterion.verification === 'automated';
   const pending = automated && !result;
   const descriptorArtifact = DESCRIPTOR_DRIVEN[criterion.id];
+  const locked = isLocked(criterion, stage);
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div className="rounded-none border border-line bg-surface p-4">
       <div className="flex items-start justify-between gap-3">
-        <span className="text-sm font-medium text-slate-800">{criterion.label}</span>
+        <span className="text-sm font-medium text-ink">{criterion.label}</span>
         <div className="flex shrink-0 gap-1">
           {requirement === 'recommended' && (
-            <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-medium text-sky-800">
+            <span className="rounded-none bg-info-bg px-1.5 py-0.5 text-[10px] font-medium text-info">
               recommended
             </span>
           )}
+          {locked && (
+            <span className="rounded-none bg-warn-bg px-1.5 py-0.5 text-[10px] font-medium text-warn">
+              locked
+            </span>
+          )}
           {automated && <StatusPill pending={pending} result={result} />}
-          <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${badge.cls}`}>
+          <span className={`rounded-none px-1.5 py-0.5 text-[10px] font-medium ${badge.cls}`}>
             {badge.label}
           </span>
         </div>
@@ -78,7 +85,7 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
 
       <div className="mt-3">
         {descriptorArtifact ? (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted">
             Validated from the {descriptorArtifact} — complete and check it on the Export page.
           </p>
         ) : (
@@ -87,25 +94,34 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
       </div>
 
       {automated && result && !result.ok && (
-        <p className="mt-1 text-xs text-rose-600">{result.message}</p>
+        <p className="mt-1 text-xs text-bad">{result.message}</p>
+      )}
+
+      {locked && (
+        <p className="mt-1 text-xs text-warn">
+          Reflects a past {criterion.lifecycle_stage} decision — record what was done; if it falls
+          short, document it as a known limitation rather than a gap to fix.
+        </p>
       )}
 
       <details className="mt-2">
-        <summary className="cursor-pointer text-xs text-slate-500">Guidance</summary>
-        <p className="mt-1 text-xs text-slate-500">{criterion.remediation}</p>
+        <summary className="cursor-pointer text-xs text-muted">Guidance</summary>
+        <p className="mt-1 text-xs text-muted">{criterion.remediation}</p>
       </details>
 
-      <input
-        type="text"
-        value={notes}
-        onChange={(e) => onChange({ notes: e.target.value })}
-        placeholder={
-          criterion.verification === 'attested'
-            ? 'Evidence link or note (optional)'
-            : 'Note (optional)'
-        }
-        className="mt-2 w-full rounded border border-slate-200 px-2 py-1 text-xs"
-      />
+      {!descriptorArtifact && (
+        <input
+          type="text"
+          value={notes}
+          onChange={(e) => onChange({ notes: e.target.value })}
+          placeholder={
+            criterion.verification === 'attested'
+              ? 'Evidence link or note (optional)'
+              : 'Note (optional)'
+          }
+          className="mt-2 w-full rounded-none border border-line px-2 py-1 text-xs"
+        />
+      )}
     </div>
   );
 }
@@ -115,7 +131,7 @@ function FieldInput({ criterion, value, onValue }) {
 
   if (t === 'boolean') {
     return (
-      <label className="flex items-center gap-2 text-sm text-slate-700">
+      <label className="flex items-center gap-2 text-sm text-ink">
         <input
           type="checkbox"
           checked={value === true}
@@ -136,7 +152,7 @@ function FieldInput({ criterion, value, onValue }) {
         rows={2}
         value={value}
         onChange={(e) => onValue(e.target.value)}
-        className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+        className="w-full rounded-none border border-line px-2 py-1 text-sm"
       />
     );
   }
@@ -149,7 +165,7 @@ function FieldInput({ criterion, value, onValue }) {
       value={value}
       onChange={(e) => onValue(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+      className="w-full rounded-none border border-line px-2 py-1 text-sm"
     />
   );
 }
@@ -173,7 +189,7 @@ function VocabSelect({ vocabularyKey, value, onValue }) {
             onValue(e.target.value);
           }
         }}
-        className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+        className="w-full rounded-none border border-line px-2 py-1 text-sm"
       >
         <option value="">— select —</option>
         {values.map((v) => (
@@ -189,7 +205,7 @@ function VocabSelect({ vocabularyKey, value, onValue }) {
           value={value}
           onChange={(e) => onValue(e.target.value)}
           placeholder="Custom value"
-          className="mt-2 w-full rounded border border-slate-300 px-2 py-1 text-sm"
+          className="mt-2 w-full rounded-none border border-line px-2 py-1 text-sm"
         />
       )}
     </div>

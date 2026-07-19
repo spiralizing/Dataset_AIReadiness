@@ -32,6 +32,13 @@ const VALID_EVIDENCE_TYPES = new Set([
   'controlled_vocabulary',
 ]);
 const VALID_VERIFICATION = new Set(['automated', 'attested', 'manual']);
+const VALID_LIFECYCLE_STAGE = new Set([
+  'acquisition',
+  'curation',
+  'documentation',
+  'governance',
+  'release',
+]);
 const REQUIRED_DIMENSIONS = [
   'FAIRness',
   'Provenance',
@@ -107,6 +114,15 @@ test('every criterion declares a valid verification mode', () => {
     assert.ok(
       VALID_VERIFICATION.has(c.verification),
       `${c.id} has invalid or missing verification mode: ${c.verification}`,
+    );
+  }
+});
+
+test('every criterion declares a valid lifecycle_stage', () => {
+  for (const c of matrix.criteria) {
+    assert.ok(
+      VALID_LIFECYCLE_STAGE.has(c.lifecycle_stage),
+      `${c.id} has invalid or missing lifecycle_stage: ${c.lifecycle_stage}`,
     );
   }
 });

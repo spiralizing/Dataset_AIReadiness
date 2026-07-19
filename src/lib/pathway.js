@@ -10,6 +10,7 @@
 
 import matrix from '../schema/matrix.json';
 import pathwaysData from '../schema/pathways.json';
+import { isUpcoming } from './stages.js';
 
 export const ALL_CRITERIA = matrix.criteria;
 export const LEVELS = matrix.levels;
@@ -66,7 +67,7 @@ export const isCriterionSatisfied = (criterion, answer, results) => {
 // 'not-required' — no criterion in the cell is required for this pathway.
 // 'met'          — every required criterion in the cell is satisfied.
 // 'unmet'        — at least one required criterion is not satisfied.
-export const cellStatus = (dimension, level, pathway, answers = {}, subDomain, results) => {
+export const cellStatus = (dimension, level, pathway, answers = {}, subDomain, results, stage) => {
   let required = ALL_CRITERIA.filter(
     (c) => c.dimension === dimension && c.level === level && isRequiredForPathway(c, pathway),
   );
@@ -74,7 +75,9 @@ export const cellStatus = (dimension, level, pathway, answers = {}, subDomain, r
     required = [...required, ...ethicsOverlay(pathway, subDomain)];
   }
   if (required.length === 0) return 'not-required';
-  return required.every((c) => isCriterionSatisfied(c, answers[c.id], results)) ? 'met' : 'unmet';
+  const active = required.filter((c) => !isUpcoming(c, stage));
+  if (active.length === 0) return 'upcoming'; // entire cell deferred to a later stage
+  return active.every((c) => isCriterionSatisfied(c, answers[c.id], results)) ? 'met' : 'unmet';
 };
 
 // All required criteria for a pathway, including Pathway-C ethics overlays for
@@ -86,8 +89,8 @@ export const requiredCriteria = (pathway, subDomain) => [
 
 // Overall verdict for a pathway. Bottlenecks are the dimensions with any unmet
 // required criterion (the paper's min-across-dimensions view).
-export const pathwayVerdict = (pathway, answers = {}, subDomain, results) => {
-  const required = requiredCriteria(pathway, subDomain);
+export const pathwayVerdict = (pathway, answers = {}, subDomain, results, stage) => {
+  const required = requiredCriteria(pathway, subDomain).filter((c) => !isUpcoming(c, stage));
   const unmetByDimension = {};
   let satisfiedCount = 0;
   for (const c of required) {

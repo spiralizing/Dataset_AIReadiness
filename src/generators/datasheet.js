@@ -11,8 +11,11 @@ import {
   criteriaForDimension,
   pathwayVerdict,
   templateForRecord,
+  requiredCriteria,
+  isCriterionSatisfied,
 } from '../lib/pathway.js';
 import { validationResults } from '../lib/validation.js';
+import { isLocked, isUpcoming } from '../lib/stages.js';
 
 const SECTION_ORDER = [
   'Characterization',
@@ -40,7 +43,7 @@ export function generateDatasheet(record, opts = {}) {
   const now = opts.now ?? new Date().toISOString();
   const meta = getPathway(pathway);
   const results = opts.results ?? validationResults(record);
-  const verdict = pathwayVerdict(pathway, answers, subDomain, results);
+  const verdict = pathwayVerdict(pathway, answers, subDomain, results, record.stage);
   const isHealth = templateForRecord(record) === 'healthsheet';
 
   const lines = [];
@@ -78,6 +81,32 @@ export function generateDatasheet(record, opts = {}) {
         line += ` _(note: ${String(answer.notes).trim()})_`;
       }
       lines.push(line);
+    }
+    lines.push('');
+  }
+
+  // Known limitations: required criteria that are locked at this lifecycle stage
+  // and unmet — past decisions to disclose rather than gaps to fix.
+  const lockedUnmet = requiredCriteria(pathway, subDomain).filter(
+    (c) => isLocked(c, record.stage) && !isCriterionSatisfied(c, answers[c.id], results),
+  );
+  if (lockedUnmet.length) {
+    lines.push('## Known limitations (immutable at this lifecycle stage)');
+    lines.push('');
+    for (const c of lockedUnmet) {
+      lines.push(`- **${c.label}** — not met; reflects a past ${c.lifecycle_stage} decision that cannot be changed now.`);
+    }
+    lines.push('');
+  }
+
+  // Upcoming: required criteria not yet due at this lifecycle stage (Plan) — a
+  // roadmap to complete at release, not current gaps.
+  const upcoming = requiredCriteria(pathway, subDomain).filter((c) => isUpcoming(c, record.stage));
+  if (upcoming.length) {
+    lines.push('## Planned for a later stage');
+    lines.push('');
+    for (const c of upcoming) {
+      lines.push(`- **${c.label}** — not due yet at this stage; complete at release.`);
     }
     lines.push('');
   }

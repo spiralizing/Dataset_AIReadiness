@@ -83,6 +83,25 @@ test('generateDatasheet stays a datasheet for C general', () => {
   assert.ok(!/healthsheet/i.test(md.split('\n')[0]));
 });
 
+// ---- lifecycle limitations ------------------------------------------------
+
+test('Upgrade stage lists unmet locked (acquisition/curation) criteria as limitations', () => {
+  const md = generateDatasheet(
+    { pathway: 'C', sub_domain: 'general', stage: 'upgrade', answers: {} },
+    { now: FIXED },
+  );
+  assert.match(md, /## Known limitations/);
+  assert.match(md, /Consent basis recorded/); // acquisition criterion, unmet + locked
+});
+
+test('Plan stage produces no limitations section (nothing locked)', () => {
+  const md = generateDatasheet(
+    { pathway: 'C', sub_domain: 'general', stage: 'plan', answers: {} },
+    { now: FIXED },
+  );
+  assert.ok(!/## Known limitations/.test(md));
+});
+
 // ---- assessment report ----------------------------------------------------
 
 test('buildAssessmentReport wraps record with verdict and metadata', () => {

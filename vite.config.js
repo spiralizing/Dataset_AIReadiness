@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  base: '/ai-readiness-assessment/',
+  base: '/Dataset_AIReadiness/',
   plugins: [react(), tailwindcss()],
   test: {
     environment: 'node',

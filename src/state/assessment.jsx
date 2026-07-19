@@ -12,10 +12,12 @@ export const RECORD_VERSION = 'assessment_record_v0';
 
 export const emptyRecord = () => ({
   schema_version: RECORD_VERSION,
+  stage: null, // lifecycle intake: 'plan' | 'prepare' | 'upgrade'
   pathway: null, // 'A' | 'B' | 'C'
   sub_domain: null, // Pathway C only
   started_at: null,
   answers: {}, // { [criterionId]: { value, notes } }
+  dataset: { name: '', description: '', version: '' }, // dataset-level metadata for the Croissant descriptor
   croissant: null, // user-edited Croissant descriptor; null => generate from answers
   provo: null, // user-edited (raw) PROV-O record; overrides the builder when set
   // Structured, step-centric provenance the builder populates; generateProvo
@@ -25,6 +27,12 @@ export const emptyRecord = () => ({
 
 export function reducer(state, action) {
   switch (action.type) {
+    case 'SET_STAGE':
+      return {
+        ...state,
+        stage: action.stage,
+        started_at: state.started_at ?? new Date().toISOString(),
+      };
     case 'SET_PATHWAY':
       return {
         ...state,
@@ -41,6 +49,8 @@ export function reducer(state, action) {
       if ('notes' in action) next.notes = action.notes;
       return { ...state, answers: { ...state.answers, [action.id]: next } };
     }
+    case 'SET_DATASET':
+      return { ...state, dataset: { ...state.dataset, ...action.dataset } };
     case 'SET_CROISSANT':
       return { ...state, croissant: action.croissant };
     case 'SET_PROVO':

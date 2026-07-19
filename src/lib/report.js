@@ -4,6 +4,7 @@
 
 import { pathwayVerdict, requiredCriteria } from './pathway.js';
 import { validationResults, AUTOMATED_WITH_VALIDATOR } from './validation.js';
+import { isUpcoming } from './stages.js';
 import { generateCroissant } from '../generators/croissant.js';
 import { validateCroissant } from './croissantValidation.js';
 
@@ -14,7 +15,7 @@ export function buildAssessmentReport(record, opts = {}) {
   const { pathway, sub_domain: subDomain, started_at, answers = {} } = record;
   const now = opts.now ?? new Date().toISOString();
   const results = opts.results ?? validationResults(record);
-  const verdict = pathwayVerdict(pathway, answers, subDomain, results);
+  const verdict = pathwayVerdict(pathway, answers, subDomain, results, record.stage);
 
   return {
     schema_version: REPORT_VERSION,
@@ -43,7 +44,7 @@ export function buildConformanceReport(record, opts = {}) {
   const results = opts.results ?? validationResults(record, { croissant });
 
   const checks = requiredCriteria(pathway, subDomain)
-    .filter((c) => c.verification === 'automated')
+    .filter((c) => c.verification === 'automated' && !isUpcoming(c, record.stage))
     .map((c) => {
       const hasValidator = AUTOMATED_WITH_VALIDATOR.has(c.id);
       const res = results[c.id];

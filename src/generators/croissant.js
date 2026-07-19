@@ -40,7 +40,7 @@ const raiFromAnswers = (a) => {
 };
 
 export function generateCroissant(record) {
-  const { pathway, answers = {} } = record;
+  const { pathway, answers = {}, dataset = {} } = record;
   const a = (id) => answers[id]?.value;
 
   const license = a('fairness.l1.license_explicit');
@@ -51,9 +51,9 @@ export function generateCroissant(record) {
     '@context': CROISSANT_CONTEXT,
     '@type': 'sc:Dataset',
     conformsTo: CROISSANT_CONFORMS_TO,
-    name: '', // not collected by the assessment — completed in the export editor
-    description: '',
-    version: '',
+    name: (dataset.name ?? '').trim(), // from the Dataset details form on Export
+    description: (dataset.description ?? '').trim(),
+    version: (dataset.version ?? '').trim(),
     distribution: [], // no file list collected — user adds cr:FileObject entries
     recordSet: [], // no variable list collected — user adds cr:RecordSet fields
   };

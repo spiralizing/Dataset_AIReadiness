@@ -1,1 +1,116 @@
 @import "tailwindcss";
+
+/* =============================================================================
+   Design tokens (from the design mockup). Edit these to restyle the whole app.
+   Light is the default; dark is applied by OS preference and overridden by the
+   in-app theme toggle, which stamps data-theme on <html>.
+   ========================================================================== */
+:root {
+  --ground: #f7f6f5;
+  --surface: #ffffff;
+  --surface-2: #faf9f8;
+  --ink: #17181a;
+  --muted: #6d6e71;
+  --faint: #8f9092;
+  --line: #e6e4e2;
+  --accent: #c41230;     /* Carnegie Red — brand, used sparingly */
+  --brand-btn: #17181a;  /* primary action = ink, not red */
+  --link: #0a72b0;
+
+  --ok: #14804a;   --ok-bg: #e7f3ec;   --ok-line: #bfe0cd;
+  --bad: #c4123a;  --bad-bg: #fbe8ec;  --bad-line: #f2c4cf;
+  --warn: #97650a; --warn-bg: #fbf0d9; --warn-line: #ecd6a3;
+  --info: #0a72b0; --info-bg: #e7f1f8; --info-line: #c3ddef;
+  --idle: #7c7d80; --idle-bg: #eeecea; --idle-line: #ddd9d5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --ground: #131315; --surface: #1b1b1e; --surface-2: #202023;
+    --ink: #ececee; --muted: #a2a3a6; --faint: #7f8083; --line: #2d2d31;
+    --accent: #e8536b; --brand-btn: #ececee; --link: #5cb4ea;
+    --ok: #58c48c; --ok-bg: #14271d; --ok-line: #235939;
+    --bad: #f0808f; --bad-bg: #2a161b; --bad-line: #6d2836;
+    --warn: #e3b65a; --warn-bg: #2a2213; --warn-line: #5f4c1f;
+    --info: #5cb4ea; --info-bg: #14232e; --info-line: #245068;
+    --idle: #9a9a9e; --idle-bg: #232326; --idle-line: #3a3a3e;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground: #131315; --surface: #1b1b1e; --surface-2: #202023;
+  --ink: #ececee; --muted: #a2a3a6; --faint: #7f8083; --line: #2d2d31;
+  --accent: #e8536b; --brand-btn: #ececee; --link: #5cb4ea;
+  --ok: #58c48c; --ok-bg: #14271d; --ok-line: #235939;
+  --bad: #f0808f; --bad-bg: #2a161b; --bad-line: #6d2836;
+  --warn: #e3b65a; --warn-bg: #2a2213; --warn-line: #5f4c1f;
+  --info: #5cb4ea; --info-bg: #14232e; --info-line: #245068;
+  --idle: #9a9a9e; --idle-bg: #232326; --idle-line: #3a3a3e;
+}
+
+/* Expose the runtime variables to Tailwind so bg-surface / text-ink /
+   border-line / text-accent / bg-ok-bg … exist and follow the theme. */
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-brand-btn: var(--brand-btn);
+  --color-link: var(--link);
+
+  --color-ok: var(--ok);     --color-ok-bg: var(--ok-bg);     --color-ok-line: var(--ok-line);
+  --color-bad: var(--bad);   --color-bad-bg: var(--bad-bg);   --color-bad-line: var(--bad-line);
+  --color-warn: var(--warn); --color-warn-bg: var(--warn-bg); --color-warn-line: var(--warn-line);
+  --color-info: var(--info); --color-info-bg: var(--info-bg); --color-info-line: var(--info-line);
+  --color-idle: var(--idle); --color-idle-bg: var(--idle-bg); --color-idle-line: var(--idle-line);
+
+  --radius-card: 10px;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@layer base {
+  /* Larger overall: scales all rem-based type and spacing up ~12.5%. */
+  html {
+    font-size: 112.5%;
+  }
+  body {
+    background-color: var(--ground);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Consistent, on-brand keyboard focus everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  h1, h2, h3 {
+    letter-spacing: -0.01em;
+  }
+
+  /* Form controls: use themed tokens so text/background contrast holds in both
+     light and dark (fields previously fell back to default colors). */
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    background-color: var(--surface);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  ::placeholder {
+    color: var(--faint);
+    opacity: 1;
+  }
+  option {
+    background-color: var(--surface);
+    color: var(--ink);
+  }
+  input {
+    accent-color: var(--accent); /* checkboxes/radios in Carnegie Red */
+  }
+}

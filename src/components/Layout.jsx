@@ -1,45 +1,135 @@
-// App shell: header, top navigation, and the routed outlet. Kept intentionally
-// minimal — the wizard steps render inside <Outlet />.
+// App shell: branded masthead (CMU University Libraries), top navigation, the
+// routed outlet, a "Developed by" TRDA footer, and a light/dark theme toggle.
 
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Link, Outlet } from 'react-router-dom';
+import cmuDarkgray from '../assets/cmu-ul-darkgray.png';
+import cmuWhite from '../assets/cmu-ul-white.png';
+import trdaLogo from '../assets/trda.png';
+
+const THEME_KEY = 'ai-readiness-theme';
+
+const systemTheme = () =>
+  window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+// Theme override: null = follow the OS; otherwise 'light' | 'dark' stamped on <html>.
+function useThemeToggle() {
+  const [override, setOverride] = useState(() => {
+    try {
+      return localStorage.getItem(THEME_KEY);
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    try {
+      if (override) {
+        root.setAttribute('data-theme', override);
+        localStorage.setItem(THEME_KEY, override);
+      } else {
+        root.removeAttribute('data-theme');
+        localStorage.removeItem(THEME_KEY);
+      }
+    } catch {
+      if (override) root.setAttribute('data-theme', override);
+    }
+  }, [override]);
+
+  const effective = override ?? systemTheme();
+  const toggle = () => setOverride(effective === 'dark' ? 'light' : 'dark');
+  return { effective, toggle };
+}
 
 const linkClass = ({ isActive }) =>
-  `px-3 py-1.5 rounded text-sm transition-colors ${
-    isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+  `px-3 py-1.5 rounded-none text-sm transition-colors ${
+    isActive ? 'bg-brand-btn text-surface' : 'text-muted hover:bg-surface-2'
   }`;
 
+// Transparent logo, sits directly on the page background (no plaque).
+function Logo({ src, alt, imgClass }) {
+  return <img src={src} alt={alt} className={`block w-auto ${imgClass}`} />;
+}
+
 export default function Layout() {
+  const { effective, toggle } = useThemeToggle();
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-lg font-semibold">AI-Readiness Assessment</h1>
-            <p className="text-xs text-slate-500">
-              Tiered self-assessment for research datasets
-            </p>
+    <div className="min-h-screen bg-ground text-ink">
+      <div className="h-[3px] bg-accent" />
+
+      <header className="border-b border-line bg-surface">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="grid h-9 w-9 place-items-center rounded-none bg-accent text-white" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12.5l5 5L20 6" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-base font-bold tracking-tight">AI-Readiness Assessment</h1>
+              <p className="text-xs text-muted">Tiered self-assessment for research datasets</p>
+            </div>
           </div>
-          <nav className="flex gap-1">
-            <NavLink to="/" end className={linkClass}>
-              Audience
-            </NavLink>
-            <NavLink to="/review" className={linkClass}>
-              Review
-            </NavLink>
-            <NavLink to="/export" className={linkClass}>
-              Export
-            </NavLink>
-          </nav>
+
+          <div className="flex items-center gap-3">
+            <Logo
+              src={effective === 'dark' ? cmuWhite : cmuDarkgray}
+              alt="Carnegie Mellon University Libraries"
+              imgClass="h-20"
+            />
+            <button
+              type="button"
+              onClick={toggle}
+              className="rounded-none border border-line px-3 py-1.5 text-xs text-ink hover:border-muted"
+              aria-label={`Switch to ${effective === 'dark' ? 'light' : 'dark'} theme`}
+            >
+              {effective === 'dark' ? '☀ Light' : '☾ Dark'}
+            </button>
+          </div>
         </div>
+
+        <nav className="mx-auto flex max-w-4xl gap-1 px-6 pb-3">
+          <NavLink to="/" end className={linkClass}>
+            Start
+          </NavLink>
+          <NavLink to="/audience" className={linkClass}>
+            Audience
+          </NavLink>
+          <NavLink to="/review" className={linkClass}>
+            Review
+          </NavLink>
+          <NavLink to="/export" className={linkClass}>
+            Export
+          </NavLink>
+        </nav>
       </header>
 
       <main className="mx-auto max-w-4xl px-6 py-8">
         <Outlet />
       </main>
 
-      <footer className="mx-auto max-w-4xl px-6 py-8 text-xs text-slate-400">
-        Proof-of-concept tool for the AI-readiness framework. Runs entirely in
-        your browser; nothing is uploaded.
+      <footer className="border-t border-line">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-6 py-8">
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+              Developed by
+            </span>
+            <Logo src={trdaLogo} alt="Tartan Research Data Alliance" imgClass="h-24" />
+          </div>
+          <div className="max-w-sm text-xs text-faint">
+            <p>
+              Proof-of-concept tool for the AI-readiness framework. Runs entirely in your browser;
+              nothing is uploaded.
+            </p>
+            <p className="mt-1">
+              <Link to="/examples" className="text-link underline">Examples</Link>
+              {' · '}
+              <Link to="/references" className="text-link underline">References &amp; sources</Link>
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   );

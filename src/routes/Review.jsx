@@ -12,12 +12,14 @@ import {
 } from '../lib/pathway.js';
 import { validationResults } from '../lib/validation.js';
 import { effectiveCroissant } from '../generators/croissant.js';
+import { getStage } from '../lib/stages.js';
 import { useAssessment } from '../state/assessment.jsx';
 
 const CELL = {
-  met: { cls: 'bg-emerald-500 text-white', glyph: '✓' },
-  unmet: { cls: 'bg-rose-100 text-rose-700', glyph: '×' },
-  'not-required': { cls: 'bg-slate-100 text-slate-300', glyph: '–' },
+  met: { cls: 'bg-ok-bg text-ok', glyph: '✓' },
+  unmet: { cls: 'bg-bad-bg text-bad', glyph: '×' },
+  upcoming: { cls: 'bg-info-bg text-info', glyph: '⋯' },
+  'not-required': { cls: 'bg-idle-bg text-idle', glyph: '–' },
 };
 
 export default function Review() {
@@ -27,19 +29,25 @@ export default function Review() {
 
   const { pathway, sub_domain: subDomain, answers } = state;
   const results = validationResults(state, { croissant: effectiveCroissant(state) });
-  const verdict = pathwayVerdict(pathway, answers, subDomain, results);
+  const verdict = pathwayVerdict(pathway, answers, subDomain, results, state.stage);
   const recommendedUnmet = recommendedForPathway(pathway).filter(
     (c) => !isCriterionSatisfied(c, answers[c.id], results),
   );
 
   return (
     <section>
-      <h2 className="text-xl font-semibold">Review</h2>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+        Step 3 · Review
+      </span>
+      <h2 className="mt-1 text-xl font-semibold">Review</h2>
+      {getStage(state.stage) && (
+        <p className="mt-1 text-xs text-muted">Starting point: {getStage(state.stage).title}</p>
+      )}
 
       {/* Verdict banner */}
       <div
-        className={`mt-3 rounded-lg border p-4 ${
-          verdict.met ? 'border-emerald-300 bg-emerald-50' : 'border-rose-300 bg-rose-50'
+        className={`mt-3 rounded-none border p-4 ${
+          verdict.met ? 'border-ok-line bg-ok-bg' : 'border-bad-line bg-bad-bg'
         }`}
       >
         <p className="text-sm font-semibold">
@@ -47,7 +55,7 @@ export default function Review() {
             ? `Meets Pathway ${pathway}.`
             : `Does not yet meet Pathway ${pathway}.`}
         </p>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-muted">
           {verdict.satisfiedCount}/{verdict.requiredCount} required criteria satisfied.
           {verdict.bottlenecks.length > 0 && (
             <>
@@ -71,9 +79,9 @@ export default function Review() {
         <table className="w-full border-separate border-spacing-1 text-sm">
           <thead>
             <tr>
-              <th className="text-left font-medium text-slate-500"></th>
+              <th className="text-left font-medium text-muted"></th>
               {LEVELS.map((l) => (
-                <th key={l.id} className="px-2 text-center text-xs font-medium text-slate-500">
+                <th key={l.id} className="px-2 text-center text-xs font-medium text-muted">
                   {l.id} · {l.name}
                 </th>
               ))}
@@ -82,18 +90,18 @@ export default function Review() {
           <tbody>
             {DIMENSIONS.map((dim) => (
               <tr key={dim}>
-                <td className="whitespace-nowrap pr-2 text-slate-700">
+                <td className="whitespace-nowrap pr-2 text-ink">
                   <Link className="hover:underline" to={`/dimension/${slugify(dim)}`}>
                     {dim}
                   </Link>
                 </td>
                 {LEVELS.map((l) => {
-                  const status = cellStatus(dim, l.id, pathway, answers, subDomain, results);
+                  const status = cellStatus(dim, l.id, pathway, answers, subDomain, results, state.stage);
                   const c = CELL[status];
                   return (
                     <td key={l.id} className="text-center">
                       <div
-                        className={`mx-auto flex h-8 w-full items-center justify-center rounded ${c.cls}`}
+                        className={`mx-auto flex h-8 w-full items-center justify-center rounded-none ${c.cls}`}
                         title={`${dim} / ${l.id}: ${status}`}
                       >
                         {c.glyph}
@@ -107,17 +115,18 @@ export default function Review() {
         </table>
       </div>
 
-      <div className="mt-3 flex gap-4 text-xs text-slate-500">
-        <span><span className="mr-1 inline-block h-3 w-3 rounded bg-emerald-500 align-middle" />met</span>
-        <span><span className="mr-1 inline-block h-3 w-3 rounded bg-rose-100 align-middle" />unmet</span>
-        <span><span className="mr-1 inline-block h-3 w-3 rounded bg-slate-100 align-middle" />not required</span>
+      <div className="mt-3 flex gap-4 text-xs text-muted">
+        <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-ok-bg0 align-middle" />met</span>
+        <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-bad-bg align-middle" />unmet</span>
+        <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-info-bg align-middle" />upcoming</span>
+        <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-idle-bg align-middle" />not required</span>
       </div>
 
       {/* Recommended-but-unmet */}
       {recommendedUnmet.length > 0 && (
-        <div className="mt-6 rounded-lg border border-sky-200 bg-sky-50 p-4">
-          <h3 className="text-sm font-semibold text-sky-800">Recommended extras not yet added</h3>
-          <ul className="mt-2 list-inside list-disc text-sm text-slate-600">
+        <div className="mt-6 rounded-none border border-info-line bg-info-bg p-4">
+          <h3 className="text-sm font-semibold text-info">Recommended extras not yet added</h3>
+          <ul className="mt-2 list-inside list-disc text-sm text-muted">
             {recommendedUnmet.map((c) => (
               <li key={c.id}>{c.label}</li>
             ))}
@@ -129,14 +138,14 @@ export default function Review() {
         <button
           type="button"
           onClick={() => navigate(`/dimension/${slugify(DIMENSIONS[DIMENSIONS.length - 1])}`)}
-          className="rounded border border-slate-300 px-4 py-2 text-sm hover:bg-slate-100"
+          className="rounded-none border border-line px-4 py-2 text-sm hover:bg-idle-bg"
         >
           ← Back
         </button>
         <button
           type="button"
           onClick={() => navigate('/export')}
-          className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+          className="rounded-none bg-brand-btn px-4 py-2 text-sm font-medium text-surface hover:opacity-90"
         >
           Export →
         </button>

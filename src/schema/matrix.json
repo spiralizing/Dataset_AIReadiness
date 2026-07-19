@@ -23,6 +23,7 @@
       "label": "Persistent identifier assigned (DOI, ARK, or repository accession)",
       "evidence_type": "identifier",
       "verification": "automated",
+      "lifecycle_stage": "release",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016", "Bahim2020", "Clark2026"],
       "remediation": "Mint a DOI via Zenodo, DataCite, or your institutional repository before publishing. The identifier must resolve to a landing page, not directly to a file."
@@ -34,6 +35,7 @@
       "label": "Landing page URL with human-readable metadata",
       "evidence_type": "uri",
       "verification": "automated",
+      "lifecycle_stage": "release",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016", "Bahim2020"],
       "remediation": "Most repositories generate a landing page automatically when you mint a DOI. Confirm the page is publicly resolvable."
@@ -45,6 +47,7 @@
       "label": "Metadata exposed in a machine-readable format (DataCite, schema.org/Dataset, or JSON-LD)",
       "evidence_type": "boolean",
       "verification": "attested",
+      "lifecycle_stage": "release",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016", "Bahim2020"],
       "remediation": "Confirm the landing page emits DataCite metadata or schema.org/Dataset JSON-LD. Most generalist repositories do this by default."
@@ -56,6 +59,7 @@
       "label": "Access protocol documented (open download, request form, or controlled-access process)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "governance",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016"],
       "remediation": "State explicitly how a user obtains the data: open download, registration, DUA, or DAC review."
@@ -68,6 +72,7 @@
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "licenses",
       "verification": "automated",
+      "lifecycle_stage": "governance",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016", "Bahim2020"],
       "remediation": "Pick a Creative Commons or Open Data Commons license. 'No license' defaults to all-rights-reserved and blocks reuse."
@@ -79,6 +84,7 @@
       "label": "Croissant 1.0 descriptor present and validates against the MLCommons schema",
       "evidence_type": "boolean",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "recommended_in_pathways": ["A"],
       "references": ["Akhtar2024", "Clark2026"],
@@ -91,6 +97,7 @@
       "label": "Variable terms drawn from recognised controlled vocabularies where applicable",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Wilkinson2016", "Blatter2022"],
       "remediation": "Map clinical fields to LOINC/SNOMED, units to UCUM, climate vars to CF, etc. Document the mapping in the Croissant descriptor."
@@ -102,6 +109,7 @@
       "label": "Links to related datasets, schemas, or ontologies (qualified references)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Wilkinson2016", "Bahim2020"],
       "remediation": "Include `isVersionOf`, `isPartOf`, `references`, or schema.org/sameAs links so machines can navigate between related artefacts."
@@ -113,6 +121,7 @@
       "label": "Croissant descriptor includes Responsible-AI annotations (intended use, known limitations, sensitive attributes)",
       "evidence_type": "boolean",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Akhtar2024", "Clark2026"],
       "remediation": "Populate the Croissant `rai:` namespace fields. The in-app generator surfaces them when Pathway C is selected."
@@ -124,6 +133,7 @@
       "label": "Versioned release with concept-level and version-level identifiers; immutable per version",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "release",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "Bahim2020"],
       "remediation": "Use a repository that mints both a concept DOI (resolves to latest) and version-specific DOIs (Zenodo and DataCite both support this)."
@@ -136,6 +146,7 @@
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "repositories_l3_general",
       "verification": "attested",
+      "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "remediation": "Pathway C sub-domain selection pre-fills candidate targets (PhysioNet, dbGaP, CHoRUS, CM4AI, AI-READI, Bridge2AI-Voice, ICPSR, institutional Dataverse)."
@@ -147,6 +158,7 @@
       "label": "Original sources of the data described in prose (instruments, registries, surveys, or upstream datasets)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "acquisition",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026"],
       "remediation": "Add a 'Sources' section to the README or datasheet listing every upstream source and how it was obtained."
@@ -158,6 +170,7 @@
       "label": "When and where the data was collected (time window, geography or instrument)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "acquisition",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "KidwaiKhan2024"],
       "remediation": "State the inclusive collection dates and any geographic/cohort constraints. This is what downstream users need to judge fit."
@@ -169,6 +182,7 @@
       "label": "Every curation and transformation step listed in prose (cleaning, harmonisation, derivation rules)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "curation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "KidwaiKhan2024"],
       "remediation": "List each step with inputs, outputs, and rationale. The PROV-O generator produces a structured version of this — write the prose first, encode it second."
@@ -180,6 +194,7 @@
       "label": "Software, scripts, and library versions used to produce the released dataset",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "curation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "W3CPROVO2013"],
       "remediation": "Capture interpreter version, library pins (requirements.txt or environment.yml), and a Git commit hash for in-house code."
@@ -191,6 +206,7 @@
       "label": "PROV-O JSON-LD record accompanies the released dataset",
       "evidence_type": "file",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
       "remediation": "Use the in-app PROV-O generator for short pipelines, or export from CWL / Snakemake / Nextflow / Galaxy for long ones."
@@ -202,6 +218,7 @@
       "label": "PROV record contains an Entity per dataset version and per declared variable",
       "evidence_type": "boolean",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
       "remediation": "Variable-level Entities enable feature-lineage queries downstream. The in-app generator emits one Entity per variable when the variable list is populated."
@@ -213,6 +230,7 @@
       "label": "PROV record contains an Activity per curation/transformation step, with parameters and software version",
       "evidence_type": "boolean",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
       "remediation": "Each Activity records `prov:used` (inputs), `prov:wasGeneratedBy` (outputs), parameters, and the software Agent that ran it."
@@ -225,6 +243,7 @@
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "stakeholder_roles",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
       "remediation": "Name a data steward, domain expert, data engineer, ML practitioner, and governance officer — even if the same person holds multiple roles in a small team."
@@ -236,6 +255,7 @@
       "label": "Schema declared: types, units, and allowed values per variable",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Wilkinson2016"],
       "remediation": "Ship a data dictionary (CSV, Markdown, or DDI XML) listing every variable with its type, units, and value set."
@@ -247,6 +267,7 @@
       "label": "Total record count and basic shape (rows × columns, or equivalent)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026"],
       "remediation": "One sentence in the README. Trivial to provide and always missed."
@@ -258,6 +279,7 @@
       "label": "Missingness rates per variable",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "KidwaiKhan2024"],
       "remediation": "Report % missing per variable. Default missingness handling encodes fairness properties — disclose what was applied."
@@ -269,6 +291,7 @@
       "label": "Summary statistics per variable (numeric: min/max/mean/std; categorical: value counts)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
       "remediation": "A one-page summary or a Great-Expectations / Pandera profiling report. Include in the documentation bundle."
@@ -280,6 +303,7 @@
       "label": "Known errors and their treatment (corrected, flagged, dropped, or left in)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
       "remediation": "Explicit disclosure beats silent correction. List known issues even if you chose not to fix them."
@@ -291,6 +315,7 @@
       "label": "Class balance for classification targets (where applicable; mark N/A otherwise)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
       "remediation": "Report counts per class. Heavy imbalance affects evaluation metrics — surfacing it lets reviewers judge fit."
@@ -302,6 +327,7 @@
       "label": "Bias audit: representation parity across protected attributes and curation-induced skew",
       "evidence_type": "file",
       "verification": "attested",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "KidwaiKhan2024", "Aldoseri2023"],
       "remediation": "Use Aequitas, Fairlearn, or an equivalent tool. Compare distributions before and after curation to detect introduced skew, not just released-state parity."
@@ -313,6 +339,7 @@
       "label": "Temporal, geographic, demographic, and modality coverage analysis",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "remediation": "List subgroups represented and subgroups missing. Coverage gaps constrain valid downstream uses."
@@ -324,6 +351,7 @@
       "label": "Intended uses and out-of-scope uses declared explicitly",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "Gebru2021"],
       "remediation": "State both: tasks the dataset should support, and tasks it should not (e.g., 'not for clinical decision support')."
@@ -335,6 +363,7 @@
       "label": "Known selection effects, measurement error, and confounders documented",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "KidwaiKhan2024"],
       "remediation": "Healthcare-utilisation proxies, exclusion windows, instrument quirks — name them. Downstream users need them to judge transferability."
@@ -347,6 +376,7 @@
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "consent_basis",
       "verification": "attested",
+      "lifecycle_stage": "acquisition",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Aldoseri2023"],
       "remediation": "Document what consent covers — including 'not applicable' for non-human-subjects or already-public data."
@@ -358,6 +388,7 @@
       "label": "Direct identifiers removed or transformed",
       "evidence_type": "boolean",
       "verification": "attested",
+      "lifecycle_stage": "curation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Aldoseri2023"],
       "remediation": "Names, contact details, MRNs, exact addresses, exact dates of service. Indirect identifiers come at L2."
@@ -370,6 +401,7 @@
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "de_id_methods",
       "verification": "attested",
+      "lifecycle_stage": "curation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "Rostamzadeh2022"],
       "remediation": "'Stripped names' is not a method. Record HIPAA Safe Harbor / Expert Determination / k-anonymity (with k) / differential privacy (with ε), etc."
@@ -381,6 +413,7 @@
       "label": "Ethics oversight documented as metadata (approving body, protocol ID, approval date, scope of permitted use, expiry/renewal status)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "Rostamzadeh2022"],
       "remediation": "The review itself happens before/during acquisition. What travels with the dataset at L3 is structured evidence of that review — that is the L3 requirement."
@@ -393,6 +426,7 @@
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "access_governance",
       "verification": "attested",
+      "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "remediation": "Match the access tier to the sensitivity of the data and the consent basis recorded at L1."
@@ -404,6 +438,7 @@
       "label": "Data-use agreement template referenced if access is restricted or controlled (mark N/A for open access)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "remediation": "Link to the DUA template the requester signs. Repositories like PhysioNet ship one; institutional Dataverse instances often do too."
@@ -415,6 +450,7 @@
       "label": "Whether secondary use is permitted, and under what constraints",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "remediation": "Bound by what consent basis at L1 supports. Be explicit — silence here defaults reviewers to 'not permitted'."
@@ -426,6 +462,7 @@
       "label": "Every variable has a human-readable definition",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026"],
       "remediation": "A column name is not a definition. Each variable needs a sentence explaining what it measures and how."
@@ -437,6 +474,7 @@
       "label": "Units recorded for every measured variable",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Blatter2022"],
       "remediation": "Use UCUM where applicable. Untyped numerics are a frequent cause of merge errors across cohorts."
@@ -448,6 +486,7 @@
       "label": "Derived variables traceable to source variable(s) and the operation that produced them",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
       "remediation": "BMI = mass / height² is a source-and-operation. Record both, not just the derived value."
@@ -459,6 +498,7 @@
       "label": "Encodings documented (one-hot, normalisation, tokenisation, vocabulary mappings)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
       "remediation": "If the released artefact is post-encoding, ship the encoder configuration / tokenizer alongside it."
@@ -470,6 +510,7 @@
       "label": "Feature lineage preserved end-to-end via the PROV record",
       "evidence_type": "boolean",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "W3CPROVO2013"],
       "remediation": "Every released feature can be reconstructed from raw inputs by following the PROV record's `wasDerivedFrom` chain."
@@ -481,6 +522,7 @@
       "label": "Released alongside or linkable to a model card (when models trained on this data exist)",
       "evidence_type": "uri",
       "verification": "attested",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Mitchell2019", "Ravi2022", "Clark2026"],
       "remediation": "Triangular linkage from Figure 8: dataset DOI ↔ model DOI/HF ID ↔ results DOI. Link bidirectionally so each artefact resolves to the others."
@@ -493,6 +535,7 @@
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "formats_tabular",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Ravi2022"],
       "remediation": "Parquet / CSV for tabular; HDF5 / NetCDF / Zarr for arrays; DICOM / NIfTI for imaging. Avoid Excel, SAS, or vendor formats as the canonical release."
@@ -504,6 +547,7 @@
       "label": "Total size and per-file size reported",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "SalehiSchmeink2024"],
       "remediation": "One line in the README. Lets downstream users plan downloads and storage."
@@ -515,6 +559,7 @@
       "label": "Long-term access plan (institutional commitment, repository SLA, or migration strategy)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "governance",
       "required_in_pathways": ["B", "C"],
       "references": ["LawrenceMontgomery2024", "Clark2026"],
       "remediation": "Use a repository with an institutional commitment (Zenodo's CERN backing, institutional Dataverse, etc.). 'Hosted on a personal server' is not a long-term plan."
@@ -527,6 +572,7 @@
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "data_centric_interventions",
       "verification": "attested",
+      "lifecycle_stage": "curation",
       "required_in_pathways": ["C"],
       "references": ["SalehiSchmeink2024", "Clark2026"],
       "remediation": "Document which intervention was applied and the metric it improved (records removed, accuracy at matched compute, etc.)."
@@ -538,6 +584,7 @@
       "label": "Compute cost of producing this release reported (compute hours, hardware type, energy or estimated emissions)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["SalehiSchmeink2024", "Clark2026"],
       "remediation": "Bind these figures to the same release bundle as the datasheet and PROV record. Without disclosure, efficiency claims are unverifiable."
@@ -549,6 +596,7 @@
       "label": "Loadable in a standard scientific-computing environment (pandas, numpy, R, or domain-equivalent)",
       "evidence_type": "boolean",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Lawrence2017"],
       "remediation": "If a reviewer can't `pd.read_parquet(path)` or its domain equivalent, the format is wrong."
@@ -560,6 +608,7 @@
       "label": "Codebook or data dictionary shipped alongside the data",
       "evidence_type": "file",
       "verification": "attested",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Gebru2021"],
       "remediation": "Variable name, type, units, value set, and a one-sentence description per field. Markdown, CSV, or DDI all work."
@@ -571,6 +620,7 @@
       "label": "Field values map to recognised controlled vocabularies where applicable (LOINC / SNOMED / UCUM / CF / ICD-10 / etc.)",
       "evidence_type": "boolean",
       "verification": "attested",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Blatter2022", "Clark2026"],
       "remediation": "Without controlled vocabularies, two correctly-documented datasets still cannot be aligned. Record the vocabulary version, not just its name."
@@ -582,6 +632,7 @@
       "label": "Schemas referenced as linked external schemas (DDI, BIDS, CF-conventions, schema.org)",
       "evidence_type": "text",
       "verification": "attested",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
       "remediation": "Reference the schema by URL inside the Croissant descriptor's `conformsTo` field."
@@ -593,6 +644,7 @@
       "label": "Croissant descriptor enables direct load into ML frameworks without custom parsing",
       "evidence_type": "boolean",
       "verification": "automated",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Akhtar2024", "Clark2026"],
       "remediation": "Verify with `mlcroissant` reference library: a four-line load (see Code Block 2 in the source paper) should yield records."
@@ -604,6 +656,7 @@
       "label": "Example load snippet provided (TensorFlow Datasets, Hugging Face, or PyTorch DataLoader)",
       "evidence_type": "text",
       "verification": "manual",
+      "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Akhtar2024", "Clark2026"],
       "remediation": "Five lines of Python in the README that load the dataset and print one record. Removes ambiguity that prose cannot."

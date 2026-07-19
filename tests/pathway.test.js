@@ -18,6 +18,7 @@ import {
   recommendedForDimension,
 } from '../src/lib/pathway.js';
 import { reducer, emptyRecord, RECORD_VERSION } from '../src/state/assessment.jsx';
+import { STAGES, getStage } from '../src/lib/stages.js';
 
 // Build an answers map that satisfies every criterion in `criteria`.
 const satisfyAll = (criteria) =>
@@ -131,6 +132,34 @@ test('recommendedForDimension surfaces Croissant at L1 in FAIRness', () => {
   assert.deepEqual(rec, ['fairness.l2.croissant_descriptor']);
 });
 
+// ---- stage-aware verdict (L.4b) -------------------------------------------
+
+test('Plan stage drops upcoming (release-time) criteria from the verdict — no DOI required', () => {
+  // Pathway A required = 16 (all L1). In Plan, only acquisition criteria are
+  // active; the 3 acquisition L1 criteria remain, the rest are upcoming.
+  const full = pathwayVerdict('A', {}, undefined, undefined, undefined);
+  const plan = pathwayVerdict('A', {}, undefined, undefined, 'plan');
+  assert.equal(full.requiredCount, 16);
+  assert.equal(plan.requiredCount, 3); // source_documented, collection_window, consent_basis_recorded
+});
+
+test('Prepare stage defers release-time criteria (no DOI/landing/metadata) but keeps documentation', () => {
+  // Pathway A L1 has 3 release-time criteria (persistent_id, landing_page,
+  // metadata_machine_readable); they defer in Prepare -> 16 - 3 = 13.
+  const prepare = pathwayVerdict('A', {}, undefined, undefined, 'prepare');
+  assert.equal(prepare.requiredCount, 13);
+  // FAIRness L1 still has active governance criteria (license, access) in Prepare,
+  // so the cell is 'unmet' (not fully upcoming) even though the DOI itself defers.
+  assert.equal(cellStatus('FAIRness', 'L1', 'A', {}, undefined, undefined, 'prepare'), 'unmet');
+});
+
+test('cellStatus returns "upcoming" for an all-deferred cell in Plan', () => {
+  // FAIRness L1 is all documentation/governance -> all upcoming in Plan.
+  assert.equal(cellStatus('FAIRness', 'L1', 'A', {}, undefined, undefined, 'plan'), 'upcoming');
+  // Provenance L1 (source + collection window) is acquisition -> active in Plan.
+  assert.equal(cellStatus('Provenance', 'L1', 'A', {}, undefined, undefined, 'plan'), 'unmet');
+});
+
 // ---- reducer --------------------------------------------------------------
 
 test('reducer SET_PATHWAY stamps started_at and defaults sub_domain for C', () => {
@@ -142,6 +171,18 @@ test('reducer SET_PATHWAY stamps started_at and defaults sub_domain for C', () =
 
   const c = reducer(s0, { type: 'SET_PATHWAY', pathway: 'C' });
   assert.equal(c.sub_domain, 'general');
+});
+
+test('lifecycle stages: three defined; getStage resolves; reducer SET_STAGE stamps started_at', () => {
+  assert.deepEqual(STAGES.map((s) => s.id), ['plan', 'prepare', 'upgrade']);
+  assert.equal(getStage('upgrade').suggestedPathway, 'C');
+  assert.equal(getStage('nope'), null);
+
+  const s0 = emptyRecord();
+  assert.equal(s0.stage, null);
+  const s1 = reducer(s0, { type: 'SET_STAGE', stage: 'prepare' });
+  assert.equal(s1.stage, 'prepare');
+  assert.ok(typeof s1.started_at === 'string' && s1.started_at.length > 0);
 });
 
 test('reducer: emptyRecord seeds an empty provenance model; SET_PROVENANCE replaces it', () => {
