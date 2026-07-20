@@ -1,0 +1,10 @@
+design/
+app_progress.md
+app_design.md
+node_modules
+dist
+.DS_Store
+*.local
+.vite
+coverage
+Paper/
