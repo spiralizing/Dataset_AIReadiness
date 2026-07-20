@@ -62,7 +62,7 @@ export default function ProvenanceBuilder() {
       <p className="mt-2 text-[11px] text-muted">
         PROV-O records lineage as <b>agents</b> running <b>activities</b> (your steps) that{' '}
         <b>use</b> inputs and <b>generate</b> outputs. Fill the builder below and it writes valid
-        PROV-O for you — no JSON required. Follows the W3C PROV Ontology (
+        PROV-O for you, no JSON required. Follows the W3C PROV Ontology (
         <a href="https://www.w3.org/TR/prov-o/" target="_blank" rel="noreferrer" className="text-link underline">Lebo et al., 2013</a>
         ).
       </p>
@@ -87,7 +87,7 @@ export default function ProvenanceBuilder() {
             <span className="font-medium text-ink">role</span>.
           </li>
           <li>
-            Aim for one step per meaningful decision that changed the data — enough that a reviewer
+            Aim for one step per meaningful decision that changed the data, enough that a reviewer
             could trace any released variable back to its raw origin.
           </li>
         </ul>

@@ -69,7 +69,7 @@ export default function Layout() {
             </div>
             <div>
               <h1 className="text-base font-bold tracking-tight">AI-Readiness Assessment</h1>
-              <p className="text-xs text-muted">Tiered self-assessment for research datasets</p>
+              <p className="text-xs text-muted">Tiered self-assessment and documentation builder for research datasets</p>
             </div>
           </div>
 

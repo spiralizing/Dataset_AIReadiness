@@ -3,6 +3,7 @@
 // DOI / persistent-identifier links (library-standard for a website).
 
 import citationsData from '../schema/references.json';
+import { THIS_WORK } from '../lib/thisWork.js';
 
 const entries = Object.entries(citationsData.citations).sort(
   (a, b) => (a[1].ref ?? 999) - (b[1].ref ?? 999),
@@ -21,7 +22,18 @@ export default function References() {
         from the following works. Links resolve to the DOI or the canonical page.
       </p>
 
-      <ol className="mt-5 list-decimal space-y-3 pl-6 text-sm marker:text-faint">
+      <div className="mt-6 border-l-2 border-accent pl-4">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+          This tool implements
+        </span>
+        <p className="mt-1 text-sm text-muted">
+          <span className="text-ink">{THIS_WORK.authors}</span> ({THIS_WORK.year}).{' '}
+          <span className="italic">{THIS_WORK.title}</span> [{THIS_WORK.note}]. {THIS_WORK.publisher}.
+        </p>
+      </div>
+
+      <h3 className="mt-8 text-sm font-semibold text-muted">Sources the framework draws on</h3>
+      <ol className="mt-3 list-decimal space-y-3 pl-6 text-sm marker:text-faint">
         {entries.map(([key, c]) => {
           const href = linkFor(c);
           return (

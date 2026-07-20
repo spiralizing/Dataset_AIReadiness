@@ -27,7 +27,7 @@ export default function AudienceSelector() {
       </span>
       <h2 className="mt-1 text-xl font-semibold">Choose your audience</h2>
       <p className="mt-2 text-sm text-muted">
-        Your pathway sets which criteria are required. Pathways are cumulative — B
+        Your pathway sets which criteria are required. Pathways are cumulative: B
         includes all of A, and C includes all of A and B.
       </p>
 

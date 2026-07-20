@@ -9,7 +9,7 @@ export const EXAMPLES = [
     id: 'zenodo-tabular',
     title: 'Tabular dataset on Zenodo',
     pathway: 'A',
-    description: 'A CC-BY open tabular dataset with a DOI — a typical Accessible (L1) release.',
+    description: 'A CC-BY open tabular dataset with a DOI: a typical Accessible (L1) release.',
     expectMet: true,
     record: completeRecord({
       pathway: 'A',
@@ -31,7 +31,7 @@ export const EXAMPLES = [
     id: 'hf-croissant',
     title: 'Hugging Face dataset with Croissant',
     pathway: 'B',
-    description: 'An ML-ready dataset with a Croissant descriptor — Faithful (L2).',
+    description: 'An ML-ready dataset with a Croissant descriptor: Faithful (L2).',
     expectMet: true,
     record: completeRecord({
       pathway: 'B',
@@ -53,7 +53,7 @@ export const EXAMPLES = [
     id: 'bids-neuroimaging',
     title: 'BIDS neuroimaging dataset',
     pathway: 'B',
-    description: 'A BIDS-organised NIfTI dataset — shows domain formats/validators at L2.',
+    description: 'A BIDS-organised NIfTI dataset: shows domain formats/validators at L2.',
     expectMet: true,
     record: completeRecord({
       pathway: 'B',
@@ -77,7 +77,7 @@ export const EXAMPLES = [
     pathway: 'C',
     subDomain: 'clinical',
     description:
-      'A synthetic MIMIC-shaped clinical dataset for Task-ready (L3). Intentionally missing a bias audit — shows a Characterization bottleneck.',
+      'A synthetic MIMIC-shaped clinical dataset for Task-ready (L3). Intentionally missing a bias audit, which shows a Characterization bottleneck.',
     expectMet: false,
     expectBottleneck: 'Characterization',
     record: completeRecord({
@@ -103,7 +103,7 @@ export const EXAMPLES = [
     title: 'Synthetic cell-mapping dataset (CM4AI-style)',
     pathway: 'C',
     subDomain: 'genomic',
-    description: 'A synthetic CM4AI-style functional-genomics dataset — a complete Task-ready (L3) example.',
+    description: 'A synthetic CM4AI-style functional-genomics dataset: a complete Task-ready (L3) example.',
     expectMet: true,
     record: completeRecord({
       pathway: 'C',
@@ -122,7 +122,7 @@ export const EXAMPLES = [
     id: 'hep-root',
     title: 'High-energy physics dataset (ROOT)',
     pathway: 'B',
-    description: 'A ROOT-format HEP dataset — illustrates FAIR extended to models at L2.',
+    description: 'A ROOT-format HEP dataset: illustrates FAIR extended to models at L2.',
     expectMet: true,
     record: completeRecord({
       pathway: 'B',

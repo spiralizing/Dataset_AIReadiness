@@ -22,6 +22,7 @@ import { validationResults } from '../lib/validation.js';
 import { buildAssessmentReport, buildConformanceReport } from '../lib/report.js';
 import { validateProvoShacl, serializeReport, provoToTurtle } from '../lib/shacl.js';
 import ProvenanceBuilder from '../components/ProvenanceBuilder.jsx';
+import ImportAssessment from '../components/ImportAssessment.jsx';
 
 function download(filename, text, mime) {
   const blob = new Blob([text], { type: mime });
@@ -144,6 +145,29 @@ export default function ExportPage() {
     const c = generateCroissant({ ...state, dataset: nextDataset });
     dispatch({ type: 'SET_CROISSANT', croissant: c });
     setCroissantText(JSON.stringify(c, null, 2));
+  };
+
+  // Save the whole assessment record to a file so it can be resumed or shared.
+  // (The exported document tabs above are derived artifacts; this is the source.)
+  const exportAssessment = () => {
+    const slug =
+      (state.dataset?.name ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'assessment';
+    download(`${slug}-ai-readiness.json`, JSON.stringify(state, null, 2), 'application/json');
+  };
+
+  // Clear everything and begin a fresh documentation. Confirm first: this wipes
+  // answers, dataset details, and any Croissant/PROV-O edits (and localStorage).
+  const startNew = () => {
+    const ok = window.confirm(
+      'Start a new dataset documentation?\n\nThis clears all current answers, the dataset details, and any Croissant or PROV-O edits. This cannot be undone.',
+    );
+    if (!ok) return;
+    dispatch({ type: 'RESET' });
+    navigate('/');
   };
 
   const downloadProvo = async () => {
@@ -342,6 +366,12 @@ export default function ExportPage() {
               </div>
 
               <div className="mt-3">
+                <p className="mb-2 text-xs text-muted">
+                  Deep validation checks the record against a formal PROV-O SHACL shape (the same
+                  structural rules a downstream tool applies when it ingests lineage), catching
+                  problems like a missing agent or a broken derivation chain before you publish
+                  rather than after.
+                </p>
                 <button type="button" onClick={runDeepValidate} className="rounded-none bg-brand-btn px-3 py-1.5 text-sm font-medium text-surface hover:opacity-90">
                   {shacl?.loading ? 'Validating…' : 'Deep validate (SHACL)'}
                 </button>
@@ -464,9 +494,31 @@ export default function ExportPage() {
         )}
       </div>
 
-      <div className="mt-8">
+      {/* Assessment file — save/resume the whole record (the source of the tabs above) */}
+      <div className="mt-10 border-t border-line pt-5">
+        <h3 className="text-sm font-semibold">Assessment file</h3>
+        <p className="mt-1 max-w-[70ch] text-xs text-muted">
+          Save the whole assessment (every answer, dataset details, and your Croissant/PROV-O edits)
+          to a file to resume later or share, or load one to continue where you left off.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-3">
+          <DownloadBtn onClick={exportAssessment}>Export assessment (.json)</DownloadBtn>
+          <ImportAssessment className="rounded-none border border-line px-4 py-2 text-sm hover:bg-idle-bg">
+            Import assessment…
+          </ImportAssessment>
+        </div>
+      </div>
+
+      <div className="mt-8 flex items-center justify-between gap-3">
         <button type="button" onClick={() => navigate('/review')} className="rounded-none border border-line px-4 py-2 text-sm hover:bg-idle-bg">
           ← Back to review
+        </button>
+        <button
+          type="button"
+          onClick={startNew}
+          className="rounded-none border border-bad-line px-4 py-2 text-sm text-bad hover:bg-bad-bg"
+        >
+          Start new documentation
         </button>
       </div>
     </section>

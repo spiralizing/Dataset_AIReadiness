@@ -52,7 +52,7 @@ function StatusPill({ pending, result }) {
   );
 }
 
-export default function CriterionField({ criterion, answer, onChange, requirement = 'required', result, stage }) {
+export default function CriterionField({ criterion, answer, onChange, requirement = 'required', result, stage, extra }) {
   const value = answer?.value ?? '';
   const notes = answer?.notes ?? '';
   const badge = VERIFICATION_BADGE[criterion.verification] ?? VERIFICATION_BADGE.manual;
@@ -86,12 +86,14 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
       <div className="mt-3">
         {descriptorArtifact ? (
           <p className="text-xs text-muted">
-            Validated from the {descriptorArtifact} — complete and check it on the Export page.
+            Validated from the {descriptorArtifact}; complete and check it on the Export page.
           </p>
         ) : (
           <FieldInput criterion={criterion} value={value} onValue={(v) => onChange({ value: v })} />
         )}
       </div>
+
+      {extra && <div className="mt-3">{extra}</div>}
 
       {automated && result && !result.ok && (
         <p className="mt-1 text-xs text-bad">{result.message}</p>
@@ -99,7 +101,7 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
 
       {locked && (
         <p className="mt-1 text-xs text-warn">
-          Reflects a past {criterion.lifecycle_stage} decision — record what was done; if it falls
+          Reflects a past {criterion.lifecycle_stage} decision. Record what was done; if it falls
           short, document it as a known limitation rather than a gap to fix.
         </p>
       )}

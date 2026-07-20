@@ -7,6 +7,11 @@ import { validationResults, AUTOMATED_WITH_VALIDATOR } from './validation.js';
 import { isUpcoming } from './stages.js';
 import { generateCroissant } from '../generators/croissant.js';
 import { validateCroissant } from './croissantValidation.js';
+import { citeThisWorkShort } from './thisWork.js';
+
+// One-line citation of the framework this tool implements, embedded in every
+// machine-readable report so downstream consumers can attribute it.
+const FRAMEWORK = citeThisWorkShort();
 
 export const REPORT_VERSION = 'assessment_report_v0';
 export const CONFORMANCE_VERSION = 'conformance_report_v0';
@@ -20,6 +25,7 @@ export function buildAssessmentReport(record, opts = {}) {
   return {
     schema_version: REPORT_VERSION,
     generated_at: now,
+    framework: FRAMEWORK,
     pathway,
     sub_domain: subDomain ?? null,
     started_at: started_at ?? null,
@@ -62,6 +68,7 @@ export function buildConformanceReport(record, opts = {}) {
   return {
     schema_version: CONFORMANCE_VERSION,
     generated_at: now,
+    framework: FRAMEWORK,
     pathway,
     sub_domain: subDomain ?? null,
     croissant: {
