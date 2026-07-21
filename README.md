@@ -2,7 +2,7 @@
 
 An interactive, browser-based tool that helps researchers assess whether their datasets are ready for publication, community sharing, or AI/ML training. The app implements the tiered assessment framework from *A practical AI-readiness assessment for Research Data* (González-Espinoza, 2026), combining the seven pre-model dimensions of the Bridge2AI Standards Working Group, the Data Readiness Levels of Lawrence, and the FAIR Maturity Indicators.
 
-🔗 **Live app:** https://<your-username>.github.io/ai-readiness-assessment/
+🔗 **Live app:** https://spiralizing.github.io/ai-readiness-assessment/
 
 ## What it does
 
