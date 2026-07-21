@@ -11,10 +11,12 @@ permissions:
   pages: write
   id-token: write
 
-# One deploy at a time; let a newer push cancel an in-progress run.
+# One deploy at a time. New group name sidesteps a run wedged in the old
+# "pages" group by a GitHub Actions incident; false avoids cancelling a
+# live deployment mid-flight.
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: pages-deploy
+  cancel-in-progress: false
 
 jobs:
   build:
