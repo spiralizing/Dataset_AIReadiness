@@ -5,6 +5,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { STAGES } from '../lib/stages.js';
 import { THIS_WORK } from '../lib/thisWork.js';
+import { LEVELS } from '../lib/dimensions.js';
 import { useAssessment } from '../state/assessment.jsx';
 import Carousel from '../components/Carousel.jsx';
 import ImportAssessment from '../components/ImportAssessment.jsx';
@@ -30,6 +31,48 @@ const DIMENSIONS = [
   ['Sustainability', 'Long-term access, governance, and the compute cost of using the data.'],
   ['Computability', 'Machine-actionable schema and metadata for direct ingestion by ML pipelines.'],
 ];
+
+// Compact per-cell summaries transcribed from the paper's AI-readiness
+// assessment matrix (§6, tab:assessment-matrix). Level headers and DRL bands
+// come from LEVELS so the schema stays the source of truth; only these
+// phrasings, which the schema doesn't carry, live here.
+const LEVEL_CELLS = {
+  FAIRness: {
+    L1: 'FAIR F+A indicators',
+    L2: 'FAIR I+R indicators; Croissant descriptor present',
+    L3: 'Croissant with responsible-AI annotations; persistent identifier; versioned release',
+  },
+  Provenance: {
+    L1: 'Source documented',
+    L2: 'Transformations logged',
+    L3: 'Full pipeline provenance (W3C PROV)',
+  },
+  Characterization: {
+    L1: 'Schema declared',
+    L2: 'Missingness, errors, distributions reported',
+    L3: 'Bias audit, coverage analysis, scope declared',
+  },
+  Ethics: {
+    L1: 'Consent basis recorded; de-identification applied',
+    L2: 'De-identification applied; method recorded',
+    L3: 'Ethical oversight documented as metadata; access governance in place',
+  },
+  'Pre-model Explainability': {
+    L1: 'Variable definitions stated',
+    L2: 'Variables traceable to source',
+    L3: 'Feature lineage intact, linked to model cards',
+  },
+  Sustainability: {
+    L1: 'Format preserved',
+    L2: 'Storage footprint reported',
+    L3: 'Data-centric efficiency applied',
+  },
+  Computability: {
+    L1: 'Loadable in a standard environment',
+    L2: 'Controlled vocabularies, linked schemas',
+    L3: 'Direct load into ML frameworks',
+  },
+};
 
 const Eyebrow = ({ children, accent }) => (
   <span
@@ -70,6 +113,26 @@ function Node({ tone, icon, label, sub }) {
   );
 }
 
+// The "FAIR-published + docs -> AI-ready" node diagram. Shared by the overview
+// slide and reused as a reminder on the "Three steps" slide.
+function ReadinessDiagram({ className = '' }) {
+  return (
+    <div className={`border-t border-line pt-6 ${className}`}>
+      <div
+        className="flex flex-wrap items-center justify-center gap-3"
+        role="img"
+        aria-label="A FAIR-published but ML-closed dataset, plus documentation layers, becomes AI-ready: reusable by people and pipelines"
+      >
+        <Node tone="closed" icon="🔒" label="FAIR-published" sub="findable & accessible, but ML-closed" />
+        <span className="shrink-0 text-2xl font-light leading-none text-accent" aria-hidden="true">+</span>
+        <Node tone="docs" icon="📑" label="Documentation layers" sub="datasheet · Croissant · PROV-O" />
+        <span className="shrink-0 text-2xl leading-none text-accent" aria-hidden="true">→</span>
+        <Node tone="ready" icon="✓" label="AI-ready" sub="reusable by people & pipelines" />
+      </div>
+    </div>
+  );
+}
+
 export default function StartingPoint() {
   const { state, dispatch } = useAssessment();
   const navigate = useNavigate();
@@ -103,24 +166,121 @@ export default function StartingPoint() {
             exports a to-do plan of what to set up.
           </p>
 
-          <div className="mt-8 border-t border-line pt-6">
-            <div
-              className="flex flex-wrap items-center justify-center gap-3"
-              role="img"
-              aria-label="A FAIR-published but ML-closed dataset, plus documentation layers, becomes AI-ready: reusable by people and pipelines"
-            >
-              <Node tone="closed" icon="🔒" label="FAIR-published" sub="findable & accessible, but ML-closed" />
-              <span className="shrink-0 text-2xl font-light leading-none text-accent" aria-hidden="true">+</span>
-              <Node tone="docs" icon="📑" label="Documentation layers" sub="datasheet · Croissant · PROV-O" />
-              <span className="shrink-0 text-2xl leading-none text-accent" aria-hidden="true">→</span>
-              <Node tone="ready" icon="✓" label="AI-ready" sub="reusable by people & pipelines" />
-            </div>
-          </div>
+          <ReadinessDiagram className="mt-8" />
 
           <p className="mt-6 border-t border-line pt-4 text-xs text-muted">
             This tool implements the framework of{' '}
             <span className="text-ink">{THIS_WORK.authors}</span> ({THIS_WORK.year}).{' '}
             <cite className="italic">{THIS_WORK.title}</cite> [{THIS_WORK.note}]. {THIS_WORK.publisher}.
+          </p>
+        </Slide>
+
+        {/* Seven dimensions */}
+        <Slide>
+          <SlideHead eyebrow="What you'll assess" title="The seven dimensions" />
+          <p className="mt-4 text-xs text-muted">
+            Dimensions from Bridge2AI (
+            <a href="https://doi.org/10.1101/2024.10.23.619844" target="_blank" rel="noreferrer" className="text-link underline">Clark et al., 2026</a>
+            ); levels align to Data Readiness Levels (
+            <a href="https://doi.org/10.48550/arXiv.1705.02245" target="_blank" rel="noreferrer" className="text-link underline">Lawrence, 2017</a>
+            ) and the FAIR Maturity Indicators (
+            <a href="https://doi.org/10.5334/dsj-2020-041" target="_blank" rel="noreferrer" className="text-link underline">Bahim et al., 2020</a>
+            ).
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {DIMENSIONS.map(([name, blurb]) => (
+              <div key={name} className="border border-line bg-surface-2 p-3">
+                <div className="text-sm font-semibold text-ink">{name}</div>
+                <p className="mt-0.5 text-xs text-muted">{blurb}</p>
+              </div>
+            ))}
+          </div>
+        </Slide>
+
+        {/* Three levels — the assessment matrix (paper §6) */}
+        <Slide>
+          <SlideHead eyebrow="How it's graded" title="The three readiness levels" />
+          <p className="mt-4 text-xs text-muted">
+            AI-readiness is graded, not binary. Each dimension progresses through three levels,
+            aligned to the Data Readiness Level bands (
+            <a href="https://doi.org/10.48550/arXiv.1705.02245" target="_blank" rel="noreferrer" className="text-link underline">Lawrence, 2017</a>
+            ). L1 suits local or niche use; L2 is expected for broad reuse; L3 is reserved for
+            datasets that demand serious governance, such as human or biological data.
+          </p>
+
+          {/* Wide screens: the full matrix as a table */}
+          <div className="mt-4 hidden overflow-x-auto sm:block">
+            <table className="w-full border-collapse text-left text-xs">
+              <thead>
+                <tr>
+                  <th className="border border-line bg-surface-2 p-2 text-ink">Dimension</th>
+                  {LEVELS.map((l) => (
+                    <th key={l.id} className="border border-line bg-surface-2 p-2 text-ink">
+                      <div className="font-semibold">{l.id} · {l.name}</div>
+                      <div className="text-[10px] font-normal text-faint">DRL Band {l.drl_band}</div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {DIMENSIONS.map(([name]) => (
+                  <tr key={name}>
+                    <th scope="row" className="border border-line bg-surface-2 p-2 align-top font-semibold text-ink">
+                      {name}
+                    </th>
+                    {LEVELS.map((l) => (
+                      <td key={l.id} className="border border-line p-2 align-top text-muted">
+                        {LEVEL_CELLS[name][l.id]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Narrow screens: one block per level, dimensions stacked inside */}
+          <div className="mt-4 grid gap-3 sm:hidden">
+            {LEVELS.map((l) => (
+              <div key={l.id} className="border border-line bg-surface-2 p-3">
+                <div className="flex items-baseline justify-between border-b border-line pb-1">
+                  <span className="text-sm font-semibold text-ink">{l.id} · {l.name}</span>
+                  <span className="text-[10px] text-faint">DRL Band {l.drl_band}</span>
+                </div>
+                <dl className="mt-2 grid gap-1.5">
+                  {DIMENSIONS.map(([name]) => (
+                    <div key={name}>
+                      <dt className="text-[11px] font-semibold text-ink">{name}</dt>
+                      <dd className="text-[11px] text-muted">{LEVEL_CELLS[name][l.id]}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-3 text-[11px] text-muted">
+            Adapted from the AI-readiness assessment matrix in{' '}
+            <span className="text-ink">{THIS_WORK.authors}</span> ({THIS_WORK.year}).
+          </p>
+        </Slide>
+
+        {/* How it works */}
+        <Slide>
+          <SlideHead eyebrow="How it works" title="Three steps" />
+          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            {STEPS.map(([n, title, body]) => (
+              <div key={n} className="border border-line bg-surface-2 p-4">
+                <span className="grid h-6 w-6 place-items-center bg-accent text-xs font-bold text-white">{n}</span>
+                <h3 className="mt-2 text-sm font-semibold text-ink">{title}</h3>
+                <p className="mt-1 text-xs text-muted">{body}</p>
+              </div>
+            ))}
+          </div>
+
+          <ReadinessDiagram className="mt-8" />
+          <p className="mt-3 text-center text-xs text-muted">
+            The three steps take a FAIR-published dataset and make it AI-ready.
           </p>
         </Slide>
 
@@ -151,41 +311,11 @@ export default function StartingPoint() {
             <a href="https://www.w3.org/TR/prov-o/" target="_blank" rel="noreferrer" className="text-link underline">Lebo et al., 2013</a>
             ).
           </p>
-        </Slide>
 
-        {/* How it works */}
-        <Slide>
-          <SlideHead eyebrow="How it works" title="Three steps" />
-          <div className="mt-5 grid gap-4 sm:grid-cols-3">
-            {STEPS.map(([n, title, body]) => (
-              <div key={n} className="border border-line bg-surface-2 p-4">
-                <span className="grid h-6 w-6 place-items-center bg-accent text-xs font-bold text-white">{n}</span>
-                <h3 className="mt-2 text-sm font-semibold text-ink">{title}</h3>
-                <p className="mt-1 text-xs text-muted">{body}</p>
-              </div>
-            ))}
-          </div>
-        </Slide>
-
-        {/* Seven dimensions */}
-        <Slide>
-          <SlideHead eyebrow="What you'll assess" title="The seven dimensions" />
-          <p className="mt-4 text-xs text-muted">
-            Dimensions from Bridge2AI (
-            <a href="https://doi.org/10.1101/2024.10.23.619844" target="_blank" rel="noreferrer" className="text-link underline">Clark et al., 2026</a>
-            ); levels align to Data Readiness Levels (
-            <a href="https://doi.org/10.48550/arXiv.1705.02245" target="_blank" rel="noreferrer" className="text-link underline">Lawrence, 2017</a>
-            ) and the FAIR Maturity Indicators (
-            <a href="https://doi.org/10.5334/dsj-2020-041" target="_blank" rel="noreferrer" className="text-link underline">Bahim et al., 2020</a>
-            ).
-          </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {DIMENSIONS.map(([name, blurb]) => (
-              <div key={name} className="border border-line bg-surface-2 p-3">
-                <div className="text-sm font-semibold text-ink">{name}</div>
-                <p className="mt-0.5 text-xs text-muted">{blurb}</p>
-              </div>
-            ))}
+          {/* Arrow cueing the required starting-point selector below the carousel. */}
+          <div className="mt-20 flex flex-col items-center text-accent">
+            <span className="text-base font-semibold uppercase tracking-wider">Start here</span>
+            <span className="mt-3 animate-bounce text-7xl leading-none" aria-hidden="true">↓</span>
           </div>
         </Slide>
       </Carousel>
@@ -194,12 +324,6 @@ export default function StartingPoint() {
         Prefer to see it filled in? <Link to="/examples" className="text-link underline">Load a worked example</Link>.
         {' '}Or <ImportAssessment className="text-link underline">import a saved assessment</ImportAssessment>.
       </p>
-
-      {/* Arrow cueing the required starting-point selector below. */}
-      <div className="mt-10 flex flex-col items-center text-accent" aria-hidden="true">
-        <span className="text-[11px] font-semibold uppercase tracking-wider">Start here</span>
-        <span className="mt-1 animate-bounce text-3xl leading-none">↓</span>
-      </div>
 
       {/* Starting point, required (editorial: eyebrow + rule, not a highlight box) */}
       <div className="mt-6">
