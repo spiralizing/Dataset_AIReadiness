@@ -1,6 +1,6 @@
 {
-  "$comment": "Citation registry for the assessment matrix and pathway descriptions. Keys here are the only valid values for any 'references' array in matrix.json or pathways.json. Mirrors the bibliography of González-Espinoza (2026); reference numbers in [brackets] match the source paper.",
-  "version": "0.1.0",
+  "$comment": "Citation registry for the assessment matrix and pathway descriptions. Keys here are the only valid values for any 'references' array in matrix.json or pathways.json. Mirrors the bibliography of González-Espinoza (2026); reference numbers in [brackets] match the source paper. Entries carrying 'source': 'materials-guidance' are cited by the Pathway-C materials sub-domain and are not in the paper's bibliography — they have no 'ref' number and sort after it in the rendered list.",
+  "version": "0.2.0",
   "citations": {
     "Clark2026": {
       "ref": 1,
@@ -145,6 +145,62 @@
       "title": "FAIR Enough: Develop and Assess a FAIR-Compliant Dataset for Large Language Model Training?",
       "venue": "Data Intelligence 6(2):559-585",
       "doi": "10.1162/dint_a_00255"
+    },
+    "Ghiringhelli2023": {
+      "source": "materials-guidance",
+      "authors": "Ghiringhelli, L. M. et al.",
+      "year": 2023,
+      "title": "Shared metadata for data-centric materials science",
+      "venue": "Scientific Data 10:626",
+      "doi": "10.1038/s41597-023-02501-8"
+    },
+    "Hall1991": {
+      "source": "materials-guidance",
+      "authors": "Hall, S. R., Allen, F. H., and Brown, I. D.",
+      "year": 1991,
+      "title": "The crystallographic information file (CIF): a new standard archive file for crystallography",
+      "venue": "Acta Crystallographica Section A 47(6):655-685",
+      "doi": "10.1107/S010876739101067X"
+    },
+    "Andersen2021": {
+      "source": "materials-guidance",
+      "authors": "Andersen, C. W. et al.",
+      "year": 2021,
+      "title": "OPTIMADE, an API for exchanging materials data",
+      "venue": "Scientific Data 8:217",
+      "doi": "10.1038/s41597-021-00974-z"
+    },
+    "EMMC2021": {
+      "source": "materials-guidance",
+      "authors": "European Materials Modelling Council (EMMC)",
+      "year": 2021,
+      "title": "EMMO — Elementary Multiperspective Material Ontology",
+      "venue": "EMMC ontology release",
+      "url": "https://emmo-repo.github.io/"
+    },
+    "Huber2020": {
+      "source": "materials-guidance",
+      "authors": "Huber, S. P. et al.",
+      "year": 2020,
+      "title": "AiiDA 1.0, a scalable computational infrastructure for automated reproducible workflows and data provenance",
+      "venue": "Scientific Data 7:300",
+      "doi": "10.1038/s41597-020-00638-4"
+    },
+    "Pizzi2016": {
+      "source": "materials-guidance",
+      "authors": "Pizzi, G., Cepellotti, A., Sabatini, R., Marzari, N., and Kozinsky, B.",
+      "year": 2016,
+      "title": "AiiDA: automated interactive infrastructure and database for computational science",
+      "venue": "Computational Materials Science 111:218-230",
+      "doi": "10.1016/j.commatsci.2015.09.013"
+    },
+    "OCarragain2019": {
+      "source": "materials-guidance",
+      "authors": "Ó Carragáin, E., Goble, C., Sefton, P., and Soiland-Reyes, S.",
+      "year": 2019,
+      "title": "A lightweight approach to research object data packaging (RO-Crate)",
+      "venue": "Bioinformatics Open Source Conference (BOSC), ISMB/ECCB",
+      "doi": "10.5281/zenodo.3250687"
     }
   }
 }

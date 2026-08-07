@@ -1,4 +1,4 @@
-# AI-Readiness Assessment
+# AI-Readiness Assessment & Documentation builder
 
 An interactive, browser-based tool that helps researchers assess whether their datasets are ready for publication, community sharing, or AI/ML training. The app implements the tiered assessment framework from *A practical AI-readiness assessment for Research Data* (González-Espinoza, 2026), combining the seven pre-model dimensions of the Bridge2AI Standards Working Group, the Data Readiness Levels of Lawrence, and the FAIR Maturity Indicators.
 
@@ -24,9 +24,9 @@ The audience selector drives which criteria are required vs. optional. A researc
 |---|---|---|
 | **A — Accessible** | L1 | Publishing on Figshare, an institutional repository, GitHub, or as paper supplementary material. DOI + basic metadata. Croissant descriptor **recommended** (not required) — including one at L1 makes the dataset trivially upgradable to L2 later and ML-loadable today. |
 | **B — Faithful** | L2 | Publishing on Hugging Face, Kaggle, OpenML, or Dataverse. ML-ready metadata expected; Croissant descriptor required. |
-| **C — Task-ready** | L3 | Dataset intended to support model training in regulated or sensitive domains (biomedical, clinical, institutional human-subjects). Full provenance, bias audit, ethics-as-metadata, model-card linkage. |
+| **C — Task-ready** | L3 | Dataset intended to support model training in a regulated, sensitive, or high-stakes reuse setting — biomedical, clinical, institutional human-subjects, or a physical-science discipline with its own encoding and provenance standards. Full provenance, bias audit, ethics-as-metadata, model-card linkage. |
 
-Pathway C includes a **sub-selector** that refines the Ethics column and pre-fills candidate deposition targets under FAIRness:
+Pathway C includes a **sub-selector** that adds discipline-specific L3 criteria and pre-fills candidate deposition targets under FAIRness. Each overlay declares the dimension it belongs to, so a sub-domain is not confined to Ethics — the biomedical sub-domains overlay Ethics only, because that is where their distinguishing evidence lives, while Materials science also overlays FAIRness, Provenance, and Characterization. Overlays are additive: no sub-domain removes or relaxes anything in the base matrix.
 
 - *General* (default) — standard L3 ethics evidence. Targets: PhysioNet, NIH Data Commons, generalist repositories with controlled-access tier.
 - *Clinical / health* — swaps in the healthsheet template, surfaces IRB protocol ID and HIPAA de-identification method. Targets: **CHoRUS** (Bridge2AI Clinical Care Grand Challenge), PhysioNet, MIMIC-style controlled-access repositories.
@@ -34,8 +34,9 @@ Pathway C includes a **sub-selector** that refines the Ethics column and pre-fil
 - *Voice / public-health biomarker* — surfaces speaker consent, demographic representation audit, and accent / language coverage. Target: **Bridge2AI-Voice** (Voice as a Biomarker of Health Grand Challenge).
 - *Salutogenesis / multi-modal precision health* — surfaces multi-modal alignment provenance, longitudinal consent, and modality-specific de-identification. Target: **AI-READI** (Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights Grand Challenge).
 - *Institutional / human-subjects* — surfaces IRB and tiered-access policy. Targets: institutional Dataverse instances with restricted-access tier, ICPSR for social-science human-subjects data.
+- *Materials science (computational & experimental)* — the first non-biomedical sub-domain, and the one that motivated making overlays dimension-aware. Surfaces domain-repository deposition, discipline encoding (CIF for crystal structures, NeXus for neutron/X-ray/muon experiments, CML for molecules), shared-vocabulary interoperability (EMMO, OPTIMADE, NOMAD Metainfo), a-priori provenance capture (AiiDA, FireWorks/atomate, signac, Nextflow + nf-prov, CWLProv, Workflow-Run RO-Crate), per-run instrument or computational parameters, and — in place of consent — the licensing and redistribution terms of third-party source data. Targets: **NOMAD**, **Materials Cloud Archive**, OQMD, ICSD, with Zenodo/Figshare/Dryad marked explicitly as a generalist fallback. Validators referenced: checkCIF (IUCr), cnxvalidate, optimade-validator.
 
-The four Bridge2AI Grand Challenges (CM4AI, CHoRUS, Bridge2AI-Voice, AI-READI) are named explicitly in Clark et al. [1] as the originating context for the seven-dimension framework, so aligning Pathway C deposition targets to them keeps the assessment criteria and the candidate repositories consistent.
+The four Bridge2AI Grand Challenges (CM4AI, CHoRUS, Bridge2AI-Voice, AI-READI) are named explicitly in Clark et al. [1] as the originating context for the seven-dimension framework, so aligning Pathway C deposition targets to them keeps the assessment criteria and the candidate repositories consistent. The Materials science sub-domain is the first extension beyond that biomedical origin: it demonstrates that the seven dimensions transfer to a discipline where the binding constraint is not consent but encoding, ontology mapping, and provenance-by-construction — captured as the workflow runs, because at high throughput it cannot be reconstructed afterward.
 
 ## How it works
 
@@ -46,7 +47,7 @@ The review screen shows a 7×3 heatmap. A cell turns green only when all its req
 ## Features
 
 - **Wizard flow** — audience selector → seven dimension pages → review/scorecard → export
-- **Prefilled options** drawn from controlled vocabularies in the source paper: licenses (CC-BY, CC0, ODbL), formats (Parquet, HDF5, NetCDF, Zarr, DICOM, NIfTI), repositories by tier — L1 (Figshare, Zenodo, institutional, GitHub), L2 (Hugging Face, Kaggle, OpenML, Dataverse, Dryad), L3 generic (PhysioNet, NIH Data Commons, dbGaP, ICPSR, GenBank), L3 Bridge2AI Grand Challenges (CM4AI, CHoRUS, Bridge2AI-Voice, AI-READI). "Custom" entry always available.
+- **Prefilled options** drawn from controlled vocabularies in the source paper: licenses (CC-BY, CC0, ODbL), formats (Parquet, HDF5, NetCDF, Zarr, DICOM, NIfTI), repositories by tier — L1 (Figshare, Zenodo, institutional, GitHub), L2 (Hugging Face, Kaggle, OpenML, Dataverse, Dryad), L3 generic (PhysioNet, NIH Data Commons, dbGaP, ICPSR, GenBank), L3 Bridge2AI Grand Challenges (CM4AI, CHoRUS, Bridge2AI-Voice, AI-READI). Discipline vocabularies extend the same mechanism — Materials science adds repositories (NOMAD, Materials Cloud, OQMD, ICSD), encoding standards (CIF, NeXus, CML), an interoperability layer (EMMO, OPTIMADE, NOMAD Metainfo), and provenance engines (AiiDA, FireWorks, signac, nf-prov, CWLProv). "Custom" entry always available.
 - **Binary checkmark heatmap** — pass/fail per cell, optional-criteria list below the heatmap
 - **Three template generators** — Croissant, PROV-O, datasheet/healthsheet — all editable in-app before download
 - **Inlined seeded examples** — six reference datasets shipped with the bundle:
@@ -89,8 +90,10 @@ ai-readiness-assessment/
 │   │   └── EditablePreview.jsx
 │   ├── schema/
 │   │   ├── matrix.json          # 7×3 assessment matrix
-│   │   ├── pathways.json        # A / B / C with sub-domains
-│   │   └── vocabularies.json    # licenses, formats, repositories
+│   │   ├── pathways.json        # A / B / C; seven Pathway-C sub-domains with L3 overlays
+│   │   ├── vocabularies.json    # licenses, formats, repositories, discipline vocabularies
+│   │   ├── validators.json      # discipline-validator registry (BIDS, CF, DDI, checkCIF, …)
+│   │   └── references.json      # citation registry keyed from matrix + pathways
 │   ├── generators/
 │   │   ├── croissant.js
 │   │   ├── prov-o.js
@@ -166,6 +169,12 @@ The assessment matrix lives at `src/schema/matrix.json`. Each entry describes on
 
 To create a domain-tuned variant (e.g., a high-energy-physics profile), copy `matrix.json`, edit, and load it via the **Import schema** option in the app. Forking the repo is not required.
 
+### Adding a discipline sub-domain
+
+A discipline that needs extra L3 criteria is added as a Pathway C sub-domain in `src/schema/pathways.json`, without touching the base matrix. One entry supplies the label, the deposition-target vocabulary, the documentation template (`datasheet` or `healthsheet`), and an `overlay` array. Each overlay entry names the `dimension` it belongs to, so it is merged into that dimension's page, that cell of the heatmap, and the matching section of the generated datasheet — no component code changes. The overlay's `remediation` string is what the researcher reads as fill-in guidance, so it is where the concrete field names of the discipline's standards belong.
+
+The supporting data lives alongside it: controlled vocabularies in `vocabularies.json` (referenced by `vocabulary_key`), any discipline validators in `validators.json`, and citations in `references.json` (every key in an overlay's `references` array must resolve there — `tests/matrix.test.js` enforces this, along with L3 scoping, id uniqueness against the base matrix, and vocabulary resolution). The Materials science sub-domain is the worked example of the full pattern.
+
 ## References
 
 The framework, dimensions, and templates implemented here are drawn from:
@@ -183,13 +192,27 @@ The framework, dimensions, and templates implemented here are drawn from:
 
 The full bibliography from the source paper is reproduced in [`docs/REFERENCES.md`](docs/REFERENCES.md).
 
+### Materials science sub-domain
+
+The Materials science overlay cites sources outside the framework paper's bibliography. They are held in the same registry (`src/schema/references.json`, marked `source: "materials-guidance"`) and render after the numbered list on the app's References page.
+
+- Ghiringhelli, L. M. et al. (2023). *Shared metadata for data-centric materials science.* Scientific Data 10: 626. doi:10.1038/s41597-023-02501-8
+- Hall, S. R., Allen, F. H., & Brown, I. D. (1991). *The crystallographic information file (CIF): a new standard archive file for crystallography.* Acta Crystallographica A47(6): 655–685. doi:10.1107/S010876739101067X
+- Andersen, C. W. et al. (2021). *OPTIMADE, an API for exchanging materials data.* Scientific Data 8: 217. doi:10.1038/s41597-021-00974-z
+- European Materials Modelling Council (2021). *EMMO — Elementary Multiperspective Material Ontology.* https://emmo-repo.github.io/
+- Huber, S. P. et al. (2020). *AiiDA 1.0, a scalable computational infrastructure for automated reproducible workflows and data provenance.* Scientific Data 7: 300. doi:10.1038/s41597-020-00638-4
+- Pizzi, G., Cepellotti, A., Sabatini, R., Marzari, N., & Kozinsky, B. (2016). *AiiDA: automated interactive infrastructure and database for computational science.* Computational Materials Science 111: 218–230. doi:10.1016/j.commatsci.2015.09.013
+- Ó Carragáin, E., Goble, C., Sefton, P., & Soiland-Reyes, S. (2019). *A lightweight approach to research object data packaging (RO-Crate).* BOSC 2019, ISMB/ECCB. doi:10.5281/zenodo.3250687
+
 ## License
 
 The application code is released under the MIT License. The assessment framework it implements is documented in the source paper cited above; see that paper for attribution requirements when adapting the framework itself.
 
 ## Citation
 
-If you use this tool in your research, please cite both the source framework and the implementation:
+Cite the **framework paper** when you use the tiered assessment model itself — the seven dimensions, the L1/L2/L3 levels, or the audience pathways — in a study or in your own tooling.
+
+Cite the **software** when you use the app to produce artifacts you ship or publish: a datasheet or healthsheet, a Croissant descriptor, a PROV-O provenance record, a release bundle, or a machine-readable assessment report. In practice this is the more common case — the documentation builder is what most users take away, and datasets released with artifacts generated here should point back to it so the templates and vocabularies used are traceable.
 
 ```bibtex
 @misc{gonzalez2026airready,
@@ -201,12 +224,18 @@ If you use this tool in your research, please cite both the source framework and
 }
 
 @software{airready_app_2026,
-  title  = {AI-Readiness Assessment App},
-  author = {González-Espinoza, Alfredo},
-  year   = {2026},
-  url    = {https://github.com/<your-username>/ai-readiness-assessment}
+  title   = {AI-Readiness Assessment and Documentation Builder:
+             a browser-based generator for datasheets, Croissant
+             descriptors, and PROV-O provenance records},
+  author  = {González-Espinoza, Alfredo},
+  year    = {2026},
+  version = {0.1.0},
+  url     = {https://github.com/spiralizing/Dataset_AIReadiness},
+  note    = {Live app: https://spiralizing.github.io/Dataset_AIReadiness/}
 }
 ```
+
+The documentation artifacts the builder emits implement published templates and specifications that carry their own attribution: datasheets (Gebru et al. 2021), healthsheets (Rostamzadeh et al. 2022), Croissant (Akhtar et al. 2024), and PROV-O (W3C 2013). Cite those alongside this tool when the artifact itself is the object of discussion — see [References](#references).
 
 ## Contributing
 

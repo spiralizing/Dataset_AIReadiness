@@ -56,7 +56,9 @@ export default function AudienceSelector() {
         <div className="mt-6">
           <h3 className="text-sm font-semibold">Sub-domain</h3>
           <p className="mt-1 text-xs text-muted">
-            Refines the Ethics criteria and the datasheet template. Defaults to General.
+            Adds discipline-specific L3 criteria — ethics evidence for the biomedical
+            sub-domains, and also encoding, interoperability, and provenance for Materials
+            science — and sets the datasheet template. Defaults to General.
           </p>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {subDomainsForC().map((s) => (

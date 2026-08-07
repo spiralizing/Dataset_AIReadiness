@@ -222,14 +222,14 @@ test('pathway deposition_targets_vocabulary keys resolve in vocabularies.json', 
   }
 });
 
-test('Pathway C declares six sub-domains including the resolved set', () => {
+test('Pathway C declares seven sub-domains including the resolved set', () => {
   const c = pathways.pathways.find((p) => p.id === 'C');
   assert.ok(c, 'Pathway C missing');
-  assert.equal(c.sub_domains.length, 6, 'expected exactly six Pathway C sub-domains');
+  assert.equal(c.sub_domains.length, 7, 'expected exactly seven Pathway C sub-domains');
   const ids = c.sub_domains.map((s) => s.id).sort();
   assert.deepEqual(
     ids,
-    ['clinical', 'general', 'genomic', 'institutional', 'salutogenesis', 'voice'],
+    ['clinical', 'general', 'genomic', 'institutional', 'materials', 'salutogenesis', 'voice'],
     `unexpected sub-domain set: ${ids.join(', ')}`,
   );
   assert.ok(
@@ -238,14 +238,33 @@ test('Pathway C declares six sub-domains including the resolved set', () => {
   );
 });
 
-test('Pathway C ethics overlays are scoped to Ethics dimension at L3 only', () => {
+test('Pathway C overlays sit at L3, in a known dimension, and resolve their vocabulary and citations', () => {
   const c = pathways.pathways.find((p) => p.id === 'C');
   for (const sub of c.sub_domains) {
-    for (const o of sub.ethics_overlay) {
-      assert.equal(o.dimension, 'Ethics', `overlay ${o.id} (sub-domain ${sub.id}) is not Ethics`);
+    assert.ok(Array.isArray(sub.overlay), `sub-domain ${sub.id} has no overlay array`);
+    for (const o of sub.overlay) {
+      assert.ok(
+        REQUIRED_DIMENSIONS.includes(o.dimension),
+        `overlay ${o.id} (sub-domain ${sub.id}) declares unknown dimension ${o.dimension}`,
+      );
       assert.equal(o.level, 'L3', `overlay ${o.id} (sub-domain ${sub.id}) is not L3`);
       assert.deepEqual(o.required_in_pathways, ['C'], `overlay ${o.id} should be required only in Pathway C`);
       assert.ok(VALID_EVIDENCE_TYPES.has(o.evidence_type), `overlay ${o.id} evidence_type invalid`);
+      if (o.verification !== undefined) {
+        assert.ok(
+          VALID_VERIFICATION.has(o.verification),
+          `overlay ${o.id} has invalid verification mode: ${o.verification}`,
+        );
+      }
+      // Same invariant as the matrix: ethics adequacy is human-judged, never automated.
+      if (o.dimension === 'Ethics') {
+        assert.notEqual(o.verification, 'automated', `overlay ${o.id} is an Ethics criterion marked automated`);
+      }
+      assert.ok(
+        typeof o.label === 'string' && o.label.length > 0 &&
+          typeof o.remediation === 'string' && o.remediation.length > 0,
+        `overlay ${o.id} missing label or remediation`,
+      );
       if (o.evidence_type === 'controlled_vocabulary') {
         assert.ok(
           Object.prototype.hasOwnProperty.call(vocabularies.vocabularies, o.vocabulary_key),
@@ -262,12 +281,23 @@ test('Pathway C ethics overlays are scoped to Ethics dimension at L3 only', () =
   }
 });
 
+test('sub-domain deposition_targets_vocabulary keys resolve in vocabularies.json', () => {
+  const c = pathways.pathways.find((p) => p.id === 'C');
+  for (const sub of c.sub_domains) {
+    if (!sub.deposition_targets_vocabulary) continue;
+    assert.ok(
+      Object.prototype.hasOwnProperty.call(vocabularies.vocabularies, sub.deposition_targets_vocabulary),
+      `sub-domain ${sub.id} references unknown vocabulary ${sub.deposition_targets_vocabulary}`,
+    );
+  }
+});
+
 test('Pathway C overlay ids are unique across all sub-domains and do not collide with matrix criterion ids', () => {
   const matrixIds = new Set(matrix.criteria.map((c) => c.id));
   const c = pathways.pathways.find((p) => p.id === 'C');
   const seen = new Set();
   for (const sub of c.sub_domains) {
-    for (const o of sub.ethics_overlay) {
+    for (const o of sub.overlay) {
       assert.ok(!seen.has(o.id), `duplicate overlay id ${o.id}`);
       seen.add(o.id);
       assert.ok(!matrixIds.has(o.id), `overlay id ${o.id} collides with a matrix criterion id`);

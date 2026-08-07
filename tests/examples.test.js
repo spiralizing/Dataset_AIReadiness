@@ -13,7 +13,7 @@ import { validationResults } from '../src/lib/validation.js';
 
 const overlayIds = pathwaysData.pathways
   .find((p) => p.id === 'C')
-  .sub_domains.flatMap((s) => s.ethics_overlay.map((o) => o.id));
+  .sub_domains.flatMap((s) => s.overlay.map((o) => o.id));
 const validIds = new Set([...matrix.criteria.map((c) => c.id), ...overlayIds]);
 
 test('six examples with unique ids and valid pathways/stage', () => {

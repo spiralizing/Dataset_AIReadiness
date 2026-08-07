@@ -70,6 +70,41 @@
       "reference_doi": "10.1371/journal.pone.0029715",
       "execution": "web-service",
       "note": "Hosted web service; submit externally and record the validation summary as attested evidence."
+    },
+    {
+      "id": "checkcif",
+      "discipline": "Materials / crystallography",
+      "applies_to": ["CIF", "crystallography", "materials"],
+      "standard": "Crystallographic Information Framework (CIF)",
+      "standard_url": "https://www.iucr.org/resources/cif",
+      "validator_name": "checkCIF",
+      "validator_url": "https://checkcif.iucr.org/",
+      "reference_doi": "10.1107/S010876739101067X",
+      "execution": "web-service",
+      "note": "IUCr hosted service; upload the CIF and record the report as attested evidence. Also runs as part of IUCr journal submission."
+    },
+    {
+      "id": "optimade-validator",
+      "discipline": "Materials / cross-database query",
+      "applies_to": ["OPTIMADE", "materials", "JSON:API"],
+      "standard": "OPTIMADE API specification",
+      "standard_url": "https://www.optimade.org/",
+      "validator_name": "optimade-validator (optimade-python-tools)",
+      "validator_url": "https://github.com/Materials-Consortia/optimade-python-tools",
+      "reference_doi": "10.1038/s41597-021-00974-z",
+      "execution": "cli",
+      "note": "Python CLI; validates an OPTIMADE endpoint against the specification. Applies when the dataset is served from a queryable API rather than deposited as files."
+    },
+    {
+      "id": "nexus-validate",
+      "discipline": "Materials / neutron, X-ray, and muon experiments",
+      "applies_to": ["NeXus", "HDF5", "materials", "spectroscopy"],
+      "standard": "NeXus application definitions",
+      "standard_url": "https://www.nexusformat.org/",
+      "validator_name": "cnxvalidate",
+      "validator_url": "https://github.com/nexusformat/cnxvalidate",
+      "execution": "cli",
+      "note": "Validates an HDF5 file against a NeXus application definition. Run externally and record the outcome as attested evidence."
     }
   ],
   "registries": [

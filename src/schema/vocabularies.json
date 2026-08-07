@@ -1,6 +1,6 @@
 {
-  "$comment": "Controlled vocabularies referenced from matrix.json criteria via 'vocabulary_key'. Sourced from Tables 3, 5, 7, 12 of González-Espinoza (2026). 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
-  "version": "0.1.0",
+  "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 3, 5, 7, 12 of González-Espinoza (2026); the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
+  "version": "0.2.0",
   "vocabularies": {
     "licenses": {
       "label": "License",
@@ -111,6 +111,55 @@
         { "id": "CM4AI", "label": "CM4AI — Bridge2AI Cell Maps for AI Grand Challenge" },
         { "id": "Bridge2AIVoice", "label": "Bridge2AI-Voice — Voice as a Biomarker of Health Grand Challenge" },
         { "id": "AIREADI", "label": "AI-READI — Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights Grand Challenge" }
+      ]
+    },
+    "repositories_l3_materials": {
+      "label": "L3 / Pathway C materials-science repositories",
+      "source": "Documenting research data in the material sciences (CMU Libraries RDM, Aug 2026), slide 12",
+      "values": [
+        { "id": "NOMAD", "label": "NOMAD — FAIR repository and archive for computational materials data", "url": "https://nomad-lab.eu/" },
+        { "id": "MaterialsCloud", "label": "Materials Cloud Archive — AiiDA-native, provenance-preserving records", "url": "https://archive.materialscloud.org/" },
+        { "id": "OQMD", "label": "OQMD — Open Quantum Materials Database", "url": "https://oqmd.org/" },
+        { "id": "ICSD", "label": "ICSD — Inorganic Crystal Structure Database (subscription; check redistribution terms)", "url": "https://icsd.products.fiz-karlsruhe.de/" },
+        { "id": "Zenodo", "label": "Zenodo (generalist fallback — no domain repository accepts the record type)", "url": "https://zenodo.org/" },
+        { "id": "Figshare", "label": "Figshare (generalist fallback)", "url": "https://figshare.com/" },
+        { "id": "Dryad", "label": "Dryad (generalist fallback)", "url": "https://datadryad.org/" }
+      ]
+    },
+    "formats_materials": {
+      "label": "Materials-science encoding standards",
+      "source": "Materials RDM slides 16 and 28; standards reviewed in Ghiringhelli et al. (2023)",
+      "values": [
+        { "id": "CIF", "label": "CIF — Crystallographic Information Framework (IUCr; crystal structures)", "url": "https://www.iucr.org/resources/cif" },
+        { "id": "NeXus", "label": "NeXus — neutron, X-ray, and muon experiment data (HDF5-backed)", "url": "https://www.nexusformat.org/" },
+        { "id": "CML", "label": "CML — Chemical Markup Language (molecules and reactions)" },
+        { "id": "HDF5", "label": "HDF5 (large arrays; the container underneath NeXus)" },
+        { "id": "JSON", "label": "JSON (structured records, human- and machine-readable)" },
+        { "id": "YAML", "label": "YAML (configuration and parameter records)" },
+        { "id": "XML", "label": "XML (schema-validated records)" }
+      ]
+    },
+    "materials_interoperability": {
+      "label": "Materials interoperability layer (ontology / API / schema)",
+      "source": "Materials RDM slides 17–18; EMMO (EMMC, 2021), OPTIMADE (Andersen et al., 2021)",
+      "values": [
+        { "id": "EMMO", "label": "EMMO — Elementary Multiperspective Material Ontology (maps code-specific field names onto shared concepts)", "url": "https://emmo-repo.github.io/" },
+        { "id": "OPTIMADE", "label": "OPTIMADE — common query API across materials databases", "url": "https://www.optimade.org/" },
+        { "id": "NOMADMetainfo", "label": "NOMAD Metainfo — repository-native schema for computational materials data", "url": "https://nomad-lab.eu/" },
+        { "id": "LocalVocabulary", "label": "Local controlled vocabulary documented with the dataset" }
+      ]
+    },
+    "provenance_engines": {
+      "label": "A-priori provenance capture (workflow engine / ELN)",
+      "source": "Materials RDM slides 19–23; AiiDA (Huber et al., 2020), RO-Crate (Ó Carragáin et al., 2019)",
+      "values": [
+        { "id": "AiiDA", "label": "AiiDA — provenance-by-construction workflow engine", "url": "https://www.aiida.net/" },
+        { "id": "FireWorks", "label": "FireWorks / atomate — high-throughput workflow management", "url": "https://materialsproject.github.io/fireworks/" },
+        { "id": "signac", "label": "signac — data and workflow management for computational studies", "url": "https://signac.io/" },
+        { "id": "NextflowProv", "label": "Nextflow with nf-prov — PROV output emitted by the run", "url": "https://github.com/nextflow-io/nf-prov" },
+        { "id": "CWLProv", "label": "CWLProv — provenance profile for CWL workflow runs", "url": "https://w3id.org/cwl/prov/" },
+        { "id": "WorkflowRunROCrate", "label": "Workflow-Run RO-Crate — packaged run provenance", "url": "https://www.researchobject.org/workflow-run-crate/" },
+        { "id": "ELN", "label": "ELN / LIMS entry captured at acquisition time (bench work)" }
       ]
     },
     "consent_basis": {

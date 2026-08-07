@@ -21,9 +21,16 @@ export const subDomainsForC = () => getPathway('C')?.sub_domains ?? [];
 export const getSubDomain = (subId) =>
   subDomainsForC().find((s) => s.id === subId) ?? null;
 
-// Pathway C ethics overlays live only in Ethics × L3; empty for A/B or no sub-domain.
-export const ethicsOverlay = (pathway, subId) =>
-  pathway === 'C' && subId ? (getSubDomain(subId)?.ethics_overlay ?? []) : [];
+// Pathway C sub-domain overlays. Each overlay entry declares its own `dimension`
+// and `level`, so a sub-domain is not confined to Ethics: the biomedical
+// sub-domains overlay Ethics only, `materials` also overlays FAIRness,
+// Provenance, and Characterization. Empty for A/B or when no sub-domain is set.
+export const overlaysFor = (pathway, subId) =>
+  pathway === 'C' && subId ? (getSubDomain(subId)?.overlay ?? []) : [];
+
+// Overlays that belong to one matrix cell (dimension × level).
+const overlaysForCell = (pathway, subId, dimension, level) =>
+  overlaysFor(pathway, subId).filter((o) => o.dimension === dimension && o.level === level);
 
 // Documentation template for a record: 'healthsheet' for Pathway C sub-domains
 // that declare it (clinical, salutogenesis), else 'datasheet'.
@@ -71,20 +78,18 @@ export const cellStatus = (dimension, level, pathway, answers = {}, subDomain, r
   let required = ALL_CRITERIA.filter(
     (c) => c.dimension === dimension && c.level === level && isRequiredForPathway(c, pathway),
   );
-  if (dimension === 'Ethics' && level === 'L3') {
-    required = [...required, ...ethicsOverlay(pathway, subDomain)];
-  }
+  required = [...required, ...overlaysForCell(pathway, subDomain, dimension, level)];
   if (required.length === 0) return 'not-required';
   const active = required.filter((c) => !isUpcoming(c, stage));
   if (active.length === 0) return 'upcoming'; // entire cell deferred to a later stage
   return active.every((c) => isCriterionSatisfied(c, answers[c.id], results)) ? 'met' : 'unmet';
 };
 
-// All required criteria for a pathway, including Pathway-C ethics overlays for
-// the chosen sub-domain. This is what the verdict and the datasheet iterate.
+// All required criteria for a pathway, including Pathway-C sub-domain overlays.
+// This is what the verdict and the datasheet iterate.
 export const requiredCriteria = (pathway, subDomain) => [
   ...criteriaForPathway(pathway),
-  ...ethicsOverlay(pathway, subDomain),
+  ...overlaysFor(pathway, subDomain),
 ];
 
 // Overall verdict for a pathway. Bottlenecks are the dimensions with any unmet
@@ -110,12 +115,13 @@ export const pathwayVerdict = (pathway, answers = {}, subDomain, results, stage)
 };
 
 // Required criteria for one dimension under a pathway, in level order, including
-// Pathway C ethics overlays (appended after the base Ethics × L3 criteria).
+// any Pathway C sub-domain overlays scoped to that dimension (appended after the
+// base criteria).
 export const criteriaForDimension = (dimension, pathway, subDomain) => {
   const base = ALL_CRITERIA.filter(
     (c) => c.dimension === dimension && isRequiredForPathway(c, pathway),
   );
-  const overlays = dimension === 'Ethics' ? ethicsOverlay(pathway, subDomain) : [];
+  const overlays = overlaysFor(pathway, subDomain).filter((o) => o.dimension === dimension);
   return [...base, ...overlays];
 };
 

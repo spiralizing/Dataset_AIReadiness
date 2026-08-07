@@ -13,7 +13,7 @@ import {
   pathwayVerdict,
   getPathway,
   subDomainsForC,
-  ethicsOverlay,
+  overlaysFor,
   criteriaForDimension,
   recommendedForDimension,
 } from '../src/lib/pathway.js';
@@ -101,24 +101,47 @@ test('pathwayVerdict: unmet with no answers, met when all required satisfied', (
 test('getPathway and subDomainsForC resolve schema metadata', () => {
   assert.equal(getPathway('A').name, 'Accessible');
   assert.equal(getPathway('Z'), null);
-  assert.equal(subDomainsForC().length, 6);
+  assert.equal(subDomainsForC().length, 7);
 });
 
-test('ethicsOverlay is empty except for Pathway C with a sub-domain', () => {
-  assert.deepEqual(ethicsOverlay('A', 'clinical'), []);
-  assert.deepEqual(ethicsOverlay('C', null), []);
-  assert.equal(ethicsOverlay('C', 'clinical').length, 3);
+test('overlaysFor is empty except for Pathway C with a sub-domain', () => {
+  assert.deepEqual(overlaysFor('A', 'clinical'), []);
+  assert.deepEqual(overlaysFor('C', null), []);
+  assert.equal(overlaysFor('C', 'clinical').length, 3);
+  assert.equal(overlaysFor('C', 'materials').length, 6);
 });
 
-test('criteriaForDimension merges Pathway-C ethics overlays into Ethics only', () => {
+test('criteriaForDimension merges each overlay into the dimension it declares', () => {
   // Base Ethics required for C = 2 (L1) + 1 (L2) + 4 (L3) = 7.
   assert.equal(criteriaForDimension('Ethics', 'C', 'general').length, 7);
   const clinical = criteriaForDimension('Ethics', 'C', 'clinical');
   assert.equal(clinical.length, 10); // 7 base + 3 clinical overlays
   assert.ok(clinical.some((c) => c.id === 'ethics.l3.clinical.irb_protocol_id'));
-  // Non-Ethics dimensions never receive overlays.
+  // A biomedical sub-domain overlays Ethics only — other dimensions are untouched.
   assert.equal(criteriaForDimension('FAIRness', 'C', 'clinical').length,
     criteriaForDimension('FAIRness', 'C', 'general').length);
+  // Materials overlays four dimensions: FAIRness ×3, Provenance ×1,
+  // Characterization ×1, Ethics ×1.
+  const fairBase = criteriaForDimension('FAIRness', 'C', 'general').length;
+  assert.equal(criteriaForDimension('FAIRness', 'C', 'materials').length, fairBase + 3);
+  assert.equal(criteriaForDimension('Provenance', 'C', 'materials').length,
+    criteriaForDimension('Provenance', 'C', 'general').length + 1);
+  assert.equal(criteriaForDimension('Characterization', 'C', 'materials').length,
+    criteriaForDimension('Characterization', 'C', 'general').length + 1);
+  assert.equal(criteriaForDimension('Ethics', 'C', 'materials').length, 8);
+  // Overlays never leak into a dimension they do not declare.
+  assert.equal(criteriaForDimension('Computability', 'C', 'materials').length,
+    criteriaForDimension('Computability', 'C', 'general').length);
+});
+
+test('cellStatus counts a non-Ethics overlay in its own cell', () => {
+  // FAIRness × L3 for materials is unmet until the three overlay criteria are answered.
+  const base = criteriaForDimension('FAIRness', 'C', 'general').filter((c) => c.level === 'L3');
+  const answers = satisfyAll(base);
+  assert.equal(cellStatus('FAIRness', 'L3', 'C', answers, 'general', undefined, 'upgrade'), 'met');
+  assert.equal(cellStatus('FAIRness', 'L3', 'C', answers, 'materials', undefined, 'upgrade'), 'unmet');
+  const withOverlay = { ...answers, ...satisfyAll(overlaysFor('C', 'materials')) };
+  assert.equal(cellStatus('FAIRness', 'L3', 'C', withOverlay, 'materials', undefined, 'upgrade'), 'met');
 });
 
 test('criteriaForDimension for Pathway A yields only that dimension L1 criteria', () => {

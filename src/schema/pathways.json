@@ -1,6 +1,6 @@
 {
-  "$comment": "Pathway definitions for the audience selector. Three pathways A/B/C aligned to L1/L2/L3 with cumulative semantics: B requires every L1 + L2 criterion in matrix.json; C requires every L1 + L2 + L3 criterion. Pathway C has six sub-domains; each sub-domain may add or relabel criteria scoped strictly to the Ethics dimension at L3 via 'ethics_overlay'. Other dimensions are constant across sub-domains.",
-  "version": "0.1.0",
+  "$comment": "Pathway definitions for the audience selector. Three pathways A/B/C aligned to L1/L2/L3 with cumulative semantics: B requires every L1 + L2 criterion in matrix.json; C requires every L1 + L2 + L3 criterion. Pathway C has seven sub-domains; each may add criteria at L3 via 'overlay'. Overlay entries declare their own 'dimension', so a sub-domain is not restricted to Ethics: the biomedical sub-domains overlay Ethics only, while 'materials' also overlays FAIRness, Provenance, and Characterization, where the discipline-specific documentation practice actually lives. Overlays are additive — nothing in matrix.json is removed or relaxed by a sub-domain. Renamed from 'ethics_overlay' in 0.2.0.",
+  "version": "0.2.0",
   "pathways": [
     {
       "id": "A",
@@ -53,7 +53,7 @@
           "description": "Standard L3 ethics evidence as written in Table 11. Default datasheet template with an ethics-evidence section.",
           "deposition_targets_vocabulary": "repositories_l3_general",
           "template": "datasheet",
-          "ethics_overlay": []
+          "overlay": []
         },
         {
           "id": "clinical",
@@ -62,7 +62,7 @@
           "deposition_targets_vocabulary": "repositories_l3_bridge2ai",
           "deposition_targets_filter": ["CHoRUS", "PhysioNet"],
           "template": "healthsheet",
-          "ethics_overlay": [
+          "overlay": [
             {
               "id": "ethics.l3.clinical.irb_protocol_id",
               "dimension": "Ethics",
@@ -103,7 +103,7 @@
           "deposition_targets_vocabulary": "repositories_l3_bridge2ai",
           "deposition_targets_filter": ["CM4AI"],
           "template": "datasheet",
-          "ethics_overlay": [
+          "overlay": [
             {
               "id": "ethics.l3.genomic.consent_type",
               "dimension": "Ethics",
@@ -143,7 +143,7 @@
           "deposition_targets_vocabulary": "repositories_l3_bridge2ai",
           "deposition_targets_filter": ["Bridge2AIVoice"],
           "template": "datasheet",
-          "ethics_overlay": [
+          "overlay": [
             {
               "id": "ethics.l3.voice.speaker_consent",
               "dimension": "Ethics",
@@ -183,7 +183,7 @@
           "deposition_targets_vocabulary": "repositories_l3_bridge2ai",
           "deposition_targets_filter": ["AIREADI"],
           "template": "healthsheet",
-          "ethics_overlay": [
+          "overlay": [
             {
               "id": "ethics.l3.salutogenesis.modality_alignment",
               "dimension": "Ethics",
@@ -223,7 +223,7 @@
           "deposition_targets_vocabulary": "repositories_l3_general",
           "deposition_targets_filter": ["ICPSR"],
           "template": "datasheet",
-          "ethics_overlay": [
+          "overlay": [
             {
               "id": "ethics.l3.institutional.review_body",
               "dimension": "Ethics",
@@ -243,6 +243,85 @@
               "required_in_pathways": ["C"],
               "references": ["Clark2026"],
               "remediation": "Institutional Dataverse and ICPSR both publish tiered-access policies; link to the one that applies."
+            }
+          ]
+        },
+        {
+          "id": "materials",
+          "name": "Materials science (computational & experimental)",
+          "description": "Non-human-subjects physical-science data. Surfaces domain-repository deposition (NOMAD, Materials Cloud, OQMD, ICSD), discipline encoding (CIF, NeXus), shared-vocabulary interoperability (EMMO, OPTIMADE, NOMAD Metainfo), and a-priori provenance capture (AiiDA, FireWorks, signac). The Ethics criterion here is provenance of rights, not consent.",
+          "deposition_targets_vocabulary": "repositories_l3_materials",
+          "template": "datasheet",
+          "overlay": [
+            {
+              "id": "fairness.l3.materials.domain_repository",
+              "dimension": "FAIRness",
+              "level": "L3",
+              "label": "Domain repository selected for deposition (generalist repository only as fallback)",
+              "evidence_type": "controlled_vocabulary",
+              "vocabulary_key": "repositories_l3_materials",
+              "verification": "attested",
+              "required_in_pathways": ["C"],
+              "references": ["Ghiringhelli2023", "Wilkinson2016"],
+              "remediation": "Domain repository first, generalist fallback second. NOMAD and the Materials Cloud Archive mint DOIs and index the metadata so the record stays machine-queryable; OQMD and ICSD are structure databases with their own submission and licensing routes. Zenodo, Figshare, and Dryad remain valid when no domain repository accepts the record type. Record which one, and the DOI it minted."
+            },
+            {
+              "id": "fairness.l3.materials.encoding_standard",
+              "dimension": "FAIRness",
+              "level": "L3",
+              "label": "Discipline encoding standard declared for the released files",
+              "evidence_type": "controlled_vocabulary",
+              "vocabulary_key": "formats_materials",
+              "verification": "attested",
+              "required_in_pathways": ["C"],
+              "references": ["Hall1991", "Ghiringhelli2023"],
+              "remediation": "Crystal structures go in CIF (IUCr): `_chemical_formula_sum`, `_cell_length_a`, `_space_group_H-M`, and an `_atom_site` loop with fractional coordinates. Neutron, X-ray, and muon experiment data go in NeXus, which is HDF5 underneath and so stays loadable in a standard environment. Molecules and reactions can use CML. Name the standard and its version — a bare CSV of peak positions is L1 evidence, not L3."
+            },
+            {
+              "id": "fairness.l3.materials.ontology_mapping",
+              "dimension": "FAIRness",
+              "level": "L3",
+              "label": "Field names mapped to a shared vocabulary or exposed through a materials API",
+              "evidence_type": "controlled_vocabulary",
+              "vocabulary_key": "materials_interoperability",
+              "verification": "attested",
+              "required_in_pathways": ["C"],
+              "references": ["EMMC2021", "Andersen2021", "Ghiringhelli2023"],
+              "remediation": "One quantity carries many names: VASP writes `E_tot`, Quantum ESPRESSO writes `etotal`, an XRD ELN writes `energy`. Map each field to one shared concept so the record is queryable across codes — EMMO for materials concepts, NOMAD Metainfo for a repository-native schema, OPTIMADE when the data is served from a queryable endpoint. Record the vocabulary and, where one exists, the concept IRI per field."
+            },
+            {
+              "id": "provenance.l3.materials.apriori_capture",
+              "dimension": "Provenance",
+              "level": "L3",
+              "label": "Provenance captured a priori by a workflow engine or ELN, not reconstructed afterward",
+              "evidence_type": "controlled_vocabulary",
+              "vocabulary_key": "provenance_engines",
+              "verification": "attested",
+              "required_in_pathways": ["C"],
+              "references": ["Huber2020", "Pizzi2016", "OCarragain2019"],
+              "remediation": "At high throughput — order 10,000 processes an hour — nobody is taking notes, and reconstructing the graph after the fact is intractable. Name what recorded inputs, steps, and outputs as the run proceeded (AiiDA, FireWorks/atomate, signac, Nextflow with nf-prov, CWLProv; an ELN/LIMS entry for bench work) and export its graph alongside the data. A Workflow-Run RO-Crate is a packaged form of that export; the PROV-O record on the Export page is the interchange form."
+            },
+            {
+              "id": "characterization.l3.materials.acquisition_parameters",
+              "dimension": "Characterization",
+              "level": "L3",
+              "label": "Instrument or computational parameters recorded per run (who / what / when / where / why / how)",
+              "evidence_type": "text",
+              "verification": "manual",
+              "required_in_pathways": ["C"],
+              "references": ["Ghiringhelli2023", "Clark2026"],
+              "remediation": "Instruments rarely export every state variable, so sample-state metadata has to be captured in an ELN or LIMS. Experimental: instrument and its identifier, radiation source, operating settings, scan range, temperature, sample preparation — e.g. Rigaku SmartLab (inst-0217), Cu Kα, 40 kV / 30 mA, 2θ 10–80°, RT. Computational: code and version, functional, pseudopotentials, k-point mesh, plane-wave cutoff, convergence thresholds — e.g. k-points 6×6×6, ecutwfc 60 Ry. Give the operator's ORCID and the date."
+            },
+            {
+              "id": "ethics.l3.materials.source_data_licensing",
+              "dimension": "Ethics",
+              "level": "L3",
+              "label": "Licensing and redistribution terms of third-party source data, plus any export-control constraint",
+              "evidence_type": "text",
+              "verification": "manual",
+              "required_in_pathways": ["C"],
+              "references": ["Wilkinson2016", "Clark2026"],
+              "remediation": "Materials data is rarely human-subjects data, so the ethics evidence here is provenance of rights rather than consent. State the licence of every input drawn from an external database — ICSD is subscription-licensed and generally not redistributable, NOMAD and OQMD are open — and give the SPDX identifier for what you release. Note any export-control or dual-use restriction and any embargo tied to an industrial partner. If none applies, say so explicitly: as open as possible, as closed as necessary."
             }
           ]
         }
