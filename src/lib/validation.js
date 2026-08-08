@@ -5,7 +5,7 @@
 // PROV-O generator, Phase 4) and fall back to the claimed check via
 // isCriterionSatisfied.
 
-import { effectiveCroissant } from '../generators/croissant.js';
+import { effectiveCroissant, declaredMime } from '../generators/croissant.js';
 import { effectiveProvo } from '../generators/provo.js';
 import { validateCroissant } from './croissantValidation.js';
 import { validateProvo } from './provoValidation.js';
@@ -24,10 +24,22 @@ const CHECKS = {
       ? { ok: true, message: `Loadable (${fmt}).` }
       : { ok: false, message: 'No recognised open format declared (see Sustainability → open format).' };
   },
-  'fairness.l2.croissant_descriptor': (ctx) =>
-    ctx.croissantResult.valid
-      ? { ok: true, message: 'Croissant descriptor validates.' }
-      : { ok: false, message: ctx.croissantResult.errors[0] ?? 'Croissant descriptor is invalid.' },
+  // Reports the open warning count as well as validity: a descriptor can validate
+  // while still missing everything that makes it useful (no files, no record sets,
+  // no license). Without this the dimension page said "validates" while the Export
+  // page listed five outstanding items.
+  'fairness.l2.croissant_descriptor': (ctx) => {
+    if (!ctx.croissantResult.valid) {
+      return { ok: false, message: ctx.croissantResult.errors[0] ?? 'Croissant descriptor is invalid.' };
+    }
+    const open = ctx.croissantResult.warnings.length;
+    return {
+      ok: true,
+      message: open
+        ? `Croissant descriptor validates, with ${open} recommended item(s) still open — see the Export page.`
+        : 'Croissant descriptor validates.',
+    };
+  },
   'computability.l3.direct_ml_load': (ctx) =>
     ctx.croissantResult.loadable
       ? { ok: true, message: 'Croissant descriptor is directly loadable.' }
@@ -73,7 +85,7 @@ export function validationResults(record, opts = {}) {
   const answers = record.answers ?? {};
   const value = (id) => answers[id]?.value;
   const croissant = opts.croissant ?? effectiveCroissant(record);
-  const croissantResult = validateCroissant(croissant);
+  const croissantResult = validateCroissant(croissant, { expectedMime: declaredMime(record) });
   const provo = opts.provo ?? effectiveProvo(record);
   const provoResult = validateProvo(provo);
   const ctx = { value, croissant, croissantResult, provo, provoResult };

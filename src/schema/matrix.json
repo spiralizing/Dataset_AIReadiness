@@ -1,6 +1,6 @@
 {
-  "$comment": "AI-readiness assessment matrix derived from Table 11 of González-Espinoza (2026). 7 Bridge2AI dimensions × 3 readiness levels (L1/L2/L3 ↔ DRL bands C/B/A). Cumulative semantics: Pathway A requires every L1 criterion; Pathway B requires every L1 + L2; Pathway C requires every L1 + L2 + L3. The Croissant descriptor lives at L2 but is marked recommended at L1 to keep upgrades frictionless. Pathway C sub-domain ethics overlays live in pathways.json, not here.",
-  "version": "0.1.0",
+  "$comment": "AI-readiness assessment matrix derived from Table 11 of González-Espinoza (2026). 7 Bridge2AI dimensions × 3 readiness levels (L1/L2/L3 ↔ DRL bands C/B/A). Cumulative semantics: Pathway A requires every L1 criterion; Pathway B requires every L1 + L2; Pathway C requires every L1 + L2 + L3. The Croissant descriptor lives at L2 but is marked recommended at L1 to keep upgrades frictionless. Pathway C sub-domain overlays live in pathways.json, not here — they may target any dimension, and a sub-domain may also reword a criterion below via 'label_overrides' (wording only; id, evidence_type, and pathway membership are never changed). All five schema files move in lockstep from 0.3.0; 1.0.0 is cut when the criterion ids are considered stable.",
+  "version": "0.3.0",
   "dimensions": [
     "FAIRness",
     "Provenance",
@@ -145,11 +145,12 @@
       "label": "Deposition repository selected with appropriate access tier",
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "repositories_l3_general",
+      "vocabulary_scope": "deposition_targets",
       "verification": "attested",
       "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
-      "remediation": "Pathway C sub-domain selection pre-fills candidate targets (PhysioNet, dbGaP, CHoRUS, CM4AI, AI-READI, Bridge2AI-Voice, ICPSR, institutional Dataverse)."
+      "remediation": "The options are scoped to your pathway and, in Pathway C, to your sub-domain — a domain repository is preferred over a generalist one, and any target recommended for your sub-domain is listed first. Record the repository you will deposit in and the access tier it will carry (open, registered, restricted, controlled, or embargoed). If the right repository is not listed, use Custom."
     },
     {
       "id": "provenance.l1.source_documented",

@@ -1,6 +1,6 @@
 {
   "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 3, 5, 7, 12 of González-Espinoza (2026); the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "vocabularies": {
     "licenses": {
       "label": "License",
@@ -19,29 +19,30 @@
     "formats_tabular": {
       "label": "Tabular formats",
       "source": "Table 5, paper",
+      "$comment": "'mime' and 'ext' seed the Croissant descriptor's encodingFormat and the template file name. Not every scientific format has an IANA-registered media type — 'text/csv' and 'text/tab-separated-values' are registered, the vendor and 'x-' types are conventional. Treat these as suggestions the user can override.",
       "values": [
-        { "id": "Parquet", "label": "Apache Parquet (columnar, compressed, typed)" },
-        { "id": "Arrow", "label": "Apache Arrow (in-memory columnar)" },
-        { "id": "CSV", "label": "CSV (lowest-common-denominator fallback)" },
-        { "id": "TSV", "label": "TSV" }
+        { "id": "Parquet", "label": "Apache Parquet (columnar, compressed, typed)", "mime": "application/vnd.apache.parquet", "ext": "parquet" },
+        { "id": "Arrow", "label": "Apache Arrow (in-memory columnar)", "mime": "application/vnd.apache.arrow.file", "ext": "arrow" },
+        { "id": "CSV", "label": "CSV (lowest-common-denominator fallback)", "mime": "text/csv", "ext": "csv" },
+        { "id": "TSV", "label": "TSV", "mime": "text/tab-separated-values", "ext": "tsv" }
       ]
     },
     "formats_array": {
       "label": "Multidimensional / scientific-array formats",
       "source": "Table 5, paper",
       "values": [
-        { "id": "HDF5", "label": "HDF5" },
-        { "id": "NetCDF", "label": "NetCDF" },
-        { "id": "Zarr", "label": "Zarr" },
-        { "id": "ROOT", "label": "ROOT (high-energy physics)" }
+        { "id": "HDF5", "label": "HDF5", "mime": "application/x-hdf5", "ext": "h5" },
+        { "id": "NetCDF", "label": "NetCDF", "mime": "application/x-netcdf", "ext": "nc" },
+        { "id": "Zarr", "label": "Zarr", "mime": "application/vnd.zarr", "ext": "zarr" },
+        { "id": "ROOT", "label": "ROOT (high-energy physics)", "mime": "application/x-root", "ext": "root" }
       ]
     },
     "formats_imaging": {
       "label": "Imaging / volumetric formats",
       "source": "Table 5, paper",
       "values": [
-        { "id": "DICOM", "label": "DICOM" },
-        { "id": "NIfTI", "label": "NIfTI" },
+        { "id": "DICOM", "label": "DICOM", "mime": "application/dicom", "ext": "dcm" },
+        { "id": "NIfTI", "label": "NIfTI", "mime": "application/x-nifti", "ext": "nii.gz" },
         { "id": "BIDS", "label": "BIDS-organized directory" }
       ]
     },
@@ -60,10 +61,10 @@
       "label": "Other formats",
       "source": "Table 5, paper",
       "values": [
-        { "id": "JSONL", "label": "JSONL (text / records)" },
-        { "id": "WAV", "label": "WAV (audio)" },
-        { "id": "FLAC", "label": "FLAC (audio)" },
-        { "id": "OGG", "label": "OGG (audio)" }
+        { "id": "JSONL", "label": "JSONL (text / records)", "mime": "application/jsonl", "ext": "jsonl" },
+        { "id": "WAV", "label": "WAV (audio)", "mime": "audio/wav", "ext": "wav" },
+        { "id": "FLAC", "label": "FLAC (audio)", "mime": "audio/flac", "ext": "flac" },
+        { "id": "OGG", "label": "OGG (audio)", "mime": "audio/ogg", "ext": "ogg" }
       ]
     },
     "repositories_l1": {
@@ -130,13 +131,13 @@
       "label": "Materials-science encoding standards",
       "source": "Materials RDM slides 16 and 28; standards reviewed in Ghiringhelli et al. (2023)",
       "values": [
-        { "id": "CIF", "label": "CIF — Crystallographic Information Framework (IUCr; crystal structures)", "url": "https://www.iucr.org/resources/cif" },
-        { "id": "NeXus", "label": "NeXus — neutron, X-ray, and muon experiment data (HDF5-backed)", "url": "https://www.nexusformat.org/" },
-        { "id": "CML", "label": "CML — Chemical Markup Language (molecules and reactions)" },
-        { "id": "HDF5", "label": "HDF5 (large arrays; the container underneath NeXus)" },
-        { "id": "JSON", "label": "JSON (structured records, human- and machine-readable)" },
-        { "id": "YAML", "label": "YAML (configuration and parameter records)" },
-        { "id": "XML", "label": "XML (schema-validated records)" }
+        { "id": "CIF", "label": "CIF — Crystallographic Information Framework (IUCr; crystal structures)", "url": "https://www.iucr.org/resources/cif", "mime": "chemical/x-cif", "ext": "cif" },
+        { "id": "NeXus", "label": "NeXus — neutron, X-ray, and muon experiment data (HDF5-backed)", "url": "https://www.nexusformat.org/", "mime": "application/x-hdf5", "ext": "nxs" },
+        { "id": "CML", "label": "CML — Chemical Markup Language (molecules and reactions)", "mime": "chemical/x-cml", "ext": "cml" },
+        { "id": "HDF5", "label": "HDF5 (large arrays; the container underneath NeXus)", "mime": "application/x-hdf5", "ext": "h5" },
+        { "id": "JSON", "label": "JSON (structured records, human- and machine-readable)", "mime": "application/json", "ext": "json" },
+        { "id": "YAML", "label": "YAML (configuration and parameter records)", "mime": "application/yaml", "ext": "yaml" },
+        { "id": "XML", "label": "XML (schema-validated records)", "mime": "application/xml", "ext": "xml" }
       ]
     },
     "materials_interoperability": {
@@ -160,6 +161,18 @@
         { "id": "CWLProv", "label": "CWLProv — provenance profile for CWL workflow runs", "url": "https://w3id.org/cwl/prov/" },
         { "id": "WorkflowRunROCrate", "label": "Workflow-Run RO-Crate — packaged run provenance", "url": "https://www.researchobject.org/workflow-run-crate/" },
         { "id": "ELN", "label": "ELN / LIMS entry captured at acquisition time (bench work)" }
+      ]
+    },
+    "croissant_datatypes": {
+      "label": "Croissant field data types",
+      "source": "Croissant 1.0 specification (MLCommons); schema.org type vocabulary",
+      "values": [
+        { "id": "sc:Text", "label": "Text (sc:Text)" },
+        { "id": "sc:Integer", "label": "Integer (sc:Integer)" },
+        { "id": "sc:Float", "label": "Float (sc:Float)" },
+        { "id": "sc:Boolean", "label": "Boolean (sc:Boolean)" },
+        { "id": "sc:Date", "label": "Date (sc:Date)" },
+        { "id": "sc:URL", "label": "URL (sc:URL)" }
       ]
     },
     "consent_basis": {

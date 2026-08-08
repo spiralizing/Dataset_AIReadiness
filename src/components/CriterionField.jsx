@@ -6,8 +6,10 @@
 // receives a partial patch ({ value } or { notes }) that the reducer merges.
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import vocabularies from '../schema/vocabularies.json';
 import { isLocked } from '../lib/stages.js';
+import { depositionTargets } from '../lib/depositionTargets.js';
 
 const VERIFICATION_BADGE = {
   automated: { label: 'automated', cls: 'bg-ok-bg text-ok' },
@@ -17,17 +19,27 @@ const VERIFICATION_BADGE = {
 
 const vocabValues = (key) => vocabularies.vocabularies[key]?.values ?? [];
 
+// Option list for a controlled-vocabulary criterion. Most read their static
+// `vocabulary_key`; a criterion declaring `vocabulary_scope` resolves its options
+// from the pathway / sub-domain instead, so the deposition-target list matches
+// where the researcher is actually depositing.
+const optionsFor = (criterion, pathway, subDomain) =>
+  criterion.vocabulary_scope === 'deposition_targets'
+    ? depositionTargets(criterion, pathway, subDomain)
+    : { values: vocabValues(criterion.vocabulary_key), recommended: [] };
+
 // Automated criteria whose check reads a generated artifact rather than this
 // field's own answer — their input is not meaningful here; they are completed on
-// the Export page. Maps id -> the artifact that drives it.
+// the Export page. Maps id -> the artifact that drives it, and the Export tab
+// that artifact lives on so the pointer can be a link rather than an instruction.
 const DESCRIPTOR_DRIVEN = {
-  'fairness.l2.croissant_descriptor': 'Croissant descriptor',
-  'computability.l3.direct_ml_load': 'Croissant descriptor',
-  'fairness.l3.responsible_ai_annotations': 'Croissant descriptor',
-  'provenance.l3.prov_record_present': 'PROV-O record',
-  'provenance.l3.entity_per_variable': 'PROV-O record',
-  'provenance.l3.activity_per_step': 'PROV-O record',
-  'explainability.l3.feature_lineage_intact': 'PROV-O record',
+  'fairness.l2.croissant_descriptor': ['Croissant descriptor', 'croissant'],
+  'computability.l3.direct_ml_load': ['Croissant descriptor', 'croissant'],
+  'fairness.l3.responsible_ai_annotations': ['Croissant descriptor', 'croissant'],
+  'provenance.l3.prov_record_present': ['PROV-O record', 'provo'],
+  'provenance.l3.entity_per_variable': ['PROV-O record', 'provo'],
+  'provenance.l3.activity_per_step': ['PROV-O record', 'provo'],
+  'explainability.l3.feature_lineage_intact': ['PROV-O record', 'provo'],
 };
 
 function StatusPill({ pending, result }) {
@@ -52,13 +64,13 @@ function StatusPill({ pending, result }) {
   );
 }
 
-export default function CriterionField({ criterion, answer, onChange, requirement = 'required', result, stage, extra }) {
+export default function CriterionField({ criterion, answer, onChange, requirement = 'required', result, stage, extra, pathway, subDomain }) {
   const value = answer?.value ?? '';
   const notes = answer?.notes ?? '';
   const badge = VERIFICATION_BADGE[criterion.verification] ?? VERIFICATION_BADGE.manual;
   const automated = criterion.verification === 'automated';
   const pending = automated && !result;
-  const descriptorArtifact = DESCRIPTOR_DRIVEN[criterion.id];
+  const [descriptorArtifact, descriptorTab] = DESCRIPTOR_DRIVEN[criterion.id] ?? [];
   const locked = isLocked(criterion, stage);
 
   return (
@@ -86,10 +98,20 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
       <div className="mt-3">
         {descriptorArtifact ? (
           <p className="text-xs text-muted">
-            Validated from the {descriptorArtifact}; complete and check it on the Export page.
+            Validated from the {descriptorArtifact}; complete and check it on the{' '}
+            <Link to={`/export?tab=${descriptorTab}`} className="text-link underline">
+              Export page
+            </Link>
+            .
           </p>
         ) : (
-          <FieldInput criterion={criterion} value={value} onValue={(v) => onChange({ value: v })} />
+          <FieldInput
+            criterion={criterion}
+            value={value}
+            onValue={(v) => onChange({ value: v })}
+            pathway={pathway}
+            subDomain={subDomain}
+          />
         )}
       </div>
 
@@ -128,7 +150,7 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
   );
 }
 
-function FieldInput({ criterion, value, onValue }) {
+function FieldInput({ criterion, value, onValue, pathway, subDomain }) {
   const t = criterion.evidence_type;
 
   if (t === 'boolean') {
@@ -145,7 +167,8 @@ function FieldInput({ criterion, value, onValue }) {
   }
 
   if (t === 'controlled_vocabulary') {
-    return <VocabSelect vocabularyKey={criterion.vocabulary_key} value={value} onValue={onValue} />;
+    const { values, recommended } = optionsFor(criterion, pathway, subDomain);
+    return <VocabSelect values={values} recommended={recommended} value={value} onValue={onValue} />;
   }
 
   if (t === 'text') {
@@ -172,11 +195,20 @@ function FieldInput({ criterion, value, onValue }) {
   );
 }
 
-function VocabSelect({ vocabularyKey, value, onValue }) {
-  const values = vocabValues(vocabularyKey);
+function VocabSelect({ values, recommended = [], value, onValue }) {
   const ids = values.map((v) => v.id);
   const CUSTOM = '__custom__';
   const [custom, setCustom] = useState(Boolean(value) && !ids.includes(value));
+
+  // When some options are recommended for the current sub-domain, group them so
+  // the distinction is visible rather than implied by ordering alone.
+  const rec = values.filter((v) => recommended.includes(v.id));
+  const rest = values.filter((v) => !recommended.includes(v.id));
+  const opt = (v) => (
+    <option key={v.id} value={v.id}>
+      {v.label}
+    </option>
+  );
 
   return (
     <div>
@@ -194,11 +226,14 @@ function VocabSelect({ vocabularyKey, value, onValue }) {
         className="w-full rounded-none border border-line px-2 py-1 text-sm"
       >
         <option value="">— select —</option>
-        {values.map((v) => (
-          <option key={v.id} value={v.id}>
-            {v.label}
-          </option>
-        ))}
+        {rec.length > 0 ? (
+          <>
+            <optgroup label="Recommended for this sub-domain">{rec.map(opt)}</optgroup>
+            <optgroup label="Other options">{rest.map(opt)}</optgroup>
+          </>
+        ) : (
+          values.map(opt)
+        )}
         <option value={CUSTOM}>Custom…</option>
       </select>
       {custom && (

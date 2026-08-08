@@ -32,6 +32,26 @@ export const overlaysFor = (pathway, subId) =>
 const overlaysForCell = (pathway, subId, dimension, level) =>
   overlaysFor(pathway, subId).filter((o) => o.dimension === dimension && o.level === level);
 
+// A sub-domain may reword a base criterion via `label_overrides` — a map of
+// criterion id -> { label?, remediation? }. Rewording is not the same as adding:
+// the criterion, its id, and its verdict semantics are untouched, only the words
+// the researcher reads. Used where a general criterion is right in substance but
+// wrong in vocabulary (compute cost is core-hours and a machine name in
+// materials, not a cloud bill).
+const labelOverridesFor = (pathway, subId) =>
+  (pathway === 'C' && subId ? getSubDomain(subId)?.label_overrides : null) ?? {};
+
+export const applyLabelOverrides = (criterion, pathway, subId) => {
+  const patch = labelOverridesFor(pathway, subId)[criterion?.id];
+  return patch ? { ...criterion, ...patch } : criterion;
+};
+
+const withOverrides = (criteria, pathway, subId) => {
+  const map = labelOverridesFor(pathway, subId);
+  if (Object.keys(map).length === 0) return criteria;
+  return criteria.map((c) => (map[c.id] ? { ...c, ...map[c.id] } : c));
+};
+
 // Documentation template for a record: 'healthsheet' for Pathway C sub-domains
 // that declare it (clinical, salutogenesis), else 'datasheet'.
 export const templateForRecord = (record) =>
@@ -87,10 +107,8 @@ export const cellStatus = (dimension, level, pathway, answers = {}, subDomain, r
 
 // All required criteria for a pathway, including Pathway-C sub-domain overlays.
 // This is what the verdict and the datasheet iterate.
-export const requiredCriteria = (pathway, subDomain) => [
-  ...criteriaForPathway(pathway),
-  ...overlaysFor(pathway, subDomain),
-];
+export const requiredCriteria = (pathway, subDomain) =>
+  withOverrides([...criteriaForPathway(pathway), ...overlaysFor(pathway, subDomain)], pathway, subDomain);
 
 // Overall verdict for a pathway. Bottlenecks are the dimensions with any unmet
 // required criterion (the paper's min-across-dimensions view).
@@ -122,7 +140,7 @@ export const criteriaForDimension = (dimension, pathway, subDomain) => {
     (c) => c.dimension === dimension && isRequiredForPathway(c, pathway),
   );
   const overlays = overlaysFor(pathway, subDomain).filter((o) => o.dimension === dimension);
-  return [...base, ...overlays];
+  return withOverrides([...base, ...overlays], pathway, subDomain);
 };
 
 // Recommended-but-not-required criteria for one dimension (e.g. Croissant at L1).

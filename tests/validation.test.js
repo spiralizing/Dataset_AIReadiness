@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 
 import { validationResults, AUTOMATED_WITH_VALIDATOR } from '../src/lib/validation.js';
 import { isCriterionSatisfied, pathwayVerdict, criteriaForPathway } from '../src/lib/pathway.js';
+import { CROISSANT_CONTEXT, CROISSANT_CONFORMS_TO } from '../src/generators/croissant.js';
 
 test('validationResults grounds identifiers, license, and format', () => {
   const record = {
@@ -78,4 +79,45 @@ test('verdict with results counts a valid persistent id but not a bad one', () =
   assert.equal(pathwayVerdict('A', good.answers, undefined, validationResults(good)).satisfiedCount, 1);
   assert.equal(pathwayVerdict('A', bad.answers, undefined, validationResults(bad)).satisfiedCount, 0);
   assert.equal(criteriaForPathway('A').length, 16);
+});
+
+// The dimension page previously said "Croissant descriptor validates." while the
+// Export page listed five outstanding recommendations. The message now carries the
+// open-warning count so the two surfaces agree.
+test('the L2 Croissant check reports how many recommended items are still open', () => {
+  const scaffold = validationResults({
+    pathway: 'B',
+    dataset: { name: 'ds' },
+    answers: {},
+  });
+  const msg = scaffold['fairness.l2.croissant_descriptor'];
+  assert.equal(msg.ok, true, 'a named scaffold is structurally valid');
+  assert.match(msg.message, /recommended item\(s\) still open/);
+
+  // A complete, loadable descriptor has nothing open, so no count is appended.
+  const complete = validationResults(
+    { pathway: 'B', dataset: { name: 'ds' }, answers: {} },
+    {
+      croissant: {
+        '@context': CROISSANT_CONTEXT,
+        '@type': 'sc:Dataset',
+        conformsTo: CROISSANT_CONFORMS_TO,
+        name: 'ds',
+        description: 'A dataset.',
+        license: 'https://creativecommons.org/licenses/by/4.0/',
+        url: 'https://example.org/ds',
+        distribution: [
+          { '@type': 'cr:FileObject', '@id': 'data.csv', encodingFormat: 'text/csv' },
+        ],
+        recordSet: [
+          {
+            '@type': 'cr:RecordSet',
+            '@id': 'records',
+            field: [{ '@type': 'cr:Field', '@id': 'records/id', dataType: 'sc:Integer' }],
+          },
+        ],
+      },
+    },
+  );
+  assert.equal(complete['fairness.l2.croissant_descriptor'].message, 'Croissant descriptor validates.');
 });

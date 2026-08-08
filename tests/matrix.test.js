@@ -20,6 +20,7 @@ const matrix = await loadJson('matrix.json');
 const pathways = await loadJson('pathways.json');
 const vocabularies = await loadJson('vocabularies.json');
 const references = await loadJson('references.json');
+const validators = await loadJson('validators.json');
 
 const VALID_PATHWAYS = new Set(['A', 'B', 'C']);
 const VALID_LEVELS = new Set(['L1', 'L2', 'L3']);
@@ -182,6 +183,42 @@ test('controlled_vocabulary criteria reference an existing vocabulary_key', () =
   }
 });
 
+test('vocabulary_scope, when present, names a supported resolver', () => {
+  // A criterion may defer its option list to the pathway / sub-domain instead of
+  // its static vocabulary_key. Only one resolver exists today; a typo here would
+  // silently fall back to the static key, which is the bug this guards.
+  const SUPPORTED = new Set(['deposition_targets']);
+  for (const c of matrix.criteria) {
+    if (c.vocabulary_scope === undefined) continue;
+    assert.ok(
+      SUPPORTED.has(c.vocabulary_scope),
+      `${c.id} declares unsupported vocabulary_scope ${c.vocabulary_scope}`,
+    );
+    assert.equal(
+      c.evidence_type,
+      'controlled_vocabulary',
+      `${c.id} declares vocabulary_scope but is not a controlled_vocabulary criterion`,
+    );
+  }
+});
+
+test('sub-domain deposition_targets_filter ids resolve in some repositories_* vocabulary', () => {
+  const repoIds = new Set(
+    Object.entries(vocabularies.vocabularies)
+      .filter(([k]) => k.startsWith('repositories_'))
+      .flatMap(([, v]) => v.values.map((x) => x.id)),
+  );
+  const c = pathways.pathways.find((p) => p.id === 'C');
+  for (const sub of c.sub_domains) {
+    for (const id of sub.deposition_targets_filter ?? []) {
+      assert.ok(
+        repoIds.has(id),
+        `sub-domain ${sub.id} filter names ${id}, which is in no repositories_* vocabulary`,
+      );
+    }
+  }
+});
+
 test('every references[] citation key resolves in references.json', () => {
   const known = new Set(Object.keys(references.citations));
   for (const c of matrix.criteria) {
@@ -248,6 +285,14 @@ test('Pathway C overlays sit at L3, in a known dimension, and resolve their voca
         `overlay ${o.id} (sub-domain ${sub.id}) declares unknown dimension ${o.dimension}`,
       );
       assert.equal(o.level, 'L3', `overlay ${o.id} (sub-domain ${sub.id}) is not L3`);
+      // Overlays declare a lifecycle stage like every matrix criterion, so the
+      // stage-aware locked/upcoming logic treats them the same way. Uniform
+      // across all sub-domains: a locked badge appearing under one discipline
+      // and not another would read as a bug rather than a statement.
+      assert.ok(
+        VALID_LIFECYCLE_STAGE.has(o.lifecycle_stage),
+        `overlay ${o.id} has invalid or missing lifecycle_stage: ${o.lifecycle_stage}`,
+      );
       assert.deepEqual(o.required_in_pathways, ['C'], `overlay ${o.id} should be required only in Pathway C`);
       assert.ok(VALID_EVIDENCE_TYPES.has(o.evidence_type), `overlay ${o.id} evidence_type invalid`);
       if (o.verification !== undefined) {
@@ -305,6 +350,29 @@ test('Pathway C overlay ids are unique across all sub-domains and do not collide
   }
 });
 
+test('format vocabularies pair mime with ext, and declare plausible media types', () => {
+  const formatKeys = Object.keys(vocabularies.vocabularies).filter((k) => k.startsWith('formats_'));
+  assert.ok(formatKeys.length > 0, 'no formats_* vocabularies found');
+  for (const key of formatKeys) {
+    for (const v of vocabularies.vocabularies[key].values) {
+      const hasMime = v.mime !== undefined;
+      const hasExt = v.ext !== undefined;
+      // Either both facets are present (used together to seed a Croissant
+      // distribution entry) or neither — e.g. a BIDS directory has no single
+      // media type, so it declares nothing rather than half a pair.
+      assert.equal(
+        hasMime,
+        hasExt,
+        `${key}/${v.id} declares only one of mime/ext; they are used together`,
+      );
+      if (hasMime) {
+        assert.match(v.mime, /^[a-z]+\/[a-zA-Z0-9.+-]+$/, `${key}/${v.id} mime is not a media type`);
+        assert.match(v.ext, /^[a-z0-9.]+$/, `${key}/${v.id} ext is not a bare extension`);
+      }
+    }
+  }
+});
+
 test('vocabulary entries each have a non-empty values array', () => {
   for (const [key, vocab] of Object.entries(vocabularies.vocabularies)) {
     assert.ok(Array.isArray(vocab.values) && vocab.values.length > 0, `vocabulary ${key} has no values`);
@@ -312,4 +380,31 @@ test('vocabulary entries each have a non-empty values array', () => {
     const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
     assert.deepEqual(dupes, [], `vocabulary ${key} has duplicate ids: ${dupes.join(', ')}`);
   }
+});
+
+test('label_overrides target real criteria and only reword them', () => {
+  const ids = new Set(matrix.criteria.map((c) => c.id));
+  const c = pathways.pathways.find((p) => p.id === 'C');
+  const REWORDABLE = new Set(['label', 'remediation']);
+  for (const sub of c.sub_domains) {
+    for (const [id, patch] of Object.entries(sub.label_overrides ?? {})) {
+      assert.ok(ids.has(id), `sub-domain ${sub.id} overrides unknown criterion ${id}`);
+      for (const key of Object.keys(patch)) {
+        // Rewording only: an override must never change evidence_type,
+        // required_in_pathways, verification, or anything else that would make a
+        // criterion mean something different under one sub-domain.
+        assert.ok(REWORDABLE.has(key), `sub-domain ${sub.id} override of ${id} changes ${key}`);
+        assert.ok(typeof patch[key] === 'string' && patch[key].length > 0, `${id}.${key} is empty`);
+      }
+    }
+  }
+});
+
+test('all five schema files carry the same version (they move in lockstep)', () => {
+  // Versions diverged once (three files at 0.2.0, two at 0.1.0) and it made
+  // "which schema is this record written against?" unanswerable. One version for
+  // the set; 1.0.0 is cut when the criterion ids are considered stable.
+  const versions = [matrix, pathways, vocabularies, references, validators].map((f) => f.version);
+  assert.equal(new Set(versions).size, 1, `schema versions have diverged: ${versions.join(', ')}`);
+  assert.match(versions[0], /^\d+\.\d+\.\d+$/);
 });

@@ -16,9 +16,10 @@ import {
   overlaysFor,
   criteriaForDimension,
   recommendedForDimension,
+  requiredCriteria,
 } from '../src/lib/pathway.js';
 import { reducer, emptyRecord, RECORD_VERSION } from '../src/state/assessment.jsx';
-import { STAGES, getStage } from '../src/lib/stages.js';
+import { STAGES, getStage, isLocked, isUpcoming } from '../src/lib/stages.js';
 
 // Build an answers map that satisfies every criterion in `criteria`.
 const satisfyAll = (criteria) =>
@@ -228,4 +229,76 @@ test('reducer SET_ANSWER merges value and notes; RESET clears', () => {
   const reset = reducer(s, { type: 'RESET' });
   assert.equal(reset.schema_version, RECORD_VERSION);
   assert.deepEqual(reset.answers, {});
+});
+
+// ---- overlays are stage-aware, like every other criterion ------------------
+
+test('overlays lock and defer with the lifecycle stage, uniformly across sub-domains', () => {
+  const byId = (subId) => Object.fromEntries(overlaysFor('C', subId).map((o) => [o.id, o]));
+  const materials = byId('materials');
+  const clinical = byId('clinical');
+
+  // Upgrade (published dataset): acquisition and curation are fixed. The
+  // a-priori provenance argument in code — a published dataset cannot retro-fit
+  // its run graph, so this is a limitation to document, not a gap to fix.
+  assert.ok(isLocked(materials['provenance.l3.materials.apriori_capture'], 'upgrade'));
+  assert.ok(isLocked(materials['characterization.l3.materials.acquisition_parameters'], 'upgrade'));
+  assert.ok(isLocked(clinical['ethics.l3.clinical.irb_protocol_id'], 'upgrade'));
+  assert.ok(isLocked(clinical['ethics.l3.clinical.hipaa_method'], 'upgrade'));
+  // Governance and documentation stay actionable after publication.
+  assert.ok(!isLocked(materials['ethics.l3.materials.source_data_licensing'], 'upgrade'));
+  assert.ok(!isLocked(materials['fairness.l3.materials.encoding_standard'], 'upgrade'));
+  assert.ok(!isLocked(clinical['ethics.l3.clinical.dua_template'], 'upgrade'));
+
+  // Prepare (collected, not yet published): only acquisition is fixed.
+  assert.ok(isLocked(clinical['ethics.l3.clinical.irb_protocol_id'], 'prepare'));
+  assert.ok(!isLocked(clinical['ethics.l3.clinical.hipaa_method'], 'prepare'));
+
+  // Plan (still collecting): nothing is locked, and post-acquisition work is
+  // upcoming rather than an outstanding failure.
+  assert.ok(!isLocked(materials['provenance.l3.materials.apriori_capture'], 'plan'));
+  assert.ok(!isUpcoming(materials['provenance.l3.materials.apriori_capture'], 'plan'));
+  assert.ok(isUpcoming(materials['ethics.l3.materials.source_data_licensing'], 'plan'));
+});
+
+test('upcoming overlays drop out of the Plan-stage verdict', () => {
+  const required = requiredCriteria('C', 'materials');
+  const planCount = pathwayVerdict('C', {}, 'materials', undefined, 'plan').requiredCount;
+  const upgradeCount = pathwayVerdict('C', {}, 'materials', undefined, 'upgrade').requiredCount;
+
+  assert.ok(planCount < upgradeCount, 'Plan should require fewer criteria than Upgrade');
+  assert.equal(upgradeCount, required.length, 'nothing is upcoming once published');
+  // The two acquisition-stage materials overlays are due while planning.
+  const planIds = requiredCriteria('C', 'materials')
+    .filter((c) => !isUpcoming(c, 'plan'))
+    .map((c) => c.id);
+  assert.ok(planIds.includes('provenance.l3.materials.apriori_capture'));
+  assert.ok(planIds.includes('characterization.l3.materials.acquisition_parameters'));
+});
+
+test('label_overrides reword a base criterion without changing its identity', () => {
+  const find = (subId) =>
+    criteriaForDimension('Sustainability', 'C', subId).find(
+      (c) => c.id === 'sustainability.l3.compute_cost_reported',
+    );
+  const base = find('general');
+  const materials = find('materials');
+
+  assert.match(materials.label, /core-hours/);
+  assert.notEqual(materials.label, base.label);
+  // Everything that decides behaviour is untouched — same id, same evidence type,
+  // same pathway membership, so the verdict cannot diverge between sub-domains.
+  assert.equal(materials.id, base.id);
+  assert.equal(materials.evidence_type, base.evidence_type);
+  assert.equal(materials.verification, base.verification);
+  assert.deepEqual(materials.required_in_pathways, base.required_in_pathways);
+  assert.equal(
+    requiredCriteria('C', 'materials').length,
+    requiredCriteria('C', 'general').length + overlaysFor('C', 'materials').length,
+  );
+  // requiredCriteria carries the reworded copy too, so the datasheet and todo agree.
+  assert.match(
+    requiredCriteria('C', 'materials').find((c) => c.id === base.id).label,
+    /core-hours/,
+  );
 });

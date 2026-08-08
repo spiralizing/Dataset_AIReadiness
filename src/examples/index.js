@@ -119,6 +119,73 @@ export const EXAMPLES = [
     }),
   },
   {
+    id: 'alpha-quartz-xrd',
+    title: 'α-quartz XRD + DFT relaxation (materials science)',
+    pathway: 'C',
+    subDomain: 'materials',
+    description:
+      'A crystallography and computational materials record: CIF encoding, EMMO/OPTIMADE mapping, and provenance captured a priori by AiiDA. The only example built through the Croissant builder rather than a hand-written descriptor.',
+    expectMet: true,
+    record: completeRecord({
+      pathway: 'C',
+      subDomain: 'materials',
+      dataset: {
+        name: 'alpha_quartz_xrd_dft',
+        description:
+          'Powder XRD patterns for α-quartz with the corresponding DFT self-consistent-field and relaxation results.',
+        license: 'https://creativecommons.org/licenses/by/4.0/',
+        url: 'https://archive.materialscloud.org/record/example',
+        sourceName: 'α-quartz structure (CIF) + XRD pattern',
+        outputName: 'relaxed structure',
+      },
+      answers: {
+        'sustainability.l1.open_format': 'HDF5',
+        // The six materials overlays, answered the way the guidance describes.
+        'fairness.l3.materials.domain_repository': 'MaterialsCloud',
+        'fairness.l3.materials.encoding_standard': 'CIF',
+        'fairness.l3.materials.ontology_mapping': 'EMMO',
+        'provenance.l3.materials.apriori_capture': 'AiiDA',
+        'characterization.l3.materials.acquisition_parameters':
+          'XRD: Rigaku SmartLab (inst-0217), Cu Kα, 40 kV / 30 mA, 2θ 10–80°, room temperature, powder mount, operator ORCID 0000-0002-1825-0097, 2024-10-09. DFT: Quantum ESPRESSO 7.2, PBE, SSSP-efficiency pseudopotentials, k-points 6×6×6, ecutwfc 60 Ry, ecutrho 480 Ry, force threshold 1e-4 Ry/bohr.',
+        'ethics.l3.materials.source_data_licensing':
+          'No third-party database content is redistributed: the structure was refined in-house, not drawn from ICSD. Released under CC-BY-4.0 (SPDX: CC-BY-4.0). No export-control or dual-use restriction applies; no industrial embargo.',
+        // Reworded for this sub-domain via label_overrides — answered in kind.
+        'sustainability.l3.compute_cost_reported':
+          '412 core-hours total on the institutional cluster (Intel Xeon Gold 6248, 40-core nodes): 1 SCF + 1 variable-cell relaxation, Quantum ESPRESSO 7.2.',
+      },
+      // Built through the builder, so the descriptor is composed from this model.
+      croissantModel: {
+        files: [
+          {
+            id: 'file-1',
+            name: 'patterns.csv',
+            contentUrl: 'https://archive.materialscloud.org/record/example/patterns.csv',
+            encodingFormat: 'text/csv',
+            sha256: '0'.repeat(64),
+          },
+          {
+            id: 'file-2',
+            name: 'alpha_quartz_relaxed.cif',
+            contentUrl: 'https://archive.materialscloud.org/record/example/alpha_quartz_relaxed.cif',
+            encodingFormat: 'chemical/x-cif',
+            sha256: '0'.repeat(64),
+          },
+        ],
+        recordSets: [
+          {
+            id: 'recordset-1',
+            name: 'patterns',
+            fields: [
+              { id: 'field-1', name: 'two_theta', dataType: 'sc:Float', fileId: 'file-1', column: 'two_theta_deg' },
+              { id: 'field-2', name: 'intensity', dataType: 'sc:Float', fileId: 'file-1', column: 'counts' },
+              { id: 'field-3', name: 'sample', dataType: 'sc:Text', fileId: 'file-1', column: 'sample_id' },
+            ],
+          },
+        ],
+      },
+    }),
+  },
+  {
     id: 'hep-root',
     title: 'High-energy physics dataset (ROOT)',
     pathway: 'B',

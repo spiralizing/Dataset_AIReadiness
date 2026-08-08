@@ -87,7 +87,21 @@ export function provModel({ sourceName = 'Raw source', outputName = 'derived var
 
 // Build a fully-satisfying record for a pathway, with optional answer overrides
 // and `drop` (criterion ids to leave unmet — to demonstrate a gap).
-export function completeRecord({ pathway, subDomain = null, stage = 'upgrade', dataset, answers = {}, drop = [] }) {
+//
+// `croissantModel` supplies the structured builder model instead of a raw
+// descriptor: the record then leaves `croissant` null and the descriptor is
+// composed from the model, which is how a researcher using the builder actually
+// works. Without it the example pins a raw override, which is fine for examples
+// that only need *a* loadable descriptor.
+export function completeRecord({
+  pathway,
+  subDomain = null,
+  stage = 'upgrade',
+  dataset,
+  answers = {},
+  drop = [],
+  croissantModel = null,
+}) {
   const base = {};
   for (const c of requiredCriteria(pathway, subDomain)) base[c.id] = { value: sampleValue(c) };
 
@@ -109,7 +123,8 @@ export function completeRecord({ pathway, subDomain = null, stage = 'upgrade', d
       version: dataset.version ?? '1.0.0',
     },
     answers: merged,
-    croissant: loadableCroissant(dataset),
+    croissant: croissantModel ? null : loadableCroissant(dataset),
+    croissant_model: croissantModel ?? { files: [], recordSets: [] },
     provo: null,
     provenance: provModel({ sourceName: dataset.sourceName, outputName: dataset.outputName }),
   };

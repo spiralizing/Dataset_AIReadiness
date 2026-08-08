@@ -12,7 +12,11 @@ import { CROISSANT_CONFORMS_TO } from '../generators/croissant.js';
 
 const isNonEmpty = (v) => typeof v === 'string' && v.trim() !== '';
 
-export function validateCroissant(desc) {
+// `opts.expectedMime` (from declaredMime(record)) enables a cross-check between
+// the format declared in the assessment and the descriptor's encodingFormat —
+// a warning, never an error: the descriptor may legitimately ship a secondary
+// format, and the assessment answer may be the stale one.
+export function validateCroissant(desc, opts = {}) {
   const errors = [];
   const warnings = [];
 
@@ -71,6 +75,17 @@ export function validateCroissant(desc) {
 
   const dupes = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
   if (dupes.length) errors.push(`duplicate @id(s): ${dupes.join(', ')}.`);
+
+  // --- consistency with the assessment (warning) ---
+  const expectedMime = isNonEmpty(opts.expectedMime) ? opts.expectedMime.trim() : '';
+  if (expectedMime) {
+    const declared = [...new Set(distribution.map((d) => d?.encodingFormat).filter(isNonEmpty))];
+    if (declared.length > 0 && !declared.includes(expectedMime)) {
+      warnings.push(
+        `no distribution declares encodingFormat "${expectedMime}", the media type of the format declared in the assessment (found: ${declared.join(', ')}).`,
+      );
+    }
+  }
 
   const valid = errors.length === 0;
   const loadable =

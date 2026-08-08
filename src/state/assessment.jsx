@@ -6,6 +6,7 @@
 // from an older schema can be detected.
 
 import { createContext, useContext, useEffect, useReducer } from 'react';
+import { isRedundantOverride } from '../generators/croissant.js';
 
 const STORAGE_KEY = 'ai-readiness-assessment';
 export const RECORD_VERSION = 'assessment_record_v0';
@@ -18,7 +19,21 @@ export const emptyRecord = () => ({
   started_at: null,
   answers: {}, // { [criterionId]: { value, notes } }
   dataset: { name: '', description: '', version: '' }, // dataset-level metadata for the Croissant descriptor
-  croissant: null, // user-edited Croissant descriptor; null => generate from answers
+  // Raw Croissant override, set only by an explicit "Edit raw" action; null means
+  // the descriptor is generated from answers. Mirrors `provo` vs `provenance`.
+  croissant: null,
+  // Structured file/record-set model the Croissant builder populates;
+  // generateCroissant composes `distribution` and `recordSet` from it. Empty =>
+  // the metadata-only scaffold. Mirrors `provenance` for PROV-O.
+  //
+  //   files:      [{ id, name, contentUrl, encodingFormat, sha256 }]
+  //   recordSets: [{ id, name, fields: [{ id, name, dataType, fileId, column }] }]
+  //
+  // `id` is an internal handle (React keys, and the field -> file reference); the
+  // Croissant `@id` is derived from `name` at compose time. Keeping them separate
+  // means renaming a file cannot break the fields that point at it — the same
+  // indirection composeFromModel uses for PROV-O entities.
+  croissant_model: { files: [], recordSets: [] },
   provo: null, // user-edited (raw) PROV-O record; overrides the builder when set
   // Structured, step-centric provenance the builder populates; generateProvo
   // composes the PROV-O graph from it. Empty => bare scaffold from answers.
@@ -53,17 +68,29 @@ export function reducer(state, action) {
       return { ...state, dataset: { ...state.dataset, ...action.dataset } };
     case 'SET_CROISSANT':
       return { ...state, croissant: action.croissant };
+    case 'SET_CROISSANT_MODEL':
+      return { ...state, croissant_model: action.croissant_model };
     case 'SET_PROVO':
       return { ...state, provo: action.provo };
     case 'SET_PROVENANCE':
       return { ...state, provenance: action.provenance };
     case 'LOAD':
-      return { ...emptyRecord(), ...action.record };
+      return normalize({ ...emptyRecord(), ...action.record });
     case 'RESET':
       return emptyRecord();
     default:
       return state;
   }
+}
+
+// One-time cleanup applied to any record entering state from outside (a saved
+// localStorage record or an imported file). Records written before the Croissant
+// tab became builder-primary carry a `croissant` copied from the scaffold on
+// every keystroke; kept as overrides they would hide every later answer from the
+// exported descriptor. Only a descriptor carrying hand-authored content — files
+// or record sets — is a real override.
+export function normalize(record) {
+  return isRedundantOverride(record) ? { ...record, croissant: null } : record;
 }
 
 function init() {
@@ -72,7 +99,7 @@ function init() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.schema_version === RECORD_VERSION) {
-        return { ...emptyRecord(), ...parsed };
+        return normalize({ ...emptyRecord(), ...parsed });
       }
     }
   } catch {

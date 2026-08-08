@@ -8,7 +8,7 @@ import { DIMENSIONS, dimensionBySlug, slugify } from '../lib/dimensions.js';
 import { criteriaForDimension, recommendedForDimension } from '../lib/pathway.js';
 import { isUpcoming } from '../lib/stages.js';
 import { validationResults } from '../lib/validation.js';
-import { effectiveCroissant, generateCroissant } from '../generators/croissant.js';
+import { effectiveCroissant } from '../generators/croissant.js';
 import { useAssessment } from '../state/assessment.jsx';
 import CriterionField from '../components/CriterionField.jsx';
 
@@ -46,12 +46,15 @@ export default function DimensionPage() {
   const setAnswer = (id, patch) => dispatch({ type: 'SET_ANSWER', id, ...patch });
 
   // Set the dataset name inline (from the L2 Croissant criterion) so its "name
-  // is required" check clears without visiting Export. Update the name on the
-  // effective descriptor, preserving any distribution/recordSet already present.
+  // is required" check clears without visiting Export. The generated descriptor
+  // reads dataset.name directly, so one dispatch is enough; a raw override
+  // bypasses the generator, so patch the name onto it too rather than letting the
+  // field silently do nothing.
   const setDatasetName = (name) => {
     dispatch({ type: 'SET_DATASET', dataset: { name } });
-    const base = state.croissant ?? generateCroissant(state);
-    dispatch({ type: 'SET_CROISSANT', croissant: { ...base, name } });
+    if (state.croissant) {
+      dispatch({ type: 'SET_CROISSANT', croissant: { ...state.croissant, name } });
+    }
   };
 
   // Inline name input for the Croissant descriptor criterion (id below), so the
@@ -105,6 +108,8 @@ export default function DimensionPage() {
                     result={results[c.id]}
                     stage={state.stage}
                     extra={extraFor(c)}
+                    pathway={state.pathway}
+                    subDomain={state.sub_domain}
                   />
                 ))}
               </div>
@@ -142,6 +147,8 @@ export default function DimensionPage() {
                 result={results[c.id]}
                 stage={state.stage}
                 extra={extraFor(c)}
+                pathway={state.pathway}
+                subDomain={state.sub_domain}
               />
             ))}
           </div>

@@ -40,7 +40,7 @@ The four Bridge2AI Grand Challenges (CM4AI, CHoRUS, Bridge2AI-Voice, AI-READI) a
 
 ## How it works
 
-The assessment matrix (7 dimensions × 3 levels) is encoded as a JSON schema separate from the UI. Each criterion has a `requirement_type` of `required` or `optional`. The audience pathway sets the required threshold per dimension; optional criteria are recorded as "additional strengths" without affecting the tier verdict.
+The assessment matrix (7 dimensions × 3 levels) is encoded as a JSON schema separate from the UI. Each criterion declares which pathways require it (`required_in_pathways`) and, where relevant, which merely recommend it (`recommended_in_pathways`) — Croissant at L1 is the standing example. The audience pathway therefore sets the required threshold per dimension; recommended-but-unmet criteria are surfaced as "additional strengths" without affecting the tier verdict.
 
 The review screen shows a 7×3 heatmap. A cell turns green only when all its required criteria are satisfied. Unmet criteria surface inline remediation hints with section references back to the source paper.
 
@@ -50,12 +50,13 @@ The review screen shows a 7×3 heatmap. A cell turns green only when all its req
 - **Prefilled options** drawn from controlled vocabularies in the source paper: licenses (CC-BY, CC0, ODbL), formats (Parquet, HDF5, NetCDF, Zarr, DICOM, NIfTI), repositories by tier — L1 (Figshare, Zenodo, institutional, GitHub), L2 (Hugging Face, Kaggle, OpenML, Dataverse, Dryad), L3 generic (PhysioNet, NIH Data Commons, dbGaP, ICPSR, GenBank), L3 Bridge2AI Grand Challenges (CM4AI, CHoRUS, Bridge2AI-Voice, AI-READI). Discipline vocabularies extend the same mechanism — Materials science adds repositories (NOMAD, Materials Cloud, OQMD, ICSD), encoding standards (CIF, NeXus, CML), an interoperability layer (EMMO, OPTIMADE, NOMAD Metainfo), and provenance engines (AiiDA, FireWorks, signac, nf-prov, CWLProv). "Custom" entry always available.
 - **Binary checkmark heatmap** — pass/fail per cell, optional-criteria list below the heatmap
 - **Three template generators** — Croissant, PROV-O, datasheet/healthsheet — all editable in-app before download
-- **Inlined seeded examples** — six reference datasets shipped with the bundle:
+- **Inlined seeded examples** — seven reference datasets shipped with the bundle:
   - Tabular Zenodo dataset (Pathway A)
   - Hugging Face dataset with Croissant descriptor (Pathway B)
   - BIDS neuroimaging dataset
   - Synthetic MIMIC-shaped clinical dataset (Pathway C → Clinical, CHoRUS-aligned)
   - Synthetic CM4AI-style cell-mapping dataset (Pathway C → Genomic)
+  - α-quartz XRD + DFT relaxation (Pathway C → Materials science; built through the Croissant builder)
   - High-energy physics ROOT example (illustrates FAIR-for-models linkage)
 - **Schema import/export** — labs can ship domain-tuned variants without forking the codebase
 - **Offline-capable** — once loaded, the app runs entirely in the browser with no external runtime calls
@@ -72,52 +73,43 @@ The review screen shows a 7×3 heatmap. A cell turns green only when all its req
 ## Repository structure
 
 ```
-ai-readiness-assessment/
-├── public/
-│   └── favicon.svg
+Dataset_AIReadiness/
+├── index.html · vite.config.js · package.json
+├── public/favicon.svg
 ├── src/
-│   ├── main.jsx
-│   ├── App.jsx
+│   ├── main.jsx                     # React root + HashRouter + AssessmentProvider
+│   ├── App.jsx                      # route table
 │   ├── routes/
-│   │   ├── AudienceSelector.jsx
-│   │   ├── DimensionPage.jsx
-│   │   ├── Review.jsx
-│   │   └── Export.jsx
+│   │   ├── StartingPoint.jsx        # lifecycle intake (index route)
+│   │   ├── AudienceSelector.jsx     # pathway + Pathway-C sub-domain
+│   │   ├── DimensionPage.jsx        # one page per dimension, schema-driven
+│   │   ├── Review.jsx               # 7×3 heatmap + verdict
+│   │   ├── Export.jsx               # tabbed release bundle
+│   │   ├── Examples.jsx · References.jsx
 │   ├── components/
-│   │   ├── Heatmap.jsx
-│   │   ├── CriterionField.jsx
-│   │   ├── PathwayCard.jsx
-│   │   └── EditablePreview.jsx
-│   ├── schema/
-│   │   ├── matrix.json          # 7×3 assessment matrix
-│   │   ├── pathways.json        # A / B / C; seven Pathway-C sub-domains with L3 overlays
-│   │   ├── vocabularies.json    # licenses, formats, repositories, discipline vocabularies
-│   │   ├── validators.json      # discipline-validator registry (BIDS, CF, DDI, checkCIF, …)
-│   │   └── references.json      # citation registry keyed from matrix + pathways
+│   │   ├── Layout.jsx · Carousel.jsx · CriterionField.jsx
+│   │   ├── CroissantBuilder.jsx     # files + record sets -> Croissant
+│   │   ├── ProvenanceBuilder.jsx    # sources + steps -> PROV-O
+│   │   └── ImportAssessment.jsx
+│   ├── lib/
+│   │   ├── dimensions.js · pathway.js · stages.js
+│   │   ├── depositionTargets.js     # pathway/sub-domain-scoped repository options
+│   │   ├── grounding.js · croissantValidation.js · provoValidation.js · validation.js
+│   │   ├── shacl.js · report.js · thisWork.js
 │   ├── generators/
-│   │   ├── croissant.js
-│   │   ├── prov-o.js
-│   │   └── datasheet.js
-│   ├── examples/                # inlined seeded examples
-│   │   ├── zenodo-tabular.json
-│   │   ├── hf-croissant.json
-│   │   ├── bids-neuroimaging.json
-│   │   ├── synthetic-mimic.json
-│   │   ├── synthetic-cm4ai.json
-│   │   └── hep-root.json
-│   └── styles/
-│       └── tailwind.css
-├── tests/
-│   ├── generators.test.js
-│   └── matrix.test.js
-├── index.html
-├── vite.config.js
-├── package.json
-├── tailwind.config.js
-├── .github/
-│   └── workflows/
-│       └── deploy.yml           # gh-pages deployment
-└── README.md
+│   │   └── croissant.js · provo.js · datasheet.js · todo.js
+│   ├── schema/
+│   │   ├── matrix.json              # 7×3 assessment matrix
+│   │   ├── pathways.json            # A / B / C; seven Pathway-C sub-domains with L3 overlays
+│   │   ├── vocabularies.json        # licenses, formats, repositories, discipline vocabularies
+│   │   ├── validators.json          # discipline-validator registry
+│   │   └── references.json          # citation registry
+│   ├── examples/build.js · index.js # seven correct-by-construction records
+│   ├── shapes/provo.shapes.ttl      # SHACL profile for the PROV-O record
+│   ├── assets/                      # CMU + TRDA logos
+│   └── styles/tailwind.css
+├── tests/                           # vitest: schema validity, generators, validators, examples
+└── .github/workflows/deploy.yml     # build + test + gh-pages deploy
 ```
 
 ## Getting started
@@ -155,17 +147,25 @@ The assessment matrix lives at `src/schema/matrix.json`. Each entry describes on
 
 ```json
 {
+  "id": "fairness.l2.croissant_descriptor",
   "dimension": "FAIRness",
   "level": "L2",
-  "id": "fairness.l2.croissant_present",
-  "requirement_type": "required",
+  "label": "Croissant 1.0 descriptor present and validates against the MLCommons schema",
   "evidence_type": "boolean",
-  "label": "Croissant descriptor present",
-  "prefilled_options": null,
+  "verification": "automated",
+  "lifecycle_stage": "documentation",
+  "required_in_pathways": ["B", "C"],
+  "recommended_in_pathways": ["A"],
   "references": ["Akhtar2024", "Clark2026"],
-  "remediation": "Generate a Croissant descriptor using the in-app tool."
+  "remediation": "Use the in-app Croissant generator. Including a descriptor at L1 makes the dataset directly ML-loadable today and trivially upgradable to L2."
 }
 ```
+
+`required_in_pathways` follows the cumulative ladder (L1 → A/B/C, L2 → B/C, L3 → C) and is
+test-enforced. `verification` is `automated`, `attested`, or `manual`; `lifecycle_stage` drives
+whether a criterion shows as active, locked, or upcoming given the researcher's starting point.
+`evidence_type` selects the input widget, and `controlled_vocabulary` criteria name a
+`vocabulary_key` resolved in `vocabularies.json`.
 
 To create a domain-tuned variant (e.g., a high-energy-physics profile), copy `matrix.json`, edit, and load it via the **Import schema** option in the app. Forking the repo is not required.
 
