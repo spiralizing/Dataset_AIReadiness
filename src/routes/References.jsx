@@ -14,7 +14,7 @@ const linkFor = (c) => (c.doi ? `https://doi.org/${c.doi}` : c.url || null);
 export default function References() {
   return (
     <section>
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">Sources</span>
+      <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-faint">Sources</span>
       <h2 className="mt-1 text-xl font-semibold">References</h2>
       <p className="mt-2 max-w-[70ch] text-sm text-muted">
         The seven pre-model dimensions, the readiness levels and FAIR criteria, and the
@@ -23,7 +23,7 @@ export default function References() {
       </p>
 
       <div className="mt-6 border-l-2 border-accent pl-4">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+        <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-faint">
           This tool implements
         </span>
         <p className="mt-1 text-sm text-muted">

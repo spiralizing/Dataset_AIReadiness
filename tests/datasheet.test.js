@@ -66,7 +66,6 @@ test('generateDatasheet orders Characterization before FAIRness before Ethics', 
 
 test('templateForRecord selects healthsheet only for the declaring sub-domains', () => {
   assert.equal(templateForRecord({ pathway: 'C', sub_domain: 'clinical' }), 'healthsheet');
-  assert.equal(templateForRecord({ pathway: 'C', sub_domain: 'salutogenesis' }), 'healthsheet');
   assert.equal(templateForRecord({ pathway: 'C', sub_domain: 'general' }), 'datasheet');
   assert.equal(templateForRecord({ pathway: 'A', sub_domain: null }), 'datasheet');
 });

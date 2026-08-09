@@ -1,5 +1,5 @@
 {
-  "$comment": "Pathway definitions for the audience selector. Three pathways A/B/C aligned to L1/L2/L3 with cumulative semantics: B requires every L1 + L2 criterion in matrix.json; C requires every L1 + L2 + L3 criterion. Pathway C has seven sub-domains; each may add criteria at L3 via 'overlay'. Overlay entries declare their own 'dimension', so a sub-domain is not restricted to Ethics: the biomedical sub-domains overlay Ethics only, while 'materials' also overlays FAIRness, Provenance, and Characterization, where the discipline-specific documentation practice actually lives. Overlays are additive — nothing in matrix.json is removed or relaxed by a sub-domain. Renamed from 'ethics_overlay' in 0.2.0.",
+  "$comment": "Pathway definitions for the audience selector. Three pathways A/B/C aligned to L1/L2/L3 with cumulative semantics: B requires every L1 + L2 criterion in matrix.json; C requires every L1 + L2 + L3 criterion. Pathway C has six sub-domains; each may add criteria at L3 via 'overlay'. Overlay entries declare their own 'dimension', so a sub-domain is not restricted to Ethics: the biomedical sub-domains overlay Ethics only, while 'materials' also overlays FAIRness, Provenance, and Characterization, where the discipline-specific documentation practice actually lives. Overlays are additive — nothing in matrix.json is removed or relaxed by a sub-domain. Renamed from 'ethics_overlay' in 0.2.0.",
   "version": "0.3.0",
   "pathways": [
     {
@@ -72,6 +72,7 @@
               "evidence_type": "identifier",
               "required_in_pathways": ["C"],
               "references": ["Rostamzadeh2022", "Clark2026"],
+              "collection_hint": "Copy the protocol number off the approval letter when it arrives; it is rarely findable later without the letter.",
               "remediation": "The number assigned by your institution's IRB. Required so reviewers can verify the approval if needed."
             },
             {
@@ -84,6 +85,7 @@
               "vocabulary_key": "de_id_methods",
               "required_in_pathways": ["C"],
               "references": ["Rostamzadeh2022", "Clark2026"],
+              "collection_hint": "Record which method was applied, and by whom, at the time de-identification is performed.",
               "remediation": "HIPAA recognises two methods. State which one applies; for Expert Determination, name the expert and the report date."
             },
             {
@@ -95,6 +97,7 @@
               "evidence_type": "uri",
               "required_in_pathways": ["C"],
               "references": ["Rostamzadeh2022", "Clark2026"],
+              "collection_hint": "Note the DUA your target repository provides, or that one must be drafted, before deposit.",
               "remediation": "PhysioNet, MIMIC, and CHoRUS provide template DUAs that can be reused."
             }
           ]
@@ -116,6 +119,7 @@
               "evidence_type": "text",
               "required_in_pathways": ["C"],
               "references": ["Clark2026"],
+              "collection_hint": "Copy the consent wording verbatim from the form participants signed, not a paraphrase of it.",
               "remediation": "Genomic consent commonly distinguishes 'general research use' from 'disease-specific use'. Record the exact wording from the consent form."
             },
             {
@@ -127,6 +131,7 @@
               "evidence_type": "identifier",
               "required_in_pathways": ["C"],
               "references": ["Clark2026"],
+              "collection_hint": "Record the accession as soon as the submission is registered.",
               "remediation": "dbGaP accessions take the form `phs######.v#.p#`."
             },
             {
@@ -138,6 +143,7 @@
               "evidence_type": "text",
               "required_in_pathways": ["C"],
               "references": ["Clark2026"],
+              "collection_hint": "Note the assessment method and the threshold at the time you run it.",
               "remediation": "Genomic data carries non-trivial re-identification risk even after standard de-identification. Document the method and threshold used."
             }
           ]
@@ -159,6 +165,7 @@
               "evidence_type": "text",
               "required_in_pathways": ["C"],
               "references": ["Clark2026"],
+              "collection_hint": "Record what speakers agreed to, including whether voice cloning and biometric use are covered or explicitly excluded.",
               "remediation": "Voice data implicates re-identification and impersonation risks; consent must explicitly cover or exclude voice cloning and biometric uses."
             },
             {
@@ -170,6 +177,7 @@
               "evidence_type": "file",
               "required_in_pathways": ["C"],
               "references": ["Clark2026", "KidwaiKhan2024"],
+              "collection_hint": "Capture speaker demographics as structured fields during enrolment; a retrospective audit is only as good as what was recorded at the time.",
               "remediation": "Counts and proportions across age, sex, race/ethnicity, and primary language."
             },
             {
@@ -181,50 +189,8 @@
               "evidence_type": "text",
               "required_in_pathways": ["C"],
               "references": ["Clark2026"],
+              "collection_hint": "Note each speaker's language and accent at enrolment, and the varieties you did not manage to recruit.",
               "remediation": "Document the accents and languages represented and any that are absent. Coverage gaps constrain valid downstream uses."
-            }
-          ]
-        },
-        {
-          "id": "salutogenesis",
-          "name": "Salutogenesis / multi-modal precision health",
-          "description": "Surfaces multi-modal alignment provenance, longitudinal consent, and modality-specific de-identification.",
-          "deposition_targets_vocabulary": "repositories_l3_bridge2ai",
-          "deposition_targets_filter": ["AIREADI"],
-          "template": "healthsheet",
-          "overlay": [
-            {
-              "id": "ethics.l3.salutogenesis.modality_alignment",
-              "dimension": "Ethics",
-              "level": "L3",
-              "lifecycle_stage": "curation",
-              "label": "Multi-modal alignment provenance (how participant identities are linked across modalities)",
-              "evidence_type": "text",
-              "required_in_pathways": ["C"],
-              "references": ["Clark2026"],
-              "remediation": "Linking labs to imaging to wearables produces re-identification surface area beyond any single modality. Document the linkage method and the identifier used."
-            },
-            {
-              "id": "ethics.l3.salutogenesis.longitudinal_consent",
-              "dimension": "Ethics",
-              "level": "L3",
-              "lifecycle_stage": "acquisition",
-              "label": "Longitudinal consent terms (re-contact, withdrawal, data retention)",
-              "evidence_type": "text",
-              "required_in_pathways": ["C"],
-              "references": ["Clark2026"],
-              "remediation": "State whether participants may withdraw, what happens to already-collected data, and how re-contact is governed."
-            },
-            {
-              "id": "ethics.l3.salutogenesis.modality_specific_deid",
-              "dimension": "Ethics",
-              "level": "L3",
-              "lifecycle_stage": "curation",
-              "label": "Modality-specific de-identification methods (imaging, wearable, lab)",
-              "evidence_type": "text",
-              "required_in_pathways": ["C"],
-              "references": ["Clark2026", "Rostamzadeh2022"],
-              "remediation": "Each modality has its own de-identification standards (DICOM tag stripping for imaging, accelerometer windowing for wearables). Document each."
             }
           ]
         },
@@ -245,6 +211,7 @@
               "evidence_type": "text",
               "required_in_pathways": ["C"],
               "references": ["Clark2026"],
+              "collection_hint": "Record the reviewing committee and its institution when the review concludes.",
               "remediation": "Name the institution and the committee. Required so reviewers can verify the review record if needed."
             },
             {
@@ -256,6 +223,7 @@
               "evidence_type": "uri",
               "required_in_pathways": ["C"],
               "references": ["Clark2026"],
+              "collection_hint": "Note which access tier the data will sit in and the policy URL that defines it.",
               "remediation": "Institutional Dataverse and ICPSR both publish tiered-access policies; link to the one that applies."
             }
           ]
@@ -284,6 +252,7 @@
               "verification": "attested",
               "required_in_pathways": ["C"],
               "references": ["Ghiringhelli2023", "Wilkinson2016"],
+              "collection_hint": "Decide the target repository early. NOMAD, Materials Cloud, OQMD, and ICSD each have submission requirements that are easier to meet before the runs than after.",
               "remediation": "Domain repository first, generalist fallback second. NOMAD and the Materials Cloud Archive mint DOIs and index the metadata so the record stays machine-queryable; OQMD and ICSD are structure databases with their own submission and licensing routes. Zenodo, Figshare, and Dryad remain valid when no domain repository accepts the record type. Record which one, and the DOI it minted."
             },
             {
@@ -297,6 +266,7 @@
               "verification": "attested",
               "required_in_pathways": ["C"],
               "references": ["Hall1991", "Ghiringhelli2023"],
+              "collection_hint": "Export in the disciplinary format at the moment of measurement or calculation — CIF for structures, NeXus for beamline data. Converting later cannot add what the original never carried.",
               "remediation": "Crystal structures go in CIF (IUCr): `_chemical_formula_sum`, `_cell_length_a`, `_space_group_H-M`, and an `_atom_site` loop with fractional coordinates. Neutron, X-ray, and muon experiment data go in NeXus, which is HDF5 underneath and so stays loadable in a standard environment. Molecules and reactions can use CML. Name the standard and its version — a bare CSV of peak positions is L1 evidence, not L3."
             },
             {
@@ -310,6 +280,7 @@
               "verification": "attested",
               "required_in_pathways": ["C"],
               "references": ["EMMC2021", "Andersen2021", "Ghiringhelli2023"],
+              "collection_hint": "For every field name your code or instrument emits, note the concept it denotes. `E_tot`, `etotal`, and `energy` are the same quantity only because someone said so.",
               "remediation": "One quantity carries many names: VASP writes `E_tot`, Quantum ESPRESSO writes `etotal`, an XRD ELN writes `energy`. Map each field to one shared concept so the record is queryable across codes — EMMO for materials concepts, NOMAD Metainfo for a repository-native schema, OPTIMADE when the data is served from a queryable endpoint. Record the vocabulary and, where one exists, the concept IRI per field."
             },
             {
@@ -323,6 +294,7 @@
               "verification": "attested",
               "required_in_pathways": ["C"],
               "references": ["Huber2020", "Pizzi2016", "OCarragain2019"],
+              "collection_hint": "Run through an engine that writes the graph as it goes. If you find yourself taking notes about what the machine just did, the record is already incomplete.",
               "remediation": "At high throughput — order 10,000 processes an hour — nobody is taking notes, and reconstructing the graph after the fact is intractable. Name what recorded inputs, steps, and outputs as the run proceeded (AiiDA, FireWorks/atomate, signac, Nextflow with nf-prov, CWLProv; an ELN/LIMS entry for bench work) and export its graph alongside the data. A Workflow-Run RO-Crate is a packaged form of that export; the PROV-O record on the Export page is the interchange form."
             },
             {
@@ -335,6 +307,7 @@
               "verification": "manual",
               "required_in_pathways": ["C"],
               "references": ["Ghiringhelli2023", "Clark2026"],
+              "collection_hint": "Log the full settings per run, at the run: source, voltage, current, scan range, temperature, and sample preparation; or code, functional, pseudopotentials, k-point mesh, cutoffs, and convergence thresholds.",
               "remediation": "Instruments rarely export every state variable, so sample-state metadata has to be captured in an ELN or LIMS. Experimental: instrument and its identifier, radiation source, operating settings, scan range, temperature, sample preparation — e.g. Rigaku SmartLab (inst-0217), Cu Kα, 40 kV / 30 mA, 2θ 10–80°, RT. Computational: code and version, functional, pseudopotentials, k-point mesh, plane-wave cutoff, convergence thresholds — e.g. k-points 6×6×6, ecutwfc 60 Ry. Give the operator's ORCID and the date."
             },
             {
@@ -347,6 +320,7 @@
               "verification": "manual",
               "required_in_pathways": ["C"],
               "references": ["Wilkinson2016", "Clark2026"],
+              "collection_hint": "Record the licence of every external input as you pull it in, with the version and date you retrieved it.",
               "remediation": "Materials data is rarely human-subjects data, so the ethics evidence here is provenance of rights rather than consent. State the licence of every input drawn from an external database — ICSD is subscription-licensed and generally not redistributable, NOMAD and OQMD are open — and give the SPDX identifier for what you release. Note any export-control or dual-use restriction and any embargo tied to an industrial partner. If none applies, say so explicitly: as open as possible, as closed as necessary."
             }
           ]

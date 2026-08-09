@@ -53,7 +53,7 @@ const withOverrides = (criteria, pathway, subId) => {
 };
 
 // Documentation template for a record: 'healthsheet' for Pathway C sub-domains
-// that declare it (clinical, salutogenesis), else 'datasheet'.
+// that declare it (clinical), else 'datasheet'.
 export const templateForRecord = (record) =>
   record?.pathway === 'C' && record.sub_domain
     ? (getSubDomain(record.sub_domain)?.template ?? 'datasheet')

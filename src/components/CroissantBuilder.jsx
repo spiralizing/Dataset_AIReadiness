@@ -175,7 +175,7 @@ export default function CroissantBuilder() {
                 </button>
               </div>
               {duplicated.has((f.name ?? '').trim()) && (
-                <p className="mt-1 text-[11px] text-warn">
+                <p className="mt-1 text-[0.7rem] text-warn">
                   Another file has this name. Both will still export, but with altered identifiers —
                   give them distinct names.
                 </p>
@@ -229,9 +229,9 @@ export default function CroissantBuilder() {
               </div>
 
               <div className="mt-2">
-                <span className="text-[11px] font-medium text-muted">Columns</span>
+                <span className="text-[0.7rem] font-medium text-muted">Columns</span>
                 {files.length === 0 && (
-                  <p className="text-[11px] text-faint">
+                  <p className="text-[0.7rem] text-faint">
                     Add a file first so columns have somewhere to come from.
                   </p>
                 )}

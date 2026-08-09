@@ -1,5 +1,5 @@
 {
-  "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 3, 5, 7, 12 of González-Espinoza (2026); the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
+  "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 3, 5, 7, 12 of González-Espinoza et al. (2026); the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
   "version": "0.3.0",
   "vocabularies": {
     "licenses": {

@@ -21,6 +21,7 @@ const pathways = await loadJson('pathways.json');
 const vocabularies = await loadJson('vocabularies.json');
 const references = await loadJson('references.json');
 const validators = await loadJson('validators.json');
+const guidanceDoc = await loadJson('guidance.json');
 
 const VALID_PATHWAYS = new Set(['A', 'B', 'C']);
 const VALID_LEVELS = new Set(['L1', 'L2', 'L3']);
@@ -183,6 +184,27 @@ test('controlled_vocabulary criteria reference an existing vocabulary_key', () =
   }
 });
 
+test('collection_hint, when present, is prose distinct from remediation', () => {
+  // The two answer different questions: collection_hint is the observation to
+  // record at the time, remediation is how to close the gap afterwards. If they
+  // are identical the hint adds nothing and should be dropped rather than faked.
+  const check = (c, where) => {
+    if (c.collection_hint === undefined) return;
+    assert.ok(
+      typeof c.collection_hint === 'string' && c.collection_hint.trim().length > 20,
+      `${where} ${c.id} has an empty or trivial collection_hint`,
+    );
+    assert.notEqual(
+      c.collection_hint.trim(),
+      (c.remediation ?? '').trim(),
+      `${where} ${c.id} duplicates remediation as its collection_hint`,
+    );
+  };
+  for (const c of matrix.criteria) check(c, 'criterion');
+  const cPath = pathways.pathways.find((p) => p.id === 'C');
+  for (const sub of cPath.sub_domains) for (const o of sub.overlay) check(o, 'overlay');
+});
+
 test('vocabulary_scope, when present, names a supported resolver', () => {
   // A criterion may defer its option list to the pathway / sub-domain instead of
   // its static vocabulary_key. Only one resolver exists today; a typo here would
@@ -259,14 +281,14 @@ test('pathway deposition_targets_vocabulary keys resolve in vocabularies.json', 
   }
 });
 
-test('Pathway C declares seven sub-domains including the resolved set', () => {
+test('Pathway C declares six sub-domains including the resolved set', () => {
   const c = pathways.pathways.find((p) => p.id === 'C');
   assert.ok(c, 'Pathway C missing');
-  assert.equal(c.sub_domains.length, 7, 'expected exactly seven Pathway C sub-domains');
+  assert.equal(c.sub_domains.length, 6, 'expected exactly six Pathway C sub-domains');
   const ids = c.sub_domains.map((s) => s.id).sort();
   assert.deepEqual(
     ids,
-    ['clinical', 'general', 'genomic', 'institutional', 'materials', 'salutogenesis', 'voice'],
+    ['clinical', 'general', 'genomic', 'institutional', 'materials', 'voice'],
     `unexpected sub-domain set: ${ids.join(', ')}`,
   );
   assert.ok(
@@ -400,11 +422,11 @@ test('label_overrides target real criteria and only reword them', () => {
   }
 });
 
-test('all five schema files carry the same version (they move in lockstep)', () => {
+test('every schema file carries the same version (they move in lockstep)', () => {
   // Versions diverged once (three files at 0.2.0, two at 0.1.0) and it made
   // "which schema is this record written against?" unanswerable. One version for
   // the set; 1.0.0 is cut when the criterion ids are considered stable.
-  const versions = [matrix, pathways, vocabularies, references, validators].map((f) => f.version);
+  const versions = [matrix, pathways, vocabularies, references, validators, guidanceDoc].map((f) => f.version);
   assert.equal(new Set(versions).size, 1, `schema versions have diverged: ${versions.join(', ')}`);
   assert.match(versions[0], /^\d+\.\d+\.\d+$/);
 });

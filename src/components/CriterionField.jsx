@@ -45,20 +45,20 @@ const DESCRIPTOR_DRIVEN = {
 function StatusPill({ pending, result }) {
   if (pending) {
     return (
-      <span className="rounded-none bg-idle-bg px-1.5 py-0.5 text-[10px] font-medium text-muted">
+      <span className="rounded-none bg-idle-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-muted">
         validator pending
       </span>
     );
   }
   if (result?.ok) {
     return (
-      <span className="rounded-none bg-ok-bg px-1.5 py-0.5 text-[10px] font-medium text-ok">
+      <span className="rounded-none bg-ok-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-ok">
         ✓ validated
       </span>
     );
   }
   return (
-    <span className="rounded-none bg-bad-bg px-1.5 py-0.5 text-[10px] font-medium text-bad">
+    <span className="rounded-none bg-bad-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-bad">
       × not valid
     </span>
   );
@@ -79,17 +79,17 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
         <span className="text-sm font-medium text-ink">{criterion.label}</span>
         <div className="flex shrink-0 gap-1">
           {requirement === 'recommended' && (
-            <span className="rounded-none bg-info-bg px-1.5 py-0.5 text-[10px] font-medium text-info">
+            <span className="rounded-none bg-info-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-info">
               recommended
             </span>
           )}
           {locked && (
-            <span className="rounded-none bg-warn-bg px-1.5 py-0.5 text-[10px] font-medium text-warn">
+            <span className="rounded-none bg-warn-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-warn">
               locked
             </span>
           )}
           {automated && <StatusPill pending={pending} result={result} />}
-          <span className={`rounded-none px-1.5 py-0.5 text-[10px] font-medium ${badge.cls}`}>
+          <span className={`rounded-none px-1.5 py-0.5 text-[0.65rem] font-medium ${badge.cls}`}>
             {badge.label}
           </span>
         </div>

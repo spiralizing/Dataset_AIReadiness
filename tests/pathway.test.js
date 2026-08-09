@@ -102,7 +102,7 @@ test('pathwayVerdict: unmet with no answers, met when all required satisfied', (
 test('getPathway and subDomainsForC resolve schema metadata', () => {
   assert.equal(getPathway('A').name, 'Accessible');
   assert.equal(getPathway('Z'), null);
-  assert.equal(subDomainsForC().length, 7);
+  assert.equal(subDomainsForC().length, 6);
 });
 
 test('overlaysFor is empty except for Pathway C with a sub-domain', () => {

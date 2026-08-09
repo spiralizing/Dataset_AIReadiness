@@ -1,5 +1,5 @@
 {
-  "$comment": "AI-readiness assessment matrix derived from Table 11 of González-Espinoza (2026). 7 Bridge2AI dimensions × 3 readiness levels (L1/L2/L3 ↔ DRL bands C/B/A). Cumulative semantics: Pathway A requires every L1 criterion; Pathway B requires every L1 + L2; Pathway C requires every L1 + L2 + L3. The Croissant descriptor lives at L2 but is marked recommended at L1 to keep upgrades frictionless. Pathway C sub-domain overlays live in pathways.json, not here — they may target any dimension, and a sub-domain may also reword a criterion below via 'label_overrides' (wording only; id, evidence_type, and pathway membership are never changed). All five schema files move in lockstep from 0.3.0; 1.0.0 is cut when the criterion ids are considered stable.",
+  "$comment": "AI-readiness assessment matrix derived from Table 11 of González-Espinoza et al. (2026). 7 Bridge2AI dimensions × 3 readiness levels (L1/L2/L3 ↔ DRL bands C/B/A). Cumulative semantics: Pathway A requires every L1 criterion; Pathway B requires every L1 + L2; Pathway C requires every L1 + L2 + L3. The Croissant descriptor lives at L2 but is marked recommended at L1 to keep upgrades frictionless. Pathway C sub-domain overlays live in pathways.json, not here — they may target any dimension, and a sub-domain may also reword a criterion below via 'label_overrides' (wording only; id, evidence_type, and pathway membership are never changed). All five schema files move in lockstep from 0.3.0; 1.0.0 is cut when the criterion ids are considered stable.",
   "version": "0.3.0",
   "dimensions": [
     "FAIRness",
@@ -124,6 +124,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Akhtar2024", "Clark2026"],
+      "collection_hint": "While you are deciding what the data is for, write the one-line intended use and the uses you would object to. Both are easier to state before there are results to defend.",
       "remediation": "Populate the Croissant `rai:` namespace fields. The in-app generator surfaces them when Pathway C is selected."
     },
     {
@@ -136,6 +137,7 @@
       "lifecycle_stage": "release",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "Bahim2020"],
+      "collection_hint": "Fix the version string for this cut of the data, and note what would make you cut the next one.",
       "remediation": "Use a repository that mints both a concept DOI (resolves to latest) and version-specific DOIs (Zenodo and DataCite both support this)."
     },
     {
@@ -150,6 +152,7 @@
       "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
+      "collection_hint": "Pick the target repository early and read its submission requirements: some constrain formats, consent wording, or file layout in ways that are cheap to satisfy before collection and expensive after.",
       "remediation": "The options are scoped to your pathway and, in Pathway C, to your sub-domain — a domain repository is preferred over a generalist one, and any target recommended for your sub-domain is listed first. Record the repository you will deposit in and the access tier it will carry (open, registered, restricted, controlled, or embargoed). If the right repository is not listed, use Custom."
     },
     {
@@ -210,6 +213,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
+      "collection_hint": "Keep the run log the record is built from: for every processing step, its inputs, its outputs, and when it ran.",
       "remediation": "Use the in-app PROV-O generator for short pipelines, or export from CWL / Snakemake / Nextflow / Galaxy for long ones."
     },
     {
@@ -222,6 +226,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
+      "collection_hint": "List every variable you will release; for derived ones, note which variables they were computed from.",
       "remediation": "Variable-level Entities enable feature-lineage queries downstream. The in-app generator emits one Entity per variable when the variable list is populated."
     },
     {
@@ -234,6 +239,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
+      "collection_hint": "At run time, record the parameters used and the exact software version. Version numbers are the first thing to become unrecoverable.",
       "remediation": "Each Activity records `prov:used` (inputs), `prov:wasGeneratedBy` (outputs), parameters, and the software Agent that ran it."
     },
     {
@@ -247,6 +253,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
+      "collection_hint": "Note who ran each step, by ORCID, and in what role.",
       "remediation": "Name a data steward, domain expert, data engineer, ML practitioner, and governance officer — even if the same person holds multiple roles in a small team."
     },
     {
@@ -331,6 +338,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "KidwaiKhan2024", "Aldoseri2023"],
+      "collection_hint": "Record the attributes you will need to audit representation on — site, instrument, batch, demographic group — as columns, not as prose. You cannot audit what was never captured.",
       "remediation": "Use Aequitas, Fairlearn, or an equivalent tool. Compare distributions before and after curation to detect introduced skew, not just released-state parity."
     },
     {
@@ -343,6 +351,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
+      "collection_hint": "Note the span the data actually covers: dates, sites, instruments, populations, modalities. Also note what you intended to cover and did not.",
       "remediation": "List subgroups represented and subgroups missing. Coverage gaps constrain valid downstream uses."
     },
     {
@@ -355,6 +364,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "Gebru2021"],
+      "collection_hint": "Write down the question this data was collected to answer. That sentence becomes the intended-use statement.",
       "remediation": "State both: tasks the dataset should support, and tasks it should not (e.g., 'not for clinical decision support')."
     },
     {
@@ -367,6 +377,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "KidwaiKhan2024"],
+      "collection_hint": "Keep a running note of anything that went wrong or changed mid-stream: a failed batch, a recalibration, an amended protocol, a site that dropped out.",
       "remediation": "Healthcare-utilisation proxies, exclusion windows, instrument quirks — name them. Downstream users need them to judge transferability."
     },
     {
@@ -417,6 +428,7 @@
       "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "Rostamzadeh2022"],
+      "collection_hint": "Record the approving body, protocol number, and approval date when approval is granted, not when you write the paper.",
       "remediation": "The review itself happens before/during acquisition. What travels with the dataset at L3 is structured evidence of that review — that is the L3 requirement."
     },
     {
@@ -430,6 +442,7 @@
       "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
+      "collection_hint": "Decide before collection who will be allowed access and under what conditions — consent wording usually has to match the access tier you intend.",
       "remediation": "Match the access tier to the sensitivity of the data and the consent basis recorded at L1."
     },
     {
@@ -442,6 +455,7 @@
       "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
+      "collection_hint": "If access will be restricted, note which data-use agreement applies, or that one still has to be drafted.",
       "remediation": "Link to the DUA template the requester signs. Repositories like PhysioNet ship one; institutional Dataverse instances often do too."
     },
     {
@@ -454,6 +468,7 @@
       "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
+      "collection_hint": "Record what the consent or licence actually permits beyond this study, in the words the document uses.",
       "remediation": "Bound by what consent basis at L1 supports. Be explicit — silence here defaults reviewers to 'not permitted'."
     },
     {
@@ -514,6 +529,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "W3CPROVO2013"],
+      "collection_hint": "As you create each derived variable, note its source variables and the operation that produced it.",
       "remediation": "Every released feature can be reconstructed from raw inputs by following the PROV record's `wasDerivedFrom` chain."
     },
     {
@@ -526,6 +542,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Mitchell2019", "Ravi2022", "Clark2026"],
+      "collection_hint": "If a model will be trained on this data, note where its model card will live.",
       "remediation": "Triangular linkage from Figure 8: dataset DOI ↔ model DOI/HF ID ↔ results DOI. Link bidirectionally so each artefact resolves to the others."
     },
     {
@@ -576,6 +593,7 @@
       "lifecycle_stage": "curation",
       "required_in_pathways": ["C"],
       "references": ["SalehiSchmeink2024", "Clark2026"],
+      "collection_hint": "If you curate, distil, or subsample before release, record what you removed and why. That decision is invisible in the released file.",
       "remediation": "Document which intervention was applied and the metric it improved (records removed, accuracy at matched compute, etc.)."
     },
     {
@@ -588,6 +606,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["SalehiSchmeink2024", "Clark2026"],
+      "collection_hint": "Note the compute this release consumed as you go: core-hours or instance-hours, the machine, and how many runs. Schedulers report it, and queue history rolls over.",
       "remediation": "Bind these figures to the same release bundle as the datasheet and PROV record. Without disclosure, efficiency claims are unverifiable."
     },
     {
@@ -648,6 +667,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Akhtar2024", "Clark2026"],
+      "collection_hint": "As files are produced, list them and the columns inside them, with types and units.",
       "remediation": "Verify with `mlcroissant` reference library: a four-line load (see Code Block 2 in the source paper) should yield records."
     },
     {
@@ -660,6 +680,7 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Akhtar2024", "Clark2026"],
+      "collection_hint": "Keep the few lines you yourself used to load the data. That is the snippet.",
       "remediation": "Five lines of Python in the README that load the dataset and print one record. Removes ambiguity that prose cannot."
     }
   ]

@@ -1,7 +1,8 @@
-// Round-trip tests for the assessment import/export path. Export is
-// JSON.stringify(state); import is a LOAD dispatch. These lock the reducer
-// behaviour the ImportAssessment component and the Export "Export assessment"
-// button depend on. Run with:  npm test
+// Reducer tests for records entering state from outside. Uploading a saved
+// assessment was removed, so LOAD now serves the worked examples (Examples.jsx)
+// and is where normalize() runs; the export half remains as an archival record.
+// The round-trip assertions are kept because they pin LOAD's backfill and
+// normalization behaviour, which the examples depend on. Run with:  npm test
 
 import { test } from 'vitest';
 import assert from 'node:assert/strict';

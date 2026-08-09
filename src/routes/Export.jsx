@@ -4,7 +4,7 @@
 // report, conformance report, and (for Plan/Prepare) a to-do action plan.
 
 import { useState } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAssessment } from '../state/assessment.jsx';
 import { templateForRecord } from '../lib/pathway.js';
 import { generateDatasheet } from '../generators/datasheet.js';
@@ -22,21 +22,10 @@ import { validateProvo } from '../lib/provoValidation.js';
 import { validationResults } from '../lib/validation.js';
 import { buildAssessmentReport, buildConformanceReport } from '../lib/report.js';
 import { validateProvoShacl, serializeReport, provoToTurtle } from '../lib/shacl.js';
+import { generateCollectionGuide } from '../generators/collectionGuide.js';
+import { download, guideFilename } from '../lib/download.js';
 import CroissantBuilder from '../components/CroissantBuilder.jsx';
 import ProvenanceBuilder from '../components/ProvenanceBuilder.jsx';
-import ImportAssessment from '../components/ImportAssessment.jsx';
-
-function download(filename, text, mime) {
-  const blob = new Blob([text], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
 
 const EXAMPLE_CROISSANT = {
   '@context': CROISSANT_CONTEXT,
@@ -256,7 +245,7 @@ export default function ExportPage() {
 
   return (
     <section>
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+      <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-faint">
         Step 4 · Release bundle
       </span>
       <h2 className="mt-1 text-xl font-semibold">Export</h2>
@@ -435,7 +424,7 @@ export default function ExportPage() {
               </summary>
 
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[11px] text-muted">
+                <p className="text-[0.7rem] text-muted">
                   {croissantOverride
                     ? 'Your edits are the descriptor now; the builder and the dataset details no longer regenerate it.'
                     : 'Rebuilt from your answers and the builder as you go. Editing by hand takes it over — reversible at any time.'}
@@ -734,6 +723,30 @@ export default function ExportPage() {
             <textarea value={todo} onChange={(e) => setTodo(e.target.value)} rows={20} className={editorClass} spellCheck={false} />
           </div>
         )}
+
+      </div>
+
+      {/* Collection guide — guidance rather than a release-bundle document, so it
+          sits outside the tabs and carries its own action colour. */}
+      <div className="mt-10 border-t border-line pt-5">
+        <h3 className="text-sm font-semibold">Collection guide</h3>
+        <p className="mt-1 max-w-[70ch] text-xs text-muted">
+          What to write down while the work is happening, so these documents are fillable later:
+          the four forms a record passes through, the six questions, and a worksheet of every
+          observation this pathway asks for, grouped by the stage at which it is still capturable.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => download(guideFilename(state), generateCollectionGuide(state), 'text/markdown')}
+            className="rounded-none bg-guide-btn px-4 py-2 text-sm font-medium text-guide-btn-fg hover:opacity-90"
+          >
+            Download collection guide (.md)
+          </button>
+          <Link to="/guide" className="text-xs text-link underline">
+            or read it here, and save it as a PDF
+          </Link>
+        </div>
       </div>
 
       {/* Assessment file — save/resume the whole record (the source of the tabs above) */}
@@ -741,13 +754,12 @@ export default function ExportPage() {
         <h3 className="text-sm font-semibold">Assessment file</h3>
         <p className="mt-1 max-w-[70ch] text-xs text-muted">
           Save the whole assessment (every answer, dataset details, and your Croissant/PROV-O edits)
-          to a file to resume later or share, or load one to continue where you left off.
+          to a file: an archival record of what was assessed, against which schema version, and when.
+          Work in progress is kept in this browser as you go, so you can close the tab and return to
+          it.
         </p>
         <div className="mt-3 flex flex-wrap gap-3">
           <DownloadBtn onClick={exportAssessment}>Export assessment (.json)</DownloadBtn>
-          <ImportAssessment className="rounded-none border border-line px-4 py-2 text-sm hover:bg-idle-bg">
-            Import assessment…
-          </ImportAssessment>
         </div>
       </div>
 

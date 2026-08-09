@@ -16,7 +16,7 @@ export default function Examples() {
 
   return (
     <section>
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">Examples</span>
+      <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-faint">Examples</span>
       <h2 className="mt-1 text-xl font-semibold">Worked examples</h2>
       <p className="mt-2 max-w-[70ch] text-sm text-muted">
         Load a pre-filled example to explore the assessment end-to-end, or use one as a template.
@@ -28,7 +28,7 @@ export default function Examples() {
           <div key={ex.id} className="flex flex-col border border-line bg-surface p-4">
             <div className="flex items-start justify-between gap-2">
               <h3 className="text-sm font-semibold text-ink">{ex.title}</h3>
-              <span className="shrink-0 border border-line px-1.5 py-0.5 text-[10px] font-medium text-muted">
+              <span className="shrink-0 border border-line px-1.5 py-0.5 text-[0.65rem] font-medium text-muted">
                 Pathway {ex.record.pathway}
                 {ex.record.sub_domain ? ` · ${ex.record.sub_domain}` : ''}
               </span>

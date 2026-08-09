@@ -47,6 +47,14 @@ const linkClass = ({ isActive }) =>
     isActive ? 'bg-brand-btn text-surface' : 'text-muted hover:bg-surface-2'
   }`;
 
+// The collection guide is not a wizard step: it is read before and alongside the
+// assessment rather than as one of its stages. It carries the guidance action
+// colour so the nav says so, matching its download and print buttons.
+const guideLinkClass = ({ isActive }) =>
+  `px-3 py-1.5 rounded-none text-sm transition-colors ${
+    isActive ? 'bg-guide-btn text-guide-btn-fg' : 'text-guide-btn hover:bg-info-bg'
+  }`;
+
 // Transparent logo, sits directly on the page background (no plaque).
 function Logo({ src, alt, imgClass }) {
   return <img src={src} alt={alt} className={`block w-auto ${imgClass}`} />;
@@ -90,7 +98,7 @@ export default function Layout() {
           </div>
         </div>
 
-        <nav className="mx-auto flex max-w-4xl gap-1 px-6 pb-3">
+        <nav className="mx-auto flex max-w-4xl flex-wrap gap-1 px-6 pb-3">
           <NavLink to="/" end className={linkClass}>
             Start
           </NavLink>
@@ -103,6 +111,9 @@ export default function Layout() {
           <NavLink to="/export" className={linkClass}>
             Export
           </NavLink>
+          <NavLink to="/guide" className={guideLinkClass}>
+            Research data collection guide
+          </NavLink>
         </nav>
       </header>
 
@@ -113,7 +124,7 @@ export default function Layout() {
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-6 py-8">
           <div className="flex items-center gap-3">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+            <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-faint">
               Developed by
             </span>
             <Logo src={trdaLogo} alt="Tartan Research Data Alliance" imgClass="h-24" />

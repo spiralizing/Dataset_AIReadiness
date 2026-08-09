@@ -36,7 +36,7 @@ export default function Review() {
 
   return (
     <section>
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+      <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-faint">
         Step 3 · Review
       </span>
       <h2 className="mt-1 text-xl font-semibold">Review</h2>

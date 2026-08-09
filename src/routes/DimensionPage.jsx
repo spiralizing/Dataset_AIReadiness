@@ -70,7 +70,7 @@ export default function DimensionPage() {
           placeholder="e.g. VA fracture-risk cohort"
           className="mt-1 w-full rounded-none border border-line px-2 py-1 text-sm text-ink"
         />
-        <span className="mt-1 block text-[11px] text-muted">
+        <span className="mt-1 block text-[0.7rem] text-muted">
           Adding a name here completes the Croissant descriptor&rsquo;s required title.
         </span>
       </label>

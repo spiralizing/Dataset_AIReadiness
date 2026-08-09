@@ -59,7 +59,7 @@ export default function ProvenanceBuilder() {
           Output <span className="opacity-70">· Entity, wasDerivedFrom</span>
         </span>
       </div>
-      <p className="mt-2 text-[11px] text-muted">
+      <p className="mt-2 text-[0.7rem] text-muted">
         PROV-O records lineage as <b>agents</b> running <b>activities</b> (your steps) that{' '}
         <b>use</b> inputs and <b>generate</b> outputs. Fill the builder below and it writes valid
         PROV-O for you, no JSON required. Follows the W3C PROV Ontology (
@@ -138,9 +138,9 @@ export default function ProvenanceBuilder() {
 
                 {/* Inputs */}
                 <div className="mt-2">
-                  <span className="text-[11px] font-medium text-muted">Inputs used</span>
+                  <span className="text-[0.7rem] font-medium text-muted">Inputs used</span>
                   {available.length === 0 ? (
-                    <p className="text-[11px] text-faint">Add a source (or an earlier step's output) first.</p>
+                    <p className="text-[0.7rem] text-faint">Add a source (or an earlier step's output) first.</p>
                   ) : (
                     <div className="mt-1 flex flex-wrap gap-2">
                       {available.map((e) => (
@@ -165,7 +165,7 @@ export default function ProvenanceBuilder() {
 
                 {/* Outputs */}
                 <div className="mt-2">
-                  <span className="text-[11px] font-medium text-muted">Outputs produced</span>
+                  <span className="text-[0.7rem] font-medium text-muted">Outputs produced</span>
                   <div className="mt-1 space-y-1">
                     {(step.outputs ?? []).map((o) => (
                       <div key={o.id} className="flex gap-2">

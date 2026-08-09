@@ -1,6 +1,6 @@
 # AI-Readiness Assessment & Documentation builder
 
-An interactive, browser-based tool that helps researchers assess whether their datasets are ready for publication, community sharing, or AI/ML training. The app implements the tiered assessment framework from *A practical AI-readiness assessment for Research Data* (González-Espinoza, 2026), combining the seven pre-model dimensions of the Bridge2AI Standards Working Group, the Data Readiness Levels of Lawrence, and the FAIR Maturity Indicators.
+An interactive, browser-based tool that helps researchers assess whether their datasets are ready for publication, community sharing, or AI/ML training. The app implements the tiered assessment framework from *A practical AI-readiness assessment for Research Data* (González-Espinoza et al., 2026), combining the seven pre-model dimensions of the Bridge2AI Standards Working Group, the Data Readiness Levels of Lawrence, and the FAIR Maturity Indicators.
 
 🔗 **Live app:** https://spiralizing.github.io/Dataset_AIReadiness/
 
@@ -15,6 +15,8 @@ At the end of the assessment, the app generates:
 - a **Croissant** JSON-LD descriptor for ML-framework consumption (MLCommons 2024)
 - a **PROV-O** JSON-LD provenance record (W3C 2013)
 - a release-ready bundle combining all of the above
+
+Before any of that, it also produces a **collection guide**: what to write down while the work is happening, so those documents are fillable later. See [Collection guide](#collection-guide).
 
 ## Audience pathways
 
@@ -32,7 +34,6 @@ Pathway C includes a **sub-selector** that adds discipline-specific L3 criteria 
 - *Clinical / health* — swaps in the healthsheet template, surfaces IRB protocol ID and HIPAA de-identification method. Targets: **CHoRUS** (Bridge2AI Clinical Care Grand Challenge), PhysioNet, MIMIC-style controlled-access repositories.
 - *Genomic / functional-genomics* — surfaces consent type, dbGaP accession, re-identification risk. Targets: **CM4AI** (Bridge2AI Cell Maps for AI Grand Challenge), dbGaP, GenBank for non-restricted derivatives.
 - *Voice / public-health biomarker* — surfaces speaker consent, demographic representation audit, and accent / language coverage. Target: **Bridge2AI-Voice** (Voice as a Biomarker of Health Grand Challenge).
-- *Salutogenesis / multi-modal precision health* — surfaces multi-modal alignment provenance, longitudinal consent, and modality-specific de-identification. Target: **AI-READI** (Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights Grand Challenge).
 - *Institutional / human-subjects* — surfaces IRB and tiered-access policy. Targets: institutional Dataverse instances with restricted-access tier, ICPSR for social-science human-subjects data.
 - *Materials science (computational & experimental)* — the first non-biomedical sub-domain, and the one that motivated making overlays dimension-aware. Surfaces domain-repository deposition, discipline encoding (CIF for crystal structures, NeXus for neutron/X-ray/muon experiments, CML for molecules), shared-vocabulary interoperability (EMMO, OPTIMADE, NOMAD Metainfo), a-priori provenance capture (AiiDA, FireWorks/atomate, signac, Nextflow + nf-prov, CWLProv, Workflow-Run RO-Crate), per-run instrument or computational parameters, and — in place of consent — the licensing and redistribution terms of third-party source data. Targets: **NOMAD**, **Materials Cloud Archive**, OQMD, ICSD, with Zenodo/Figshare/Dryad marked explicitly as a generalist fallback. Validators referenced: checkCIF (IUCr), cnxvalidate, optimade-validator.
 
@@ -46,10 +47,10 @@ The review screen shows a 7×3 heatmap. A cell turns green only when all its req
 
 ## Features
 
-- **Wizard flow** — audience selector → seven dimension pages → review/scorecard → export
+- **Wizard flow** — starting point → audience selector → seven dimension pages → review/scorecard → export, with the collection guide reachable at any time
 - **Prefilled options** drawn from controlled vocabularies in the source paper: licenses (CC-BY, CC0, ODbL), formats (Parquet, HDF5, NetCDF, Zarr, DICOM, NIfTI), repositories by tier — L1 (Figshare, Zenodo, institutional, GitHub), L2 (Hugging Face, Kaggle, OpenML, Dataverse, Dryad), L3 generic (PhysioNet, NIH Data Commons, dbGaP, ICPSR, GenBank), L3 Bridge2AI Grand Challenges (CM4AI, CHoRUS, Bridge2AI-Voice, AI-READI). Discipline vocabularies extend the same mechanism — Materials science adds repositories (NOMAD, Materials Cloud, OQMD, ICSD), encoding standards (CIF, NeXus, CML), an interoperability layer (EMMO, OPTIMADE, NOMAD Metainfo), and provenance engines (AiiDA, FireWorks, signac, nf-prov, CWLProv). "Custom" entry always available.
 - **Binary checkmark heatmap** — pass/fail per cell, optional-criteria list below the heatmap
-- **Three template generators** — Croissant, PROV-O, datasheet/healthsheet — all editable in-app before download
+- **Three template generators** — Croissant, PROV-O, datasheet/healthsheet. The datasheet is editable before download; the Croissant descriptor and PROV-O record are composed from their builders, with raw JSON-LD editing available as an explicit, reversible override
 - **Inlined seeded examples** — seven reference datasets shipped with the bundle:
   - Tabular Zenodo dataset (Pathway A)
   - Hugging Face dataset with Croissant descriptor (Pathway B)
@@ -58,8 +59,49 @@ The review screen shows a 7×3 heatmap. A cell turns green only when all its req
   - Synthetic CM4AI-style cell-mapping dataset (Pathway C → Genomic)
   - α-quartz XRD + DFT relaxation (Pathway C → Materials science; built through the Croissant builder)
   - High-energy physics ROOT example (illustrates FAIR-for-models linkage)
-- **Schema import/export** — labs can ship domain-tuned variants without forking the codebase
+- **Collection guide** — a printable worksheet of what to observe and when, generated from the same criteria (see below)
+- **Two authoring builders** — files and columns compose the Croissant descriptor; sources and steps compose the PROV-O record, so neither requires hand-written JSON-LD
 - **Offline-capable** — once loaded, the app runs entirely in the browser with no external runtime calls
+
+## Collection guide
+
+The assessment asks for a Croissant descriptor and a provenance record. Neither is fillable unless
+somebody wrote the right things down while the work was happening, and by the time the assessment is
+run it is usually too late: instrument settings, operator, calibration state, and consent wording are
+available at the moment of collection and progressively harder to recover after it.
+
+The **Research data collection guide** (its own entry in the top navigation, or `/guide`) closes that
+gap. It covers:
+
+- **The four forms of a record** — paper notebook → electronic lab notebook → structured capture
+  (templated ELN, LIMS, or an instrument export in a disciplinary format) → machine-actionable
+  (Croissant and PROV-O, terms bound to shared vocabularies). One worked observation is carried
+  through all four, with what each form gains, what it still withholds, and how strongly it obliges
+  you to adopt a standard. Where acquisition is semi-automated or fully automated, the progression
+  collapses: the engine writes the machine-actionable record in real time with the experiment.
+- **The six questions** — who, what, when, where, why, how, and which artifact each answer lands in.
+  This is why the tool emits more than one document: Croissant answers *what*, PROV-O answers
+  *how it came to be*.
+- **What builds each documentation layer** — the records a project already keeps, mapped onto the
+  artifact they populate, over the identifier and vocabulary schemes (ORCID, ROR, RRID, PIDINST, DOI,
+  SPDX, UCUM, LOINC/SNOMED, EMMO) that ground all three.
+- **A per-run log template** and a **worksheet** of every observation the selected pathway will ask
+  for, grouped by the lifecycle stage at which it is still capturable. The acquisition group comes
+  first because it is the only one that becomes unrecoverable.
+- **Binding terms to shared vocabularies** (Pathway C), with three worked examples, and a survey of
+  the tools that reduce the burden: workflow engines that emit provenance as a by-product, formats
+  that carry their own metadata, ELN/LIMS, identifier schemes, metadata templates, and repositories
+  that parse structured metadata from raw output.
+
+The worksheet is generated from the same criteria as the assessment, so adding a criterion or a
+sub-domain overlay extends the guide with no separate edit. Criteria carry a `collection_hint` (what
+to record, at the time) distinct from `remediation` (how to close a gap); L3 criteria and all
+sub-domain overlays have one, and the rest fall back to their remediation text.
+
+It is available three ways: **on screen**, as a **Markdown download**, and as a **PDF** through the
+browser's print dialog. The PDF is a separate rendering rather than a print stylesheet over the web
+page — serif body sized in points, numbered sections, a contents list, tables in place of coloured
+chips, and a masthead and colophon so a page found on its own still says what it describes.
 
 ## Tech stack
 
@@ -68,7 +110,7 @@ The review screen shows a 7×3 heatmap. A cell turns green only when all its req
 - **zod** for JSON-Schema validation of user inputs (also used to validate generated Croissant descriptors against the bundled MLCommons schema)
 - **HashRouter** for deep links on GitHub Pages without server-side rewrites
 - Plain-JS JSON-LD construction (no Node runtime required at load time)
-- **`localStorage`** for resumable in-progress assessments, plus **file export/import** for portability and sharing across browsers, devices, and sessions. `localStorage` is a prototype-grade choice (private-browsing tabs disable it, and it is per-origin/per-browser); the durable, shareable artifact is the exported JSON profile
+- **`localStorage`** for resumable in-progress assessments, plus a **JSON export** of the whole record as an archival artifact. `localStorage` is a prototype-grade choice (private-browsing tabs disable it, and it is per-origin/per-browser), so an assessment resumes in the same browser but does not travel between devices
 
 ## Repository structure
 
@@ -85,25 +127,29 @@ Dataset_AIReadiness/
 │   │   ├── DimensionPage.jsx        # one page per dimension, schema-driven
 │   │   ├── Review.jsx               # 7×3 heatmap + verdict
 │   │   ├── Export.jsx               # tabbed release bundle
+│   │   ├── Guide.jsx                # collection guide, readable and printable
 │   │   ├── Examples.jsx · References.jsx
 │   ├── components/
 │   │   ├── Layout.jsx · Carousel.jsx · CriterionField.jsx
+│   │   ├── guidance.jsx             # ladder / questions / layer-input blocks (shared)
+│   │   ├── CollectionGuide.jsx      # the guide on screen
+│   │   ├── CollectionGuidePrint.jsx # the guide as a paper document
 │   │   ├── CroissantBuilder.jsx     # files + record sets -> Croissant
-│   │   ├── ProvenanceBuilder.jsx    # sources + steps -> PROV-O
-│   │   └── ImportAssessment.jsx
+│   │   └── ProvenanceBuilder.jsx    # sources + steps -> PROV-O
 │   ├── lib/
 │   │   ├── dimensions.js · pathway.js · stages.js
 │   │   ├── depositionTargets.js     # pathway/sub-domain-scoped repository options
 │   │   ├── grounding.js · croissantValidation.js · provoValidation.js · validation.js
-│   │   ├── shacl.js · report.js · thisWork.js
+│   │   ├── shacl.js · report.js · thisWork.js · download.js
 │   ├── generators/
-│   │   └── croissant.js · provo.js · datasheet.js · todo.js
+│   │   └── croissant.js · provo.js · datasheet.js · todo.js · collectionGuide.js
 │   ├── schema/
 │   │   ├── matrix.json              # 7×3 assessment matrix
-│   │   ├── pathways.json            # A / B / C; seven Pathway-C sub-domains with L3 overlays
+│   │   ├── pathways.json            # A / B / C; six Pathway-C sub-domains with L3 overlays
 │   │   ├── vocabularies.json        # licenses, formats, repositories, discipline vocabularies
 │   │   ├── validators.json          # discipline-validator registry
-│   │   └── references.json          # citation registry
+│   │   ├── references.json          # citation registry
+│   │   └── guidance.json            # standing guidance prose (ladder, questions, examples)
 │   ├── examples/build.js · index.js # seven correct-by-construction records
 │   ├── shapes/provo.shapes.ttl      # SHACL profile for the PROV-O record
 │   ├── assets/                      # CMU + TRDA logos
@@ -117,8 +163,8 @@ Dataset_AIReadiness/
 ### Run locally
 
 ```bash
-git clone https://github.com/<your-username>/ai-readiness-assessment.git
-cd ai-readiness-assessment
+git clone https://github.com/spiralizing/Dataset_AIReadiness.git
+cd Dataset_AIReadiness
 npm install
 npm run dev
 ```
@@ -138,8 +184,9 @@ The static bundle is written to `dist/`.
 The included workflow at `.github/workflows/deploy.yml` builds and deploys on every push to `main`. To enable:
 
 1. In repo settings, set **Pages → Source** to `GitHub Actions`.
-2. Update `base` in `vite.config.js` to match your repo name (e.g., `/ai-readiness-assessment/`).
-3. Push to `main`.
+2. Push to `main`.
+
+If you fork this under a different repository name, update `base` in `vite.config.js` to match it (currently `/Dataset_AIReadiness/`), or the built assets will 404.
 
 ## Customizing the assessment
 
@@ -167,7 +214,7 @@ whether a criterion shows as active, locked, or upcoming given the researcher's 
 `evidence_type` selects the input widget, and `controlled_vocabulary` criteria name a
 `vocabulary_key` resolved in `vocabularies.json`.
 
-To create a domain-tuned variant (e.g., a high-energy-physics profile), copy `matrix.json`, edit, and load it via the **Import schema** option in the app. Forking the repo is not required.
+To create a domain-tuned variant (e.g., a high-energy-physics profile), edit `matrix.json` and rebuild. The schema files are plain JSON with no code references to individual criteria, so a discipline profile is a data change. (Loading a tuned schema at runtime, without a rebuild, is a possible future extension rather than a current feature.)
 
 ### Adding a discipline sub-domain
 
@@ -190,7 +237,7 @@ The framework, dimensions, and templates implemented here are drawn from:
 9. Rostamzadeh, N., Mincu, D., Roy, S., et al. (2022). *Healthsheet: Development of a Transparency Artifact for Health Datasets.* In *Proceedings of the 2022 ACM Conference on Fairness, Accountability, and Transparency (FAccT '22)*, Seoul, Republic of Korea, 21–24 June 2022, pp. 1943–1961. doi:10.1145/3531146.3533239
 10. Ravi, N., Chaturvedi, P., Huerta, E. A., et al. (2022). *FAIR principles for AI models with a practical application for accelerated high energy diffraction microscopy.* Scientific Data 9: 657. doi:10.1038/s41597-022-01712-9
 
-The full bibliography from the source paper is reproduced in [`docs/REFERENCES.md`](docs/REFERENCES.md).
+The app's References page renders this list from `src/schema/references.json`, with resolvable DOI links.
 
 ### Materials science sub-domain
 
@@ -218,7 +265,7 @@ Cite the **software** when you use the app to produce artifacts you ship or publ
 @misc{gonzalez2026airready,
   title  = {A practical AI-readiness assessment for Research Data:
             A review and tiered framework},
-  author = {González-Espinoza, Alfredo},
+  author = {González-Espinoza, Alfredo and others},
   year   = {2026},
   institution = {Carnegie Mellon University, University Libraries}
 }
@@ -227,7 +274,7 @@ Cite the **software** when you use the app to produce artifacts you ship or publ
   title   = {AI-Readiness Assessment and Documentation Builder:
              a browser-based generator for datasheets, Croissant
              descriptors, and PROV-O provenance records},
-  author  = {González-Espinoza, Alfredo},
+  author  = {González-Espinoza, Alfredo and others},
   year    = {2026},
   version = {0.1.0},
   url     = {https://github.com/spiralizing/Dataset_AIReadiness},
@@ -240,6 +287,10 @@ The documentation artifacts the builder emits implement published templates and 
 ## Contributing
 
 Issues and pull requests are welcome. For substantive changes to the assessment matrix itself, please open an issue first describing the rationale and the source it derives from — the matrix is intended to track the published framework, and divergences should be documented.
+
+## AI Disclosure Statement
+
+This project was built using GitHub Co-pilot as autocomplete, Claude Code (Opus 4.8 in manual mode) for most of the webpage architecture, backend and documentation, and the chatbot version of Claude Opus 4.8 for the visual design. Everything generated with LLMs was planned prior execution and revised after generation, sometimes with iterated prompts, most of the content was edited before publishig. Not a single LLM-generated content was produced by using _zero-shot_ techniques or with Agents (automatic delegation). The authors of this project are thankful to Open Science and all the contributors of Open Source that made the training data for Large Language Models possible. 
 
 ## Contact
 

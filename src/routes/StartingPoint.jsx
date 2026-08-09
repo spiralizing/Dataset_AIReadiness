@@ -8,7 +8,13 @@ import { THIS_WORK } from '../lib/thisWork.js';
 import { LEVELS } from '../lib/dimensions.js';
 import { useAssessment } from '../state/assessment.jsx';
 import Carousel from '../components/Carousel.jsx';
-import ImportAssessment from '../components/ImportAssessment.jsx';
+import {
+  LadderStrip,
+  AutomationNote,
+  LadderDetail,
+  WhQuestions,
+  DocumentationInputs,
+} from '../components/guidance.jsx';
 
 const STEPS = [
   ['1', 'Set your context', "Say where you are in the lifecycle and your publishing pathway. That fixes the requirement tier."],
@@ -76,14 +82,23 @@ const LEVEL_CELLS = {
 
 const Eyebrow = ({ children, accent }) => (
   <span
-    className={`text-[11px] font-semibold uppercase tracking-wider ${accent ? 'text-accent' : 'text-faint'}`}
+    className={`text-[0.7rem] font-semibold uppercase tracking-wider ${accent ? 'text-accent' : 'text-faint'}`}
   >
     {children}
   </span>
 );
 
-function Slide({ children }) {
-  return <div className="h-full border border-line bg-surface p-8">{children}</div>;
+// `fill` makes the slide a flex column so a trailing element can claim the
+// leftover space with mt-auto. Slides stretch to the height of the tallest, so
+// the gap under a short slide varies; a fixed margin cannot track it. Opt-in,
+// because turning every slide into a flex container is a layout change the other
+// eight do not need.
+function Slide({ children, fill = false }) {
+  return (
+    <div className={`h-full border border-line bg-surface p-8 ${fill ? 'flex flex-col' : ''}`}>
+      {children}
+    </div>
+  );
 }
 
 // Header block with a full-width hairline rule beneath (editorial, symmetric).
@@ -108,13 +123,14 @@ function Node({ tone, icon, label, sub }) {
         {icon}
       </div>
       <div className="mt-2 text-sm font-semibold text-ink">{label}</div>
-      <div className="text-[11px] text-muted">{sub}</div>
+      <div className="text-[0.7rem] text-muted">{sub}</div>
     </div>
   );
 }
 
-// The "FAIR-published + docs -> AI-ready" node diagram. Shared by the overview
-// slide and reused as a reminder on the "Three steps" slide.
+// The "FAIR-published + docs -> AI-ready" node diagram, on the overview slide.
+// "Three steps" used to reuse it; it now carries DocumentationInputs, which
+// says something the numbered steps do not.
 function ReadinessDiagram({ className = '' }) {
   return (
     <div className={`border-t border-line pt-6 ${className}`}>
@@ -129,6 +145,17 @@ function ReadinessDiagram({ className = '' }) {
         <span className="shrink-0 text-2xl leading-none text-accent" aria-hidden="true">→</span>
         <Node tone="ready" icon="✓" label="AI-ready" sub="reusable by people & pipelines" />
       </div>
+    </div>
+  );
+}
+
+// Cue pointing at the lifecycle selector below the carousel. Must sit on the
+// LAST slide, since that is the one adjacent to the selector.
+function StartHereCue() {
+  return (
+    <div className="mt-auto flex flex-col items-center pt-12 text-accent">
+      <span className="text-base font-semibold uppercase tracking-wider">Start here</span>
+      <span className="mt-3 animate-bounce text-7xl leading-none" aria-hidden="true">↓</span>
     </div>
   );
 }
@@ -217,7 +244,7 @@ export default function StartingPoint() {
                   {LEVELS.map((l) => (
                     <th key={l.id} className="border border-line bg-surface-2 p-2 text-ink">
                       <div className="font-semibold">{l.id} · {l.name}</div>
-                      <div className="text-[10px] font-normal text-faint">DRL Band {l.drl_band}</div>
+                      <div className="text-[0.65rem] font-normal text-faint">DRL Band {l.drl_band}</div>
                     </th>
                   ))}
                 </tr>
@@ -245,13 +272,13 @@ export default function StartingPoint() {
               <div key={l.id} className="border border-line bg-surface-2 p-3">
                 <div className="flex items-baseline justify-between border-b border-line pb-1">
                   <span className="text-sm font-semibold text-ink">{l.id} · {l.name}</span>
-                  <span className="text-[10px] text-faint">DRL Band {l.drl_band}</span>
+                  <span className="text-[0.65rem] text-faint">DRL Band {l.drl_band}</span>
                 </div>
                 <dl className="mt-2 grid gap-1.5">
                   {DIMENSIONS.map(([name]) => (
                     <div key={name}>
-                      <dt className="text-[11px] font-semibold text-ink">{name}</dt>
-                      <dd className="text-[11px] text-muted">{LEVEL_CELLS[name][l.id]}</dd>
+                      <dt className="text-[0.7rem] font-semibold text-ink">{name}</dt>
+                      <dd className="text-[0.7rem] text-muted">{LEVEL_CELLS[name][l.id]}</dd>
                     </div>
                   ))}
                 </dl>
@@ -259,13 +286,82 @@ export default function StartingPoint() {
             ))}
           </div>
 
-          <p className="mt-3 text-[11px] text-muted">
+          <p className="mt-3 text-[0.7rem] text-muted">
             Adapted from the AI-readiness assessment matrix in{' '}
             <span className="text-ink">{THIS_WORK.authors}</span> ({THIS_WORK.year}).
           </p>
         </Slide>
 
         {/* How it works */}
+        {/* How the raw observation becomes those layers: the shape of the path */}
+        <Slide>
+          <SlideHead eyebrow="How to get there" title="From notes to machine-actionable" />
+          <p className="mt-4 text-sm text-muted">
+            The documentation layers are the last of four forms an experimental record passes
+            through, starting at the bench or the job script. The obligation to adopt a standard
+            strengthens at every step.
+          </p>
+
+          <LadderStrip className="mt-5" />
+          <AutomationNote className="mt-4" />
+
+          <p className="mt-4 text-xs text-muted">
+            Each form is cheap to produce while standing on the one before it. Retrofitting the one
+            above, after the run is over, is where the cost lands. Metadata as the wh-questions:{' '}
+            <a href="https://doi.org/10.1038/s41597-023-02501-8" target="_blank" rel="noreferrer" className="text-link underline">
+              Ghiringhelli et al., 2023
+            </a>
+            .
+          </p>
+        </Slide>
+
+        {/* The first two forms: still read by a person */}
+        <Slide>
+          <SlideHead eyebrow="How to get there" title="Forms a person reads" />
+          <p className="mt-4 text-sm text-muted">
+            One XRD observation carried up the ladder. In the first two forms the record is written
+            for a human, and a human is what it takes to get a value back out.
+          </p>
+
+          <LadderDetail className="mt-5" slice={[0, 2]} />
+        </Slide>
+
+        {/* The last two forms: read by a parser, then by a tool */}
+        <Slide>
+          <SlideHead eyebrow="How to get there" title="Forms a machine reads" />
+          <p className="mt-4 text-sm text-muted">
+            The same observation once it is structured, and again once its terms are bound to shared
+            vocabularies. A parser can consume the third form; a tool can act on the fourth.
+          </p>
+
+          <LadderDetail className="mt-5" slice={[2, 4]} />
+
+          <p className="mt-4 text-xs text-muted">
+            <Link to="/guide" className="text-link underline">Open the collection guide</Link> for the
+            full worksheet of what to record, grouped by the stage at which it is still capturable.
+          </p>
+        </Slide>
+
+        {/* What to capture, and where each answer lands */}
+        <Slide>
+          <SlideHead eyebrow="Before you have data" title="What to write down while you work" />
+          <p className="mt-4 text-sm text-muted">
+            Six questions cover almost everything the assessment will ask for later. Each answer
+            lands in a different artifact — which is why the tool produces more than one.
+          </p>
+          <WhQuestions className="mt-4" />
+          <p className="mt-3 text-xs text-muted">
+            Captured while the run happens, this record is a flight recorder. Reconstructed
+            afterwards it is a witness statement, and at high throughput, where nobody is taking
+            notes, not even that. The{' '}
+            <Link to="/guide" className="text-link underline">collection guide</Link> lists every
+            observation this assessment will ask for, grouped by when it is still capturable:{' '}
+            <a href="https://doi.org/10.1038/s41597-020-00638-4" target="_blank" rel="noreferrer" className="text-link underline">
+              Huber et al., 2020
+            </a>
+            .
+          </p>
+        </Slide>
         <Slide>
           <SlideHead eyebrow="How it works" title="Three steps" />
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
@@ -278,14 +374,11 @@ export default function StartingPoint() {
             ))}
           </div>
 
-          <ReadinessDiagram className="mt-8" />
-          <p className="mt-3 text-center text-xs text-muted">
-            The three steps take a FAIR-published dataset and make it AI-ready.
-          </p>
+          <DocumentationInputs className="mt-8 border-t border-line pt-6" />
         </Slide>
 
-        {/* Documentation layers */}
-        <Slide>
+        {/* Documentation layers — last slide, so it carries the Start here cue */}
+        <Slide fill>
           <SlideHead eyebrow="What you'll produce" title="The documentation layers" />
           <p className="mt-4 text-sm text-muted">
             Three machine-readable layers compose into an AI-ready dataset. Each answers a different
@@ -296,7 +389,7 @@ export default function StartingPoint() {
               <div key={name} className="flex items-center justify-between gap-3 border border-line bg-surface-2 p-3">
                 <div>
                   <div className="text-sm font-semibold text-ink">{name}</div>
-                  <div className="text-[11px] text-muted">{fmt}</div>
+                  <div className="text-[0.7rem] text-muted">{fmt}</div>
                 </div>
                 <div className="max-w-[46%] text-right text-xs italic text-muted">{q}</div>
               </div>
@@ -312,17 +405,12 @@ export default function StartingPoint() {
             ).
           </p>
 
-          {/* Arrow cueing the required starting-point selector below the carousel. */}
-          <div className="mt-20 flex flex-col items-center text-accent">
-            <span className="text-base font-semibold uppercase tracking-wider">Start here</span>
-            <span className="mt-3 animate-bounce text-7xl leading-none" aria-hidden="true">↓</span>
-          </div>
+          <StartHereCue />
         </Slide>
       </Carousel>
 
       <p className="mt-4 text-center text-xs text-muted">
         Prefer to see it filled in? <Link to="/examples" className="text-link underline">Load a worked example</Link>.
-        {' '}Or <ImportAssessment className="text-link underline">import a saved assessment</ImportAssessment>.
       </p>
 
       {/* Starting point, required (editorial: eyebrow + rule, not a highlight box) */}

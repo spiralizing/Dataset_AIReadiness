@@ -5,7 +5,11 @@
 //   Author (Year). Title [Manuscript in preparation]. Publisher.
 
 export const THIS_WORK = {
-  authors: 'González-Espinoza, A.',
+  authors: 'González-Espinoza, A. et al.',
+  // Short form for the one-line attribution in generated files. Held explicitly
+  // rather than derived from `authors`, which used to be split on the comma and
+  // would now drop the "et al.".
+  authorsShort: 'González-Espinoza et al.',
   year: 2026,
   title:
     'AI-readiness assessment for research data in academic environments: A review and tiered framework',
@@ -27,6 +31,5 @@ export function citeThisWorkMarkdown(w = THIS_WORK) {
 // One-line short citation — for the exported files (datasheet, to-do, reports),
 // where a compact attribution is wanted rather than the full reference.
 export function citeThisWorkShort(w = THIS_WORK) {
-  const last = w.authors.split(',')[0].trim();
-  return `${last} (${w.year}), ${w.shortTitle} (preprint).`;
+  return `${w.authorsShort} (${w.year}), ${w.shortTitle} (preprint).`;
 }
