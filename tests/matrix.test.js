@@ -251,6 +251,35 @@ test('every references[] citation key resolves in references.json', () => {
   }
 });
 
+test('reference numbering is contiguous and mirrors the paper bibliography', () => {
+  // The References page sorts on `ref`, and the rendered <ol> markers only agree
+  // with the paper's bracketed numbers while these are 1..N with no gaps. They
+  // silently drifted once when a section was inserted into the manuscript and
+  // every entry after it shifted by one, so the invariant is asserted here.
+  const entries = Object.entries(references.citations);
+  const numbered = entries.filter(([, c]) => c.ref !== undefined);
+  const refs = numbered.map(([, c]) => c.ref).sort((a, b) => a - b);
+
+  assert.deepEqual(
+    refs,
+    refs.map((_, i) => i + 1),
+    `reference numbers are not contiguous 1..${refs.length}: ${refs.join(', ')}`,
+  );
+
+  // An entry is in the paper's bibliography (has a `ref`) or is cited only by a
+  // sub-domain overlay (has a `source` tag) — never both, never neither.
+  for (const [key, c] of entries) {
+    const hasRef = c.ref !== undefined;
+    const hasSource = c.source !== undefined;
+    assert.ok(
+      hasRef !== hasSource,
+      `${key} must carry either a 'ref' (in the paper's bibliography) or a 'source' tag (outside it), not ${
+        hasRef ? 'both' : 'neither'
+      }`,
+    );
+  }
+});
+
 test('every criterion has a non-empty label and remediation', () => {
   for (const c of matrix.criteria) {
     assert.ok(typeof c.label === 'string' && c.label.length > 0, `${c.id} missing label`);

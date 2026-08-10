@@ -1,6 +1,6 @@
 {
   "$comment": "Pathway definitions for the audience selector. Three pathways A/B/C aligned to L1/L2/L3 with cumulative semantics: B requires every L1 + L2 criterion in matrix.json; C requires every L1 + L2 + L3 criterion. Pathway C has six sub-domains; each may add criteria at L3 via 'overlay'. Overlay entries declare their own 'dimension', so a sub-domain is not restricted to Ethics: the biomedical sub-domains overlay Ethics only, while 'materials' also overlays FAIRness, Provenance, and Characterization, where the discipline-specific documentation practice actually lives. Overlays are additive — nothing in matrix.json is removed or relaxed by a sub-domain. Renamed from 'ethics_overlay' in 0.2.0.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "pathways": [
     {
       "id": "A",
@@ -50,7 +50,7 @@
         {
           "id": "general",
           "name": "General",
-          "description": "Standard L3 ethics evidence as written in Table 11. Default datasheet template with an ethics-evidence section.",
+          "description": "Standard L3 ethics evidence as written in the assessment matrix. Default datasheet template with an ethics-evidence section.",
           "deposition_targets_vocabulary": "repositories_l3_general",
           "template": "datasheet",
           "overlay": []

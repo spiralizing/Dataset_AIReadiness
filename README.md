@@ -1,6 +1,6 @@
 # AI-Readiness Assessment & Documentation builder
 
-An interactive, browser-based tool that helps researchers assess whether their datasets are ready for publication, community sharing, or AI/ML training. The app implements the tiered assessment framework from *A practical AI-readiness assessment for Research Data* (González-Espinoza et al., 2026), combining the seven pre-model dimensions of the Bridge2AI Standards Working Group, the Data Readiness Levels of Lawrence, and the FAIR Maturity Indicators.
+An interactive, browser-based tool that helps researchers assess whether their datasets are ready for publication, community sharing, or AI/ML training. The app implements the tiered assessment framework from *A framework for assessing and documenting research data for machine learning reuse* (González-Espinoza et al., 2026), combining the seven pre-model dimensions of the Bridge2AI Standards Working Group, the Data Readiness Levels of Lawrence, and the FAIR Maturity Indicators.
 
 🔗 **Live app:** https://spiralizing.github.io/Dataset_AIReadiness/
 
@@ -241,13 +241,11 @@ The app's References page renders this list from `src/schema/references.json`, w
 
 ### Materials science sub-domain
 
-The Materials science overlay cites sources outside the framework paper's bibliography. They are held in the same registry (`src/schema/references.json`, marked `source: "materials-guidance"`) and render after the numbered list on the app's References page.
+Most of the sources the Materials science overlay cites are now in the framework paper's bibliography and carry its reference number in the registry (Ghiringhelli et al. 2023 and Huber et al. 2020 among them). Five are cited only by the overlay and not by the paper. They are held in the same registry (`src/schema/references.json`, marked `source: "materials-guidance"` and carrying no `ref`) and render after the numbered list on the app's References page.
 
-- Ghiringhelli, L. M. et al. (2023). *Shared metadata for data-centric materials science.* Scientific Data 10: 626. doi:10.1038/s41597-023-02501-8
 - Hall, S. R., Allen, F. H., & Brown, I. D. (1991). *The crystallographic information file (CIF): a new standard archive file for crystallography.* Acta Crystallographica A47(6): 655–685. doi:10.1107/S010876739101067X
 - Andersen, C. W. et al. (2021). *OPTIMADE, an API for exchanging materials data.* Scientific Data 8: 217. doi:10.1038/s41597-021-00974-z
 - European Materials Modelling Council (2021). *EMMO — Elementary Multiperspective Material Ontology.* https://emmo-repo.github.io/
-- Huber, S. P. et al. (2020). *AiiDA 1.0, a scalable computational infrastructure for automated reproducible workflows and data provenance.* Scientific Data 7: 300. doi:10.1038/s41597-020-00638-4
 - Pizzi, G., Cepellotti, A., Sabatini, R., Marzari, N., & Kozinsky, B. (2016). *AiiDA: automated interactive infrastructure and database for computational science.* Computational Materials Science 111: 218–230. doi:10.1016/j.commatsci.2015.09.013
 - Ó Carragáin, E., Goble, C., Sefton, P., & Soiland-Reyes, S. (2019). *A lightweight approach to research object data packaging (RO-Crate).* BOSC 2019, ISMB/ECCB. doi:10.5281/zenodo.3250687
 
@@ -263,8 +261,8 @@ Cite the **software** when you use the app to produce artifacts you ship or publ
 
 ```bibtex
 @misc{gonzalez2026airready,
-  title  = {A practical AI-readiness assessment for Research Data:
-            A review and tiered framework},
+  title  = {A framework for assessing and documenting research data
+            for machine learning reuse},
   author = {González-Espinoza, Alfredo and others},
   year   = {2026},
   institution = {Carnegie Mellon University, University Libraries}

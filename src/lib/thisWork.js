@@ -12,8 +12,8 @@ export const THIS_WORK = {
   authorsShort: 'González-Espinoza et al.',
   year: 2026,
   title:
-    'AI-readiness assessment for research data in academic environments: A review and tiered framework',
-  shortTitle: 'AI-readiness assessment for research data',
+    'A framework for assessing and documenting research data for machine learning reuse',
+  shortTitle: 'Assessing and documenting research data for machine learning reuse',
   note: 'Manuscript in preparation',
   publisher: 'Carnegie Mellon University Libraries',
 };

@@ -1,6 +1,6 @@
 {
-  "$comment": "AI-readiness assessment matrix derived from Table 11 of González-Espinoza et al. (2026). 7 Bridge2AI dimensions × 3 readiness levels (L1/L2/L3 ↔ DRL bands C/B/A). Cumulative semantics: Pathway A requires every L1 criterion; Pathway B requires every L1 + L2; Pathway C requires every L1 + L2 + L3. The Croissant descriptor lives at L2 but is marked recommended at L1 to keep upgrades frictionless. Pathway C sub-domain overlays live in pathways.json, not here — they may target any dimension, and a sub-domain may also reword a criterion below via 'label_overrides' (wording only; id, evidence_type, and pathway membership are never changed). All five schema files move in lockstep from 0.3.0; 1.0.0 is cut when the criterion ids are considered stable.",
-  "version": "0.3.0",
+  "$comment": "AI-readiness assessment matrix derived from the assessment matrix of González-Espinoza et al. (2026) — Table 13 (tab:assessment-matrix) in the current draft. Pointers into the paper are given as LaTeX labels with the number of the current draft, because float numbers move whenever a section is inserted; the label does not. 7 Bridge2AI dimensions × 3 readiness levels (L1/L2/L3 ↔ DRL bands C/B/A). Cumulative semantics: Pathway A requires every L1 criterion; Pathway B requires every L1 + L2; Pathway C requires every L1 + L2 + L3. Each matrix cell expands to one to five independently checkable criteria, so the criterion count is larger than the 21 cells. The Croissant descriptor lives at L2 but is marked recommended at L1 to keep upgrades frictionless. Pathway C sub-domain overlays live in pathways.json, not here — they may target any dimension, and a sub-domain may also reword a criterion below via 'label_overrides' (wording only; id, evidence_type, and pathway membership are never changed). All six schema files move in lockstep from 0.4.0; 1.0.0 is cut when the criterion ids are considered stable.",
+  "version": "0.4.0",
   "dimensions": [
     "FAIRness",
     "Provenance",
@@ -99,8 +99,8 @@
       "verification": "manual",
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
-      "references": ["Wilkinson2016", "Blatter2022"],
-      "remediation": "Map clinical fields to LOINC/SNOMED, units to UCUM, climate vars to CF, etc. Document the mapping in the Croissant descriptor."
+      "references": ["Wilkinson2016", "Blatter2022", "Sansone2019"],
+      "remediation": "Map clinical fields to LOINC/SNOMED, units to UCUM, climate vars to CF, etc. Document the mapping in the Croissant descriptor. Where the right vocabulary for your field is not obvious, look it up in FAIRsharing, the DCC Disciplinary Metadata Catalogue, or the RDA Metadata Standards Catalog rather than inventing terms."
     },
     {
       "id": "fairness.l2.cross_dataset_links",
@@ -212,9 +212,9 @@
       "verification": "automated",
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
-      "references": ["W3CPROVO2013", "Clark2026"],
+      "references": ["W3CPROVO2013", "Knublauch2017", "Clark2026"],
       "collection_hint": "Keep the run log the record is built from: for every processing step, its inputs, its outputs, and when it ran.",
-      "remediation": "Use the in-app PROV-O generator for short pipelines, or export from CWL / Snakemake / Nextflow / Galaxy for long ones."
+      "remediation": "Use the in-app PROV-O generator for short pipelines, or export from CWL / Snakemake / Nextflow / Galaxy for long ones. The record is an RDF graph, so it is checked with SHACL shape constraints, not just parsed."
     },
     {
       "id": "provenance.l3.entity_per_variable",
@@ -246,7 +246,7 @@
       "id": "provenance.l3.agents_with_roles",
       "dimension": "Provenance",
       "level": "L3",
-      "label": "Agents declared with CRediT-style roles drawn from Table 12",
+      "label": "Agents declared with CRediT-style stakeholder roles",
       "evidence_type": "controlled_vocabulary",
       "vocabulary_key": "stakeholder_roles",
       "verification": "automated",
@@ -543,7 +543,7 @@
       "required_in_pathways": ["C"],
       "references": ["Mitchell2019", "Ravi2022", "Clark2026"],
       "collection_hint": "If a model will be trained on this data, note where its model card will live.",
-      "remediation": "Triangular linkage from Figure 8: dataset DOI ↔ model DOI/HF ID ↔ results DOI. Link bidirectionally so each artefact resolves to the others."
+      "remediation": "Triangular linkage: dataset DOI ↔ model DOI/HF ID ↔ results DOI. Link bidirectionally so each artefact resolves to the others."
     },
     {
       "id": "sustainability.l1.open_format",

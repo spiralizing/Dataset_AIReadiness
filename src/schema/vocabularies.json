@@ -1,10 +1,10 @@
 {
-  "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 3, 5, 7, 12 of González-Espinoza et al. (2026); the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
-  "version": "0.3.0",
+  "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 4, 7, 9, 11, and 14 of González-Espinoza et al. (2026); each 'source' below names the table number in the current draft together with its LaTeX label, because float numbers move whenever a section is inserted and the label does not; the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
+  "version": "0.4.0",
   "vocabularies": {
     "licenses": {
       "label": "License",
-      "source": "Section 2.5, paper",
+      "source": "Table 4 (tab:release-components), paper §2.6",
       "values": [
         { "id": "CC-BY-4.0", "label": "Creative Commons Attribution 4.0", "url": "https://creativecommons.org/licenses/by/4.0/" },
         { "id": "CC-BY-SA-4.0", "label": "Creative Commons Attribution-ShareAlike 4.0", "url": "https://creativecommons.org/licenses/by-sa/4.0/" },
@@ -18,7 +18,7 @@
     },
     "formats_tabular": {
       "label": "Tabular formats",
-      "source": "Table 5, paper",
+      "source": "Table 7 (tab:ml-formats), paper",
       "$comment": "'mime' and 'ext' seed the Croissant descriptor's encodingFormat and the template file name. Not every scientific format has an IANA-registered media type — 'text/csv' and 'text/tab-separated-values' are registered, the vendor and 'x-' types are conventional. Treat these as suggestions the user can override.",
       "values": [
         { "id": "Parquet", "label": "Apache Parquet (columnar, compressed, typed)", "mime": "application/vnd.apache.parquet", "ext": "parquet" },
@@ -29,7 +29,7 @@
     },
     "formats_array": {
       "label": "Multidimensional / scientific-array formats",
-      "source": "Table 5, paper",
+      "source": "Table 7 (tab:ml-formats), paper",
       "values": [
         { "id": "HDF5", "label": "HDF5", "mime": "application/x-hdf5", "ext": "h5" },
         { "id": "NetCDF", "label": "NetCDF", "mime": "application/x-netcdf", "ext": "nc" },
@@ -39,7 +39,7 @@
     },
     "formats_imaging": {
       "label": "Imaging / volumetric formats",
-      "source": "Table 5, paper",
+      "source": "Table 7 (tab:ml-formats), paper",
       "values": [
         { "id": "DICOM", "label": "DICOM", "mime": "application/dicom", "ext": "dcm" },
         { "id": "NIfTI", "label": "NIfTI", "mime": "application/x-nifti", "ext": "nii.gz" },
@@ -48,7 +48,7 @@
     },
     "formats_clinical": {
       "label": "Laboratory / clinical controlled vocabularies",
-      "source": "Table 5, paper",
+      "source": "Table 7 (tab:ml-formats), paper",
       "values": [
         { "id": "LOINC", "label": "LOINC (lab observations)" },
         { "id": "SNOMED-CT", "label": "SNOMED CT (clinical terminology)" },
@@ -59,7 +59,7 @@
     },
     "formats_other": {
       "label": "Other formats",
-      "source": "Table 5, paper",
+      "source": "Table 7 (tab:ml-formats), paper",
       "values": [
         { "id": "JSONL", "label": "JSONL (text / records)", "mime": "application/jsonl", "ext": "jsonl" },
         { "id": "WAV", "label": "WAV (audio)", "mime": "audio/wav", "ext": "wav" },
@@ -69,7 +69,7 @@
     },
     "repositories_l1": {
       "label": "L1 / Pathway A repositories",
-      "source": "Table 3 + Table 11, paper",
+      "source": "Table 4 (tab:release-components) + Table 13 (tab:assessment-matrix), paper",
       "values": [
         { "id": "Figshare", "label": "Figshare" },
         { "id": "Zenodo", "label": "Zenodo" },
@@ -81,7 +81,7 @@
     },
     "repositories_l2": {
       "label": "L2 / Pathway B repositories",
-      "source": "Table 3 + Table 11, paper",
+      "source": "Table 4 (tab:release-components) + Table 13 (tab:assessment-matrix), paper",
       "values": [
         { "id": "HuggingFace", "label": "Hugging Face Datasets" },
         { "id": "Kaggle", "label": "Kaggle" },
@@ -93,7 +93,7 @@
     },
     "repositories_l3_general": {
       "label": "L3 / Pathway C generic repositories",
-      "source": "Table 3 + paper Section 2.5",
+      "source": "Table 4 (tab:release-components), paper §2.6",
       "values": [
         { "id": "PhysioNet", "label": "PhysioNet" },
         { "id": "NIHDataCommons", "label": "NIH Data Commons" },
@@ -177,7 +177,7 @@
     },
     "consent_basis": {
       "label": "Consent basis",
-      "source": "Table 7, paper",
+      "source": "Table 9 (tab:ethics-requirements), paper",
       "values": [
         { "id": "documented_collection", "label": "Documented collection consent" },
         { "id": "documented_secondary_use", "label": "Documented consent covering secondary use" },
@@ -190,7 +190,7 @@
     },
     "de_id_methods": {
       "label": "De-identification methods",
-      "source": "Table 7 + paper Sections 4.3 / 6.4",
+      "source": "Table 9 (tab:ethics-requirements), paper §§4.3, 6.4",
       "values": [
         { "id": "HIPAA-Safe-Harbor", "label": "HIPAA Safe Harbor" },
         { "id": "HIPAA-Expert-Determination", "label": "HIPAA Expert Determination" },
@@ -204,7 +204,7 @@
     },
     "access_governance": {
       "label": "Access governance tier",
-      "source": "Table 7, paper",
+      "source": "Table 9 (tab:ethics-requirements), paper",
       "values": [
         { "id": "open", "label": "Open access" },
         { "id": "registered", "label": "Registered (account-gated, no review)" },
@@ -215,7 +215,7 @@
     },
     "ethics_oversight": {
       "label": "Ethics oversight",
-      "source": "Table 7, paper",
+      "source": "Table 9 (tab:ethics-requirements), paper",
       "values": [
         { "id": "IRB-approved", "label": "IRB approved" },
         { "id": "IRB-exempt", "label": "IRB exempt" },
@@ -226,7 +226,7 @@
     },
     "stakeholder_roles": {
       "label": "Stakeholder roles (CRediT-style)",
-      "source": "Table 12, paper",
+      "source": "Table 14 (tab:stakeholder-roles), paper",
       "values": [
         { "id": "data_steward", "label": "Data steward — FAIRness, Computability" },
         { "id": "domain_expert", "label": "Domain expert — Characterization, Ethics" },
@@ -237,7 +237,7 @@
     },
     "data_centric_interventions": {
       "label": "Data-centric green-AI interventions",
-      "source": "Table 9, paper",
+      "source": "Table 11 (tab:green-ai-interventions), paper",
       "values": [
         { "id": "curation", "label": "Curation (remove low-signal records)" },
         { "id": "distillation", "label": "Distillation (compress while preserving coverage)" },

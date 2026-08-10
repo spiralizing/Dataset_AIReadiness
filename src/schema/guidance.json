@@ -1,6 +1,6 @@
 {
   "$comment": "Standing guidance content for the collection guide and the intro cards: the notes-to-actionable ladder, the wh-questions crosswalk, the per-run log template, worked ontology examples, and the burden-reduction landscape. Held here rather than inline in components so the cards on the start page and the generated guide cannot drift apart. Prose, not criteria — nothing here affects a verdict. Citation keys in any 'references' array resolve in references.json, the same registry the matrix uses; matrix.test.js enforces it.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "ladder": [
     {
       "rung": "Paper notebook",
