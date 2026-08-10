@@ -430,3 +430,23 @@ test('every schema file carries the same version (they move in lockstep)', () =>
   assert.equal(new Set(versions).size, 1, `schema versions have diverged: ${versions.join(', ')}`);
   assert.match(versions[0], /^\d+\.\d+\.\d+$/);
 });
+
+test('every citation key in guidance.json resolves in references.json', () => {
+  // The guide cites the same registry the matrix does, so a key cannot go stale
+  // in one and survive in the other.
+  const known = new Set(Object.keys(references.citations));
+  const check = (keys, where) => {
+    for (const k of keys ?? []) assert.ok(known.has(k), `${where} cites unknown reference ${k}`);
+  };
+  check(guidanceDoc.ladder_references, 'ladder');
+  check(guidanceDoc.automation.references, 'automation');
+  check(guidanceDoc.wh_questions_references, 'wh_questions');
+  check(guidanceDoc.documentation_inputs.references, 'documentation_inputs');
+  check(guidanceDoc.ontology_examples_references, 'ontology_examples');
+  for (const b of guidanceDoc.burden_reduction) check(b.references, `burden "${b.title}"`);
+
+  // The claims that name specific tools must be attributed; only the two that
+  // describe a practice rather than a published system may go uncited.
+  const uncited = guidanceDoc.burden_reduction.filter((b) => (b.references ?? []).length === 0);
+  assert.ok(uncited.length <= 2, `too many uncited burden items: ${uncited.map((b) => b.title).join(', ')}`);
+});

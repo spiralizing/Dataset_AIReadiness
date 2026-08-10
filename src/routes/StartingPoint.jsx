@@ -80,10 +80,10 @@ const LEVEL_CELLS = {
   },
 };
 
-const Eyebrow = ({ children, accent }) => (
-  <span
-    className={`text-[0.7rem] font-semibold uppercase tracking-wider ${accent ? 'text-accent' : 'text-faint'}`}
-  >
+// Only the selector below the carousel uses this now; the muted variant went
+// with the slide eyebrows.
+const Eyebrow = ({ children }) => (
+  <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-accent">
     {children}
   </span>
 );
@@ -102,11 +102,12 @@ function Slide({ children, fill = false }) {
 }
 
 // Header block with a full-width hairline rule beneath (editorial, symmetric).
-function SlideHead({ eyebrow, title }) {
+// Title only: the eyebrows above these headings restated what the title already
+// said, and eight of them in a row read as chrome rather than orientation.
+function SlideHead({ title }) {
   return (
     <div className="border-b border-line pb-3">
-      <Eyebrow>{eyebrow}</Eyebrow>
-      <h2 className="mt-1 text-xl font-semibold text-ink">{title}</h2>
+      <h2 className="text-xl font-semibold text-ink">{title}</h2>
     </div>
   );
 }
@@ -178,8 +179,7 @@ export default function StartingPoint() {
       <Carousel label="About this tool">
         {/* Overview — full-width text, diagram below a rule */}
         <Slide>
-          <Eyebrow>What this tool is for</Eyebrow>
-          <h1 className="mt-2 text-3xl font-bold leading-tight tracking-tight text-ink text-balance">
+          <h1 className="text-3xl font-bold leading-tight tracking-tight text-ink text-balance">
             Make a dataset AI-ready: plan it, prepare it, or upgrade it
           </h1>
           <p className="mt-4 text-base leading-relaxed text-muted">
@@ -204,7 +204,7 @@ export default function StartingPoint() {
 
         {/* Seven dimensions */}
         <Slide>
-          <SlideHead eyebrow="What you'll assess" title="The seven dimensions" />
+          <SlideHead title="The seven dimensions" />
           <p className="mt-4 text-xs text-muted">
             Dimensions from Bridge2AI (
             <a href="https://doi.org/10.1101/2024.10.23.619844" target="_blank" rel="noreferrer" className="text-link underline">Clark et al., 2026</a>
@@ -226,7 +226,7 @@ export default function StartingPoint() {
 
         {/* Three levels — the assessment matrix (paper §6) */}
         <Slide>
-          <SlideHead eyebrow="How it's graded" title="The three readiness levels" />
+          <SlideHead title="The three readiness levels" />
           <p className="mt-4 text-xs text-muted">
             AI-readiness is graded, not binary. Each dimension progresses through three levels,
             aligned to the Data Readiness Level bands (
@@ -295,7 +295,7 @@ export default function StartingPoint() {
         {/* How it works */}
         {/* How the raw observation becomes those layers: the shape of the path */}
         <Slide>
-          <SlideHead eyebrow="How to get there" title="From notes to machine-actionable" />
+          <SlideHead title="From notes to machine-actionable" />
           <p className="mt-4 text-sm text-muted">
             The documentation layers are the last of four forms an experimental record passes
             through, starting at the bench or the job script. The obligation to adopt a standard
@@ -317,7 +317,7 @@ export default function StartingPoint() {
 
         {/* The first two forms: still read by a person */}
         <Slide>
-          <SlideHead eyebrow="How to get there" title="Forms a person reads" />
+          <SlideHead title="Forms a person reads" />
           <p className="mt-4 text-sm text-muted">
             One XRD observation carried up the ladder. In the first two forms the record is written
             for a human, and a human is what it takes to get a value back out.
@@ -328,7 +328,7 @@ export default function StartingPoint() {
 
         {/* The last two forms: read by a parser, then by a tool */}
         <Slide>
-          <SlideHead eyebrow="How to get there" title="Forms a machine reads" />
+          <SlideHead title="Forms a machine reads" />
           <p className="mt-4 text-sm text-muted">
             The same observation once it is structured, and again once its terms are bound to shared
             vocabularies. A parser can consume the third form; a tool can act on the fourth.
@@ -344,7 +344,7 @@ export default function StartingPoint() {
 
         {/* What to capture, and where each answer lands */}
         <Slide>
-          <SlideHead eyebrow="Before you have data" title="What to write down while you work" />
+          <SlideHead title="What to write down while you work" />
           <p className="mt-4 text-sm text-muted">
             Six questions cover almost everything the assessment will ask for later. Each answer
             lands in a different artifact — which is why the tool produces more than one.
@@ -363,7 +363,7 @@ export default function StartingPoint() {
           </p>
         </Slide>
         <Slide>
-          <SlideHead eyebrow="How it works" title="Three steps" />
+          <SlideHead title="Three steps" />
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
             {STEPS.map(([n, title, body]) => (
               <div key={n} className="border border-line bg-surface-2 p-4">
@@ -379,7 +379,7 @@ export default function StartingPoint() {
 
         {/* Documentation layers — last slide, so it carries the Start here cue */}
         <Slide fill>
-          <SlideHead eyebrow="What you'll produce" title="The documentation layers" />
+          <SlideHead title="The documentation layers" />
           <p className="mt-4 text-sm text-muted">
             Three machine-readable layers compose into an AI-ready dataset. Each answers a different
             question, and none replaces the others.
@@ -416,7 +416,7 @@ export default function StartingPoint() {
       {/* Starting point, required (editorial: eyebrow + rule, not a highlight box) */}
       <div className="mt-6">
         <div className="border-b border-line pb-3">
-          <Eyebrow accent>Start here · required</Eyebrow>
+          <Eyebrow>Start here · required</Eyebrow>
           <h2 className="mt-1 text-2xl font-semibold tracking-tight text-ink">
             Where are you in the dataset lifecycle?
           </h2>

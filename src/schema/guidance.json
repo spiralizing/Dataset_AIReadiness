@@ -1,5 +1,5 @@
 {
-  "$comment": "Standing guidance content for the collection guide and the intro cards: the notes-to-actionable ladder, the wh-questions crosswalk, the per-run log template, worked ontology examples, and the burden-reduction landscape. Held here rather than inline in components so the cards on the start page and the generated guide cannot drift apart. Prose, not criteria — nothing here affects a verdict.",
+  "$comment": "Standing guidance content for the collection guide and the intro cards: the notes-to-actionable ladder, the wh-questions crosswalk, the per-run log template, worked ontology examples, and the burden-reduction landscape. Held here rather than inline in components so the cards on the start page and the generated guide cannot drift apart. Prose, not criteria — nothing here affects a verdict. Citation keys in any 'references' array resolve in references.json, the same registry the matrix uses; matrix.test.js enforces it.",
   "version": "0.3.0",
   "ladder": [
     {
@@ -51,11 +51,19 @@
       "standards": "Constitutive here. A shared vocabulary is what the receiving tool acts on, so a field name that appears in no vocabulary leaves the record readable and inert."
     }
   ],
+  "ladder_references": [
+    "Ghiringhelli2023",
+    "Kanza2017"
+  ],
   "automation": {
     "icon": "⚙️",
     "title": "Semi-automated and automated laboratories",
     "text": "Where an instrument, a sample changer, or a workflow engine writes the record as the run proceeds, the four forms collapse into one. The machine-actionable record is designed before the campaign begins and produced in real time alongside the measurements it describes. At high throughput this is the only workable arrangement, since nobody is taking notes and the graph cannot be reconstructed afterwards.",
-    "examples": "AiiDA · Nextflow with nf-prov · Snakemake · CWLProv · signac · FireWorks / atomate · instrumented sample changers"
+    "examples": "AiiDA · Nextflow with nf-prov · Snakemake · CWLProv · signac · FireWorks / atomate · instrumented sample changers",
+    "references": [
+      "Huber2020",
+      "Pizzi2016"
+    ]
   },
   "wh_questions": [
     {
@@ -88,6 +96,9 @@
       "record": "Settings, parameters, software and versions, and every processing step.",
       "lands": "PROV-O activity · Croissant encodingFormat"
     }
+  ],
+  "wh_questions_references": [
+    "Ghiringhelli2023"
   ],
   "documentation_inputs": {
     "layers": [
@@ -137,7 +148,12 @@
         "EMMO"
       ],
       "note": "Identifiers and vocabularies that turn a field from a string a reader interprets into a value a consumer can resolve. They ground all three layers."
-    }
+    },
+    "references": [
+      "Gebru2021",
+      "Akhtar2024",
+      "W3CPROVO2013"
+    ]
   },
   "levels": {
     "lead": "Every worksheet row is tagged with the readiness level it belongs to. The levels are cumulative, so a row tagged L1 is required at every tier, L2 from Faithful upward, and L3 only for Task-ready. Names and DRL bands come from the assessment matrix; the sentence is what each level is for.",
@@ -181,66 +197,101 @@
       "why": "One observation, four standards, and nothing invented: the disciplinary format carries the physics, the ontology carries the meaning, and Croissant and PROV-O carry the loadability and the lineage."
     }
   ],
+  "ontology_examples_references": [
+    "Ghiringhelli2023",
+    "Blatter2022"
+  ],
   "burden_reduction": [
     {
       "effect": "removes",
       "title": "Let the workflow engine write it",
       "what": "Run the analysis through an engine that records inputs, steps, and outputs as a side effect. The provenance graph is a by-product of running, not a task after it.",
-      "examples": "AiiDA · Nextflow with nf-prov · Snakemake · CWLProv · signac · FireWorks / atomate"
+      "examples": "AiiDA · Nextflow with nf-prov · Snakemake · CWLProv · signac · FireWorks / atomate",
+      "references": [
+        "Huber2020",
+        "Pizzi2016"
+      ]
     },
     {
       "effect": "removes",
       "title": "Use a format that carries its own metadata",
       "what": "Disciplinary containers store acquisition parameters inside the file, so the metadata travels with the data instead of being re-entered somewhere else.",
-      "examples": "NeXus · DICOM · CIF · mzML · FITS"
+      "examples": "NeXus · DICOM · CIF · mzML · FITS",
+      "references": [
+        "Hall1991",
+        "Ghiringhelli2023"
+      ]
     },
     {
       "effect": "removes",
       "title": "Let the repository parse it",
       "what": "Some repositories extract structured metadata directly from raw code output — deposit what the code wrote and the description is derived for you.",
-      "examples": "NOMAD Metainfo parsers"
+      "examples": "NOMAD Metainfo parsers",
+      "references": [
+        "Ghiringhelli2023"
+      ]
     },
     {
       "effect": "reduces",
       "title": "Capture once, at the bench",
       "what": "Instruments rarely export every state variable. An ELN or LIMS is often the only place sample-state metadata exists at all, and it is browser-accessible from wherever the work happens.",
-      "examples": "eLabFTW · RSpace · openBIS · Chemotion · LabArchives · Benchling"
+      "examples": "eLabFTW · RSpace · openBIS · Chemotion · LabArchives · Benchling",
+      "references": [
+        "Kanza2017"
+      ]
     },
     {
       "effect": "reduces",
       "title": "Replace free text with identifiers",
       "what": "Each identifier converts an ambiguous string into something resolvable, deduplicable, and comparable across datasets — at no extra effort over typing the name.",
-      "examples": "ORCID (people) · ROR (institutions) · RRID (reagents, software, instruments) · PIDINST (instruments) · SPDX (licences) · DOI (upstream data)"
+      "examples": "ORCID (people) · ROR (institutions) · RRID (reagents, software, instruments) · PIDINST (instruments) · SPDX (licences) · DOI (upstream data)",
+      "references": [
+        "Stocker2020"
+      ]
     },
     {
       "effect": "reduces",
       "title": "Fill a template, not a blank page",
       "what": "A constrained form with the right fields already named beats free text, for the same reason this tool's builders beat hand-written JSON.",
-      "examples": "CEDAR Workbench (ontology autocompletion) · ISA-Tab / ISA-JSON · LinkML · DataHarmonizer · Frictionless Data Package"
+      "examples": "CEDAR Workbench (ontology autocompletion) · ISA-Tab / ISA-JSON · LinkML · DataHarmonizer · Frictionless Data Package",
+      "references": [
+        "Musen2015",
+        "Sansone2012"
+      ]
     },
     {
       "effect": "reduces",
       "title": "Look terms up instead of inventing them",
       "what": "Before coining a field name or a code, search the vocabularies. A term that already exists comes with a definition, a URI, and everyone who already uses it.",
-      "examples": "EBI OLS · BioPortal · ZOOMA · TIB Terminology Service · EMMO · OPTIMADE · LOINC / SNOMED / UCUM"
+      "examples": "EBI OLS · BioPortal · ZOOMA · TIB Terminology Service · EMMO · OPTIMADE · LOINC / SNOMED / UCUM",
+      "references": [
+        "Ghiringhelli2023"
+      ]
     },
     {
       "effect": "reduces",
       "title": "Package it once",
       "what": "A single container for the data, its metadata, and the run record, so the pieces cannot be separated in transit.",
-      "examples": "RO-Crate · Workflow-Run RO-Crate"
+      "examples": "RO-Crate · Workflow-Run RO-Crate",
+      "references": [
+        "SoilandReyes2022"
+      ]
     },
     {
       "effect": "reduces",
       "title": "Reuse the data management plan",
       "what": "A machine-actionable DMP written at proposal time already contains much of what the deposit will ask for. Written once, read twice.",
-      "examples": "RDA DMP Common Standard · DMPTool · Argos"
+      "examples": "RDA DMP Common Standard · DMPTool · Argos",
+      "references": []
     },
     {
       "effect": "reduces",
       "title": "Have a model structure existing notes",
       "what": "A generative model can turn a pile of free-text notes into draft structured records. It is a probabilistic generator: the same prompt can produce different output, and it can be wrong. Record the model, version, parameters, and the exact prompt, and check every field. That makes the step transparent, not reproducible.",
-      "examples": "Any general-purpose assistant, with the run documented as a method"
+      "examples": "Any general-purpose assistant, with the run documented as a method",
+      "references": [
+        "Mitchell2019"
+      ]
     }
   ]
 }

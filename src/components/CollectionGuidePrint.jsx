@@ -16,7 +16,7 @@
 // tailwind.css rather than in utilities, which is what lets this look like a
 // document instead of a web page.
 
-import { buildCollectionGuide } from '../generators/collectionGuide.js';
+import { buildCollectionGuide, citationHref, citationText } from '../generators/collectionGuide.js';
 import { citeThisWork } from '../lib/thisWork.js';
 
 // Section numbering is positional: the ontology section only appears at L3, so
@@ -30,6 +30,7 @@ const useSections = (g) =>
     { id: 'worksheet', title: 'Worksheet: what to record, and when' },
     g.ontology.applies ? { id: 'ontology', title: 'Binding terms to shared vocabularies' } : null,
     { id: 'burden', title: 'Reducing the burden' },
+    { id: 'sources', title: 'Sources' },
   ]
     .filter(Boolean)
     .map((s, i) => ({ ...s, n: i + 1 }));
@@ -139,6 +140,9 @@ export default function CollectionGuidePrint({ record }) {
           Each form is cheap to produce while standing on the one before it. Retrofitting the one
           above, after the run is over, is where the cost lands.
         </p>
+        <p className="gp-note">
+          Sources: {g.ladderRefs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+        </p>
       </section>
 
       {/* 2 — wh-questions */}
@@ -166,6 +170,9 @@ export default function CollectionGuidePrint({ record }) {
             ))}
           </tbody>
         </table>
+        <p className="gp-note">
+          Sources: {g.whQuestionsRefs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+        </p>
       </section>
 
       {/* 3 — documentation inputs */}
@@ -190,6 +197,9 @@ export default function CollectionGuidePrint({ record }) {
             </dd>
           </div>
         </dl>
+        <p className="gp-note">
+          Sources: {g.documentationInputs.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+        </p>
       </section>
 
       {/* 4 — run log */}
@@ -307,10 +317,29 @@ export default function CollectionGuidePrint({ record }) {
               </dt>
               <dd>
                 {b.what} <span className="gp-note">{b.examples}</span>
+                {b.refs.length > 0 && (
+                  <span className="gp-note">
+                    {' '}
+                    {b.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+                  </span>
+                )}
               </dd>
             </div>
           ))}
         </dl>
+      </section>
+
+      {/* 8 — sources */}
+      <section className="gp-section">
+        <h2>{n('sources')}. Sources</h2>
+        <p>Works cited above, with resolvable identifiers.</p>
+        <ol className="gp-sources">
+          {g.sources.map((c) => (
+            <li key={c.key}>
+              {citationText(c)} {citationHref(c) && <span className="gp-doi">{citationHref(c)}</span>}
+            </li>
+          ))}
+        </ol>
       </section>
 
       <footer className="gp-colophon">

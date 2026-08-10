@@ -201,6 +201,46 @@
       "title": "A lightweight approach to research object data packaging (RO-Crate)",
       "venue": "Bioinformatics Open Source Conference (BOSC), ISMB/ECCB",
       "doi": "10.5281/zenodo.3250687"
+    },
+    "Kanza2017": {
+      "source": "collection-guidance",
+      "authors": "Kanza, S. et al.",
+      "year": 2017,
+      "title": "Electronic lab notebooks: can they replace paper?",
+      "venue": "Journal of Cheminformatics 9:31",
+      "doi": "10.1186/s13321-017-0221-3"
+    },
+    "Stocker2020": {
+      "source": "collection-guidance",
+      "authors": "Stocker, M. et al.",
+      "year": 2020,
+      "title": "Persistent Identification of Instruments",
+      "venue": "Data Science Journal 19:18",
+      "doi": "10.5334/dsj-2020-018"
+    },
+    "Musen2015": {
+      "source": "collection-guidance",
+      "authors": "Musen, M. A. et al.",
+      "year": 2015,
+      "title": "The center for expanded data annotation and retrieval",
+      "venue": "Journal of the American Medical Informatics Association 22(6):1148-1152",
+      "doi": "10.1093/jamia/ocv048"
+    },
+    "Sansone2012": {
+      "source": "collection-guidance",
+      "authors": "Sansone, S.-A. et al.",
+      "year": 2012,
+      "title": "Toward interoperable bioscience data",
+      "venue": "Nature Genetics 44(2):121-126",
+      "doi": "10.1038/ng.1054"
+    },
+    "SoilandReyes2022": {
+      "source": "collection-guidance",
+      "authors": "Soiland-Reyes, S. et al.",
+      "year": 2022,
+      "title": "Packaging research artefacts with RO-Crate",
+      "venue": "Data Science 5(2):97-138",
+      "doi": "10.3233/DS-210053"
     }
   }
 }

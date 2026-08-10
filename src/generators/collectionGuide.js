@@ -23,6 +23,7 @@ import { getStage } from '../lib/stages.js';
 import { validationResults } from '../lib/validation.js';
 import { citeThisWorkShort } from '../lib/thisWork.js';
 import guidance from '../schema/guidance.json';
+import references from '../schema/references.json';
 
 // Which pathways require a given level. A pathway requires every level up to and
 // including its own, so this is derived from the ladder rather than restated:
@@ -39,6 +40,17 @@ const levelLegend = () =>
     meaning: guidance.levels.meaning[l.id],
     requiredIn: pathwaysRequiring(l.id),
   }));
+
+// Citation keys resolve in references.json, the registry the matrix already uses,
+// so the guide cites the same works the assessment does and a key cannot go stale
+// in one place while surviving in the other.
+const resolve = (keys = []) =>
+  keys.map((key) => ({ key, ...references.citations[key] })).filter((c) => c.title);
+
+export const citationHref = (c) => (c.doi ? `https://doi.org/${c.doi}` : (c.url ?? null));
+
+export const citationText = (c) =>
+  `${c.authors} (${c.year ?? 'n.d.'}). ${c.title}. ${c.venue}.`;
 
 // Order the work actually happens in.
 const STAGE_ORDER = ['acquisition', 'curation', 'documentation', 'governance', 'release'];
@@ -122,16 +134,40 @@ export function buildCollectionGuide(record, opts = {}) {
       recorded,
     },
     ladder: guidance.ladder,
-    automation: guidance.automation,
+    ladderRefs: resolve(guidance.ladder_references),
+    automation: { ...guidance.automation, refs: resolve(guidance.automation.references) },
     whQuestions: guidance.wh_questions,
-    documentationInputs: guidance.documentation_inputs,
+    whQuestionsRefs: resolve(guidance.wh_questions_references),
+    documentationInputs: {
+      ...guidance.documentation_inputs,
+      refs: resolve(guidance.documentation_inputs.references),
+    },
     levels: { lead: guidance.levels.lead, rows: levelLegend() },
     runLogFields: guidance.run_log_fields,
     // The ontology section is L3 material: below Pathway C nothing requires a
     // bound vocabulary, so it is offered as background rather than instruction.
-    ontology: { applies: pathway === 'C', examples: guidance.ontology_examples },
-    burden: guidance.burden_reduction,
+    ontology: {
+      applies: pathway === 'C',
+      examples: guidance.ontology_examples,
+      refs: resolve(guidance.ontology_examples_references),
+    },
+    burden: guidance.burden_reduction.map((b) => ({ ...b, refs: resolve(b.references) })),
     groups,
+    // Every work cited anywhere above, once, in registry order so the numbered
+    // framework sources keep their numbering and the guidance additions follow.
+    sources: (() => {
+      const used = new Set([
+        ...guidance.ladder_references,
+        ...guidance.automation.references,
+        ...guidance.wh_questions_references,
+        ...guidance.documentation_inputs.references,
+        ...guidance.ontology_examples_references,
+        ...guidance.burden_reduction.flatMap((b) => b.references ?? []),
+      ]);
+      return Object.keys(references.citations)
+        .filter((k) => used.has(k))
+        .map((key) => ({ key, ...references.citations[key] }));
+    })(),
   };
 }
 
@@ -178,6 +214,8 @@ export function generateCollectionGuide(record, opts = {}) {
   p();
   p('Each form is cheap to produce while standing on the one before it. Retrofitting the one above, after the run is over, is where the cost lands.');
   p();
+  if (g.ladderRefs.length) p(`_Sources: ${g.ladderRefs.map((c) => `${c.authors} (${c.year})`).join('; ')}._`);
+  if (g.ladderRefs.length) p();
 
   p('## The six questions');
   p();
@@ -185,6 +223,10 @@ export function generateCollectionGuide(record, opts = {}) {
   p('|---|---|---|');
   for (const w of g.whQuestions) p(`| **${w.q}** | ${w.record} | ${w.lands} |`);
   p();
+  if (g.whQuestionsRefs.length) {
+    p(`_Sources: ${g.whQuestionsRefs.map((c) => `${c.authors} (${c.year})`).join('; ')}._`);
+    p();
+  }
 
   p('## What builds each layer');
   p();
@@ -260,6 +302,17 @@ export function generateCollectionGuide(record, opts = {}) {
   for (const b of g.burden) {
     p(`- **${b.title}** _(${b.effect} the work)_ — ${b.what}`);
     p(`  - ${b.examples}`);
+    if (b.refs.length) p(`  - _${b.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}_`);
+  }
+  p();
+
+  p('## Sources');
+  p();
+  p('Works cited above, with resolvable identifiers.');
+  p();
+  for (const c of g.sources) {
+    const href = citationHref(c);
+    p(`- ${citationText(c)}${href ? ` <${href}>` : ''}`);
   }
   p();
 

@@ -11,6 +11,7 @@ import {
   generateCollectionGuide,
   whatToRecord,
   hasCollectionHint,
+  citationHref,
 } from '../src/generators/collectionGuide.js';
 import { requiredCriteria, ALL_CRITERIA, subDomainsForC } from '../src/lib/pathway.js';
 
@@ -209,4 +210,26 @@ test('the level legend explains the tags, and derives cumulative membership', ()
   const md = generateCollectionGuide(rec('C', 'materials'), { now: FIXED });
   assert.ok(md.includes('| Level | Name | DRL band | Required in | What it is for |'));
   assert.ok(md.includes('| **L3** | Task-ready | A | C |'));
+});
+
+test('the guide carries its sources, resolved and de-duplicated', () => {
+  const g = buildCollectionGuide(rec('C', 'materials'), { now: FIXED });
+  assert.ok(g.sources.length >= 8, `only ${g.sources.length} sources resolved`);
+  assert.equal(new Set(g.sources.map((c) => c.key)).size, g.sources.length, 'duplicate sources');
+  for (const c of g.sources) {
+    assert.ok(c.authors && c.title && c.venue, `${c.key} is missing citation fields`);
+    assert.ok(citationHref(c), `${c.key} has neither a DOI nor a URL`);
+  }
+  // Every key cited by a section appears in the consolidated list.
+  const keys = new Set(g.sources.map((c) => c.key));
+  for (const c of [...g.ladderRefs, ...g.whQuestionsRefs, ...g.documentationInputs.refs,
+                   ...g.burden.flatMap((b) => b.refs)]) {
+    assert.ok(keys.has(c.key), `${c.key} cited inline but absent from Sources`);
+  }
+
+  const md = generateCollectionGuide(rec('C', 'materials'), { now: FIXED });
+  assert.ok(md.includes('## Sources'));
+  assert.ok(md.includes('Kanza, S. et al. (2017)'), 'ELN source missing');
+  assert.ok(md.includes('https://doi.org/10.3233/DS-210053'), 'RO-Crate DOI missing');
+  assert.ok(md.includes('_Sources: '), 'no inline attribution');
 });

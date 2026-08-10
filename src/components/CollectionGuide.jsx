@@ -11,7 +11,7 @@
 // derived from the schema and the answers, so an edit would be discarded the
 // moment either changed, and there is nothing to validate it against.
 
-import { buildCollectionGuide } from '../generators/collectionGuide.js';
+import { buildCollectionGuide, citationHref, citationText } from '../generators/collectionGuide.js';
 import { LadderStrip, AutomationNote, LadderDetail, WhQuestions, DocumentationInputs } from './guidance.jsx';
 
 const LEVEL_TAG = {
@@ -19,6 +19,17 @@ const LEVEL_TAG = {
   L2: 'bg-info-bg text-info',
   L3: 'bg-warn-bg text-warn',
 };
+
+// Inline attribution under a section, naming the works its claims come from.
+// The full reference for each is in the Sources section at the end.
+function Sources({ refs }) {
+  if (!refs?.length) return null;
+  return (
+    <p className="mt-3 text-xs text-faint">
+      Sources: {refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+    </p>
+  );
+}
 
 function Section({ id, title, lead, children }) {
   return (
@@ -70,6 +81,7 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
           Each form is cheap to produce while standing on the one before it. Retrofitting the one
           above, after the run is over, is where the cost lands.
         </p>
+        <Sources refs={g.ladderRefs} />
       </Section>
 
       <Section
@@ -78,6 +90,7 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
         lead="These cover almost everything the assessment will ask for later. Each answer lands in a different artifact, which is why the tool produces more than one."
       >
         <WhQuestions className="mt-4" />
+        <Sources refs={g.whQuestionsRefs} />
       </Section>
 
       <Section
@@ -86,6 +99,7 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
         lead="The records below are the raw material for the three released artifacts. Most of them already exist somewhere in a project; the work is routing them."
       >
         <DocumentationInputs className="mt-4" />
+        <Sources refs={g.documentationInputs.refs} />
       </Section>
 
       <Section
@@ -205,9 +219,33 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
               </div>
               <p className="mt-1 text-xs text-muted">{b.what}</p>
               <p className="mt-1 font-mono text-[0.65rem] text-faint">{b.examples}</p>
+              {b.refs.length > 0 && (
+                <p className="mt-1 text-[0.65rem] text-faint">
+                  {b.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+                </p>
+              )}
             </div>
           ))}
         </div>
+      </Section>
+
+      <Section
+        id="sources"
+        title="Sources"
+        lead="Works cited above, with resolvable identifiers. They sit in the same registry as the assessment's own references."
+      >
+        <ol className="mt-4 grid list-inside list-decimal gap-2 text-xs text-muted marker:text-faint">
+          {g.sources.map((c) => (
+            <li key={c.key} className="break-inside-avoid">
+              {citationText(c)}{' '}
+              {citationHref(c) && (
+                <a href={citationHref(c)} target="_blank" rel="noreferrer" className="break-all text-link underline">
+                  {citationHref(c)}
+                </a>
+              )}
+            </li>
+          ))}
+        </ol>
       </Section>
     </article>
   );

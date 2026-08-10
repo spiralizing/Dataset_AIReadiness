@@ -226,6 +226,10 @@
 .guide-print .gp-note { font-family: var(--font-sans); font-size: 8pt; color: #444; }
 .guide-print .gp-defs dt .gp-note { margin-left: 0.6em; font-weight: 400; }
 
+.guide-print .gp-sources { font-size: 9pt; padding-left: 1.3em; margin: 0.5em 0; }
+.guide-print .gp-sources li { break-inside: avoid; margin-bottom: 0.35em; max-width: 36em; }
+.guide-print .gp-doi { font-family: var(--font-mono); font-size: 8pt; word-break: break-all; }
+
 .guide-print .gp-colophon { border-top: 0.5pt solid #000; margin-top: 1.6em; padding-top: 0.6em; font-size: 8.5pt; }
 .guide-print .gp-colophon p { margin: 0 0 0.2em; max-width: none; }
 
