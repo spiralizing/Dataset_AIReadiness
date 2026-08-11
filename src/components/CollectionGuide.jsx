@@ -19,6 +19,8 @@ import {
   LadderDetail,
   DegreesStrip,
   VerificationModes,
+  ValidationChecks,
+  Stewardship,
   WhQuestions,
   DocumentationInputs,
 } from './guidance.jsx';
@@ -115,6 +117,24 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
       >
         <VerificationModes className="mt-4" />
         <Sources refs={g.verificationModes.refs} />
+      </Section>
+
+      <Section
+        id="validation"
+        title="Validating before release"
+        lead="The last point at which a defect introduced earlier is still catchable."
+      >
+        <ValidationChecks className="mt-4" />
+        <Sources refs={g.validation.refs} />
+      </Section>
+
+      <Section
+        id="stewardship"
+        title="After release"
+        lead="Deposit is not the end of the obligation. These are the four or five sentences a downstream user needs and rarely gets."
+      >
+        <Stewardship className="mt-4" />
+        <Sources refs={g.stewardship.refs} />
       </Section>
 
       <Section

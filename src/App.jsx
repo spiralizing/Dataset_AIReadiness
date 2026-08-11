@@ -15,6 +15,7 @@ import ExportPage from './routes/Export.jsx';
 import References from './routes/References.jsx';
 import Examples from './routes/Examples.jsx';
 import Guide from './routes/Guide.jsx';
+import Validators from './routes/Validators.jsx';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="references" element={<References />} />
         <Route path="examples" element={<Examples />} />
         <Route path="guide" element={<Guide />} />
+        <Route path="validators" element={<Validators />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

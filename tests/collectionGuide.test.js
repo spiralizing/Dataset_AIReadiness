@@ -15,6 +15,10 @@ import {
   captureKind,
 } from '../src/generators/collectionGuide.js';
 import { requiredCriteria, ALL_CRITERIA, subDomains } from '../src/lib/pathway.js';
+import vocabularies from '../src/schema/vocabularies.json';
+
+// Every overlay criterion across all sub-domains, flattened.
+const subDomainsForCAll = () => subDomains().flatMap((s) => s.overlay ?? []);
 
 const FIXED = '2026-08-07T00:00:00Z';
 const rec = (pathway, subDomain = null, extra = {}) => ({
@@ -250,4 +254,59 @@ test('the guide carries its sources, resolved and de-duplicated', () => {
   assert.ok(md.includes('Kanza, S. et al. (2017)'), 'ELN source missing');
   assert.ok(md.includes('https://doi.org/10.3233/DS-210053'), 'RO-Crate DOI missing');
   assert.ok(md.includes('_Sources: '), 'no inline attribution');
+});
+
+test('the guide carries the validation categories and the post-release obligations', () => {
+  // §2.5 and §2.7 of the paper had no representation in the tool's guidance: the guide
+  // told a researcher what to capture and never what to check before depositing, nor
+  // what release does not end.
+  const md = generateCollectionGuide(rec('C', 'general'), { now: FIXED });
+
+  assert.ok(md.includes('## Validating before release'));
+  for (const category of ['Statistical', 'Structural', 'Domain expert review', 'Bias and fairness', 'Reproducibility']) {
+    assert.ok(md.includes(`### ${category}`), `missing validation category: ${category}`);
+  }
+  // Each category names what settles it, including the one no validator can.
+  assert.ok(md.includes('Great Expectations'), 'statistical tools not named');
+  assert.ok(md.includes('No validator settles this'), 'domain review is not flagged as human-judged');
+  // Validation produces an artifact, and a failure blocks rather than annotates.
+  assert.match(md, /Failures should block the release/);
+
+  assert.ok(md.includes('## After release'));
+  for (const practice of ['Version, and cite the version', 'Deprecate rather than withdraw', 'Publish a route for errata']) {
+    assert.ok(md.includes(practice), `missing stewardship practice: ${practice}`);
+  }
+});
+
+test('every pick-list explains itself, and its values explain themselves', () => {
+  // A user choosing between k-anonymity and differential privacy, or between restricted
+  // and controlled access, was given a bare list of ids.
+  const EXPLAINED = [
+    'consent_basis',
+    'de_id_methods',
+    'access_governance',
+    'data_centric_interventions',
+    'stakeholder_roles',
+  ];
+  for (const key of EXPLAINED) {
+    const v = vocabularies.vocabularies[key];
+    assert.ok(v.guidance?.length > 60, `${key} has no guidance`);
+    for (const value of v.values) {
+      assert.ok(value.note?.length > 40, `${key}/${value.id} has no note`);
+    }
+  }
+});
+
+test('no vocabulary ships unreachable', () => {
+  // Two lists sat in the bundle referenced by nothing: ethics_oversight and
+  // formats_clinical. A vocabulary is reachable through a criterion's `vocabulary_key`,
+  // its `suggested_values`, a pathway's deposition targets, or the app's own modules.
+  const referenced = new Set();
+  for (const c of [...ALL_CRITERIA, ...subDomainsForCAll()]) {
+    if (c.vocabulary_key) referenced.add(c.vocabulary_key);
+    if (c.suggested_values) referenced.add(c.suggested_values);
+  }
+  for (const key of ['ethics_oversight', 'formats_clinical']) {
+    assert.ok(referenced.has(key), `${key} is still unreachable from any criterion`);
+  }
 });

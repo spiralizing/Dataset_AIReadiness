@@ -26,6 +26,8 @@ const useSections = (g) =>
     { id: 'forms', title: 'The four forms of a record' },
     { id: 'degrees', title: 'Degrees of machine-actionability' },
     { id: 'verification', title: 'How each row is confirmed' },
+    { id: 'validation', title: 'Validating before release' },
+    { id: 'stewardship', title: 'After release' },
     { id: 'questions', title: 'The six questions' },
     { id: 'layers', title: 'What builds each documentation layer' },
     { id: 'runlog', title: 'Per-run log' },
@@ -182,6 +184,44 @@ export default function CollectionGuidePrint({ record }) {
         <p>{g.verificationModes.note}</p>
         <p className="gp-note">
           Sources: {g.verificationModes.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+        </p>
+      </section>
+
+      {/* the five validation categories */}
+      <section className="gp-section">
+        <h2>{n('validation')}. Validating before release</h2>
+        <p>{g.validation.lead}</p>
+        <dl className="gp-defs">
+          {g.validation.categories.map((c) => (
+            <div key={c.id}>
+              <dt>{c.name}</dt>
+              <dd>
+                {c.check} <em>{c.tools}</em>
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p>{g.validation.report_note}</p>
+        <p>{g.validation.lookup_note}</p>
+        <p className="gp-note">
+          Sources: {g.validation.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+        </p>
+      </section>
+
+      {/* what release does not end */}
+      <section className="gp-section">
+        <h2>{n('stewardship')}. After release</h2>
+        <p>{g.stewardship.lead}</p>
+        <dl className="gp-defs">
+          {g.stewardship.practices.map((x) => (
+            <div key={x.id}>
+              <dt>{x.name}</dt>
+              <dd>{x.what}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="gp-note">
+          Sources: {g.stewardship.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
         </p>
       </section>
 

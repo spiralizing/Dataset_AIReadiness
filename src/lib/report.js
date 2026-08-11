@@ -14,7 +14,7 @@ import { generateCroissant } from '../generators/croissant.js';
 import { effectiveProvo } from '../generators/provo.js';
 import { validateCroissant } from './croissantValidation.js';
 import { validateProvo } from './provoValidation.js';
-import { artifactDegrees, DEGREES } from './actionability.js';
+import { artifactDegrees, DEGREES, levelSupport } from './actionability.js';
 import { citeThisWorkShort } from './thisWork.js';
 
 // One-line citation of the framework this tool implements, embedded in every
@@ -160,6 +160,11 @@ export function buildConformanceReport(record, opts = {}) {
       degrees: DEGREES,
       croissant: ladder.croissant,
       provo: ladder.provo,
+      // Which L3 claims the artifacts currently support. The level axis and the
+      // artifact axis measure the same property — unattended machine consumption —
+      // so a descriptor short of `grounded` bounds what Computability can claim,
+      // however the criteria are answered.
+      supports: levelSupport(ladder),
     },
     criteria,
     summary: {

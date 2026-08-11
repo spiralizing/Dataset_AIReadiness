@@ -149,6 +149,48 @@ export function VerificationModes({ className = '' }) {
   );
 }
 
+// The five categories of validation check, and what settles each. Placed in the guide
+// because validation is the last stage at which an earlier defect is still catchable —
+// after release it is an erratum and a model somebody already trained.
+export function ValidationChecks({ className = '' }) {
+  const v = guidance.validation;
+  return (
+    <div className={className}>
+      <p className="text-sm text-muted">{v.lead}</p>
+      <div className="mt-3 grid gap-2">
+        {v.categories.map((c) => (
+          <div key={c.id} className={`break-inside-avoid border p-3 ${c.tone}`}>
+            <span className="text-sm font-semibold text-ink">{c.name}</span>
+            <p className="mt-1 text-xs text-muted">{c.check}</p>
+            <p className="mt-1 text-[0.7rem] text-faint">{c.tools}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 border-l-2 border-accent pl-3 text-xs text-muted">{v.report_note}</p>
+      <p className="mt-2 text-xs text-muted">{v.lookup_note}</p>
+    </div>
+  );
+}
+
+// What release does not end. The stewardship layer the paper argues is the actual
+// rate-limiting factor for AI adoption in science.
+export function Stewardship({ className = '' }) {
+  const st = guidance.stewardship;
+  return (
+    <div className={className}>
+      <p className="text-sm text-muted">{st.lead}</p>
+      <dl className="mt-3 grid gap-2">
+        {st.practices.map((x) => (
+          <div key={x.id} className="break-inside-avoid border border-line p-3">
+            <dt className="text-sm font-semibold text-ink">{x.name}</dt>
+            <dd className="mt-1 text-xs text-muted">{x.what}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
 // The six wh-questions and the artifact each answer lands in.
 export function WhQuestions({ className = '' }) {
   return (

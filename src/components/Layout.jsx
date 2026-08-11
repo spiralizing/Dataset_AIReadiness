@@ -137,6 +137,8 @@ export default function Layout() {
             <p className="mt-1">
               <Link to="/examples" className="text-link underline">Examples</Link>
               {' · '}
+              <Link to="/validators" className="text-link underline">Validators</Link>
+              {' · '}
               <Link to="/references" className="text-link underline">References &amp; sources</Link>
             </p>
           </div>

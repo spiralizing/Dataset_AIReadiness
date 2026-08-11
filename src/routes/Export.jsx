@@ -22,7 +22,13 @@ import { validateProvo } from '../lib/provoValidation.js';
 import { validationResults } from '../lib/validation.js';
 import { buildAssessmentReport, buildConformanceReport } from '../lib/report.js';
 import { validateProvoShacl, serializeReport, provoToTurtle } from '../lib/shacl.js';
-import { DEGREES, croissantDegrees, provoDegrees, getDegree } from '../lib/actionability.js';
+import {
+  DEGREES,
+  croissantDegrees,
+  provoDegrees,
+  getDegree,
+  levelSupport,
+} from '../lib/actionability.js';
 import { generateCollectionGuide } from '../generators/collectionGuide.js';
 import { download, guideFilename } from '../lib/download.js';
 import CroissantBuilder from '../components/CroissantBuilder.jsx';
@@ -96,7 +102,7 @@ const DEGREE_TONE = {
 };
 const DEGREE_MARK = { pass: '✓', fail: '×', 'out-of-scope': '–' };
 
-const DegreeLadder = ({ degrees, artifact }) => {
+const DegreeLadder = ({ degrees, artifact, supports }) => {
   const attained = degrees.attained ? getDegree(degrees.attained)?.label : null;
   return (
     <div className="mt-3">
@@ -135,6 +141,22 @@ const DegreeLadder = ({ degrees, artifact }) => {
           </li>
         ))}
       </ul>
+
+      {/* What the rung means for the assessment. The level axis and the artifact axis
+          measure the same property — whether a machine can consume this unattended — so
+          a descriptor short of Grounded bounds what Computability can claim however the
+          criteria are answered. Stating it here is the point of failure. */}
+      {supports?.length > 0 && (
+        <ul className="mt-2 space-y-0.5 border-t border-line pt-2 text-xs">
+          {supports.map((e) => (
+            <li key={`${e.dimension}-${e.level}`} className={e.ok ? 'text-ok' : 'text-warn'}>
+              <span aria-hidden="true">{e.ok ? '✓' : '×'}</span>{' '}
+              <span className="font-medium">{e.dimension} {e.level}</span>{' '}
+              <span className="text-muted">{e.ok ? 'supported' : e.message}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
@@ -194,6 +216,10 @@ export default function ExportPage() {
   const provoLadder = provoDegrees(provoDoc, provoResult, {
     shacl: shacl && !shacl.loading && !shacl.error ? shacl : undefined,
   });
+  // Which L3 claims each artifact currently supports, from the correspondence declared
+  // in guidance.json.
+  const support = levelSupport({ croissant: croissantLadder, provo: provoLadder });
+  const supportFor = (artifact) => support.filter((e) => e.artifact === artifact);
 
   const template = templateForRecord(state);
   const datasheetName = template === 'healthsheet' ? 'healthsheet.md' : 'datasheet.md';
@@ -422,7 +448,7 @@ export default function ExportPage() {
               <CroissantBuilder />
             )}
 
-            <DegreeLadder degrees={croissantLadder} artifact="This descriptor" />
+            <DegreeLadder degrees={croissantLadder} artifact="This descriptor" supports={supportFor('croissant')} />
 
             {/* Validator output — errors, warnings, and what "directly loadable"
                 is still missing. Sits directly under the builder so the effect of
@@ -673,7 +699,7 @@ export default function ExportPage() {
                 </span>
               </div>
 
-              <DegreeLadder degrees={provoLadder} artifact="This record" />
+              <DegreeLadder degrees={provoLadder} artifact="This record" supports={supportFor('provo')} />
 
               <div className="mt-3">
                 <p className="mb-2 text-xs text-muted">
@@ -784,8 +810,8 @@ export default function ExportPage() {
                 </p>
 
                 <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                  <DegreeLadder degrees={croissantLadder} artifact="croissant.json" />
-                  <DegreeLadder degrees={provoLadder} artifact="prov.jsonld" />
+                  <DegreeLadder degrees={croissantLadder} artifact="croissant.json" supports={supportFor('croissant')} />
+                  <DegreeLadder degrees={provoLadder} artifact="prov.jsonld" supports={supportFor('provo')} />
                 </div>
                 <p className="mt-3 border-l-2 border-line pl-3 text-xs text-muted">
                   <span className="font-medium text-ink">Executable</span> is the one rung this tool

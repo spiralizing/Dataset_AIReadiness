@@ -1,6 +1,6 @@
 {
   "$comment": "Standing guidance content for the collection guide and the intro cards: the notes-to-actionable ladder, the wh-questions crosswalk, the per-run log template, worked ontology examples, and the burden-reduction landscape. Held here rather than inline in components so the cards on the start page and the generated guide cannot drift apart. Prose, not criteria — nothing here affects a verdict. Citation keys in any 'references' array resolve in references.json, the same registry the matrix uses; matrix.test.js enforces it.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "ladder": [
     {
       "rung": "Paper notebook",
@@ -105,6 +105,37 @@
         "means": "The tool that will consume the data has actually loaded it. Verify this yourself before release, with mlcroissant for a descriptor or your triple store for a provenance graph."
       }
     ],
+    "$supports_comment": "Which rung a released artifact must reach before a dimension can claim L3. The paper defines L3 as machine-actionable enough that a workflow engine, an AutoML system, or an instrumented laboratory can ingest the dataset and traverse its lineage unattended — which is the same property the ladder measures, seen from the level axis instead of the artifact axis. Stating the correspondence is what stops the tool computing both and relating neither. `min_degree` is the lowest rung that supports the claim; a higher rung is strictly better.",
+    "supports": [
+      {
+        "dimension": "FAIRness",
+        "level": "L3",
+        "artifact": "croissant",
+        "min_degree": "grounded",
+        "why": "The descriptor is what a consumer dereferences. A licence, a dataset URL, a file URL, and a checksum that are labels rather than resolvable values leave a pipeline with nothing to fetch."
+      },
+      {
+        "dimension": "Computability",
+        "level": "L3",
+        "artifact": "croissant",
+        "min_degree": "grounded",
+        "why": "Direct load means fetching the files without asking anybody. A declared file with no resolvable contentUrl, or a checksum still set to the template placeholder, stops an unattended loader at the first step."
+      },
+      {
+        "dimension": "Provenance",
+        "level": "L3",
+        "artifact": "provo",
+        "min_degree": "referentially_sound",
+        "why": "Full pipeline provenance means the graph can be walked. A wasDerivedFrom edge pointing at a node that is not declared is not a pipeline, whatever else the record contains. Grounding the agents in ORCIDs is stronger again, and is what makes the lineage meaningful outside the project."
+      },
+      {
+        "dimension": "Pre-model Explainability",
+        "level": "L3",
+        "artifact": "provo",
+        "min_degree": "referentially_sound",
+        "why": "Tracing a released feature back to raw inputs is a traversal, so every derivation edge has to land on a declared node. An intact chain is the claim; resolving edges are the mechanism."
+      }
+    ],
     "references": [
       "Akhtar2024",
       "Knublauch2017"
@@ -134,6 +165,86 @@
     ],
     "note": "Where a criterion cannot be checked mechanically, the honest position is to record it as an attested or human-judged statement. A verdict simulated by the tool would read as evidence to a downstream user.",
     "references": [
+      "Clark2026"
+    ]
+  },
+  "validation": {
+    "lead": "Validation is the last point at which a defect introduced earlier is still catchable. After release it is a correction, an erratum, and a model somebody already trained. The five categories below are what to check before you deposit; the tool runs the structural and grounding checks itself and references discipline validators for the rest.",
+    "categories": [
+      {
+        "id": "statistical",
+        "name": "Statistical",
+        "check": "Distribution summaries per variable; missingness rates; coverage across demographic, temporal, and geographic subgroups; outlier and range checks against domain-plausible bounds; class balance for classification targets.",
+        "tools": "Great Expectations · Pandera · Deequ",
+        "tone": "border-info-line bg-info-bg"
+      },
+      {
+        "id": "structural",
+        "name": "Structural",
+        "check": "Schema conformance (types, required fields, cardinality); referential integrity across linked tables; uniqueness of identifiers; format validation for dates, units, and controlled vocabularies.",
+        "tools": "Frictionless · the tool's own Croissant and PROV-O checks · SHACL for an RDF release",
+        "tone": "border-line bg-surface-2"
+      },
+      {
+        "id": "domain_expert",
+        "name": "Domain expert review",
+        "check": "Plausibility of derived variables against domain expectations; agreement between automated extraction and manual annotation on a sample; confusion analysis for NLP- or classification-derived fields.",
+        "tools": "No validator settles this. It is the reason a dimension needs a named owner.",
+        "tone": "border-warn-line bg-warn-bg"
+      },
+      {
+        "id": "bias_fairness",
+        "name": "Bias and fairness",
+        "check": "Representation parity across protected attributes; comparison of distributions before and after curation to detect introduced skew; documentation of exclusions and their demographic consequences.",
+        "tools": "Aequitas · Fairlearn",
+        "tone": "border-warn-line bg-warn-bg"
+      },
+      {
+        "id": "reproducibility",
+        "name": "Reproducibility",
+        "check": "Re-running the pipeline on a sample yields identical outputs; the PROV-O record resolves and matches the released dataset; version hashes match between the metadata and the data files.",
+        "tools": "Your own pipeline, run twice · the tool's PROV-O and checksum checks",
+        "tone": "border-ok-line bg-ok-bg"
+      }
+    ],
+    "report_note": "The output of validation is an artifact, not a feeling: a machine-readable report (JSON or RDF) bundled with the release and referenced from the dataset's metadata record. Failures should block the release rather than annotate it.",
+    "lookup_note": "Which validator applies is field-dependent. The tool ships a seeded registry and suggests from it, and the three community registries are the authoritative lookup for everything it does not carry.",
+    "references": [
+      "Sansone2019",
+      "Knublauch2017"
+    ]
+  },
+  "stewardship": {
+    "lead": "Release is not the end of the obligation. Versioning binds a change to a citable reference, so a model trained on one version stays reproducible after the dataset moves on; long-term stewardship extends that into infrastructure. This layer, rather than model innovation, is the rate-limiting factor for AI adoption in science: without it the lifecycle resets with every project instead of accumulating into reusable assets.",
+    "practices": [
+      {
+        "id": "version",
+        "name": "Version, and cite the version",
+        "what": "Mint a concept identifier that resolves to the latest release and a version identifier for each cut. A citation that names only the concept DOI cannot be reproduced once the data changes."
+      },
+      {
+        "id": "deprecate",
+        "name": "Deprecate rather than withdraw",
+        "what": "Keep a superseded version resolvable and marked as superseded. A model trained on v1 stays reproducible only while v1 still resolves, so removing it breaks work that was correct when it was done."
+      },
+      {
+        "id": "errata",
+        "name": "Publish a route for errata",
+        "what": "Name where a user reports a suspected error, and who answers. Discovering a problem and having nowhere to report it is how a known defect stays in circulation."
+      },
+      {
+        "id": "cadence",
+        "name": "State the cadence",
+        "what": "Say how often the dataset is expected to change, even if the answer is never. A downstream user is deciding whether to pin a version or track the latest, and cannot without this."
+      },
+      {
+        "id": "migration",
+        "name": "Plan for format migration",
+        "what": "Formats outlive neither their software nor their institutions. Note who is responsible for migrating the release if its format falls out of support, and what the commitment behind that is."
+      }
+    ],
+    "references": [
+      "LawrenceMontgomery2024",
       "Clark2026"
     ]
   },

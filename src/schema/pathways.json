@@ -1,6 +1,6 @@
 {
   "$comment": "Pathway definitions for the audience selector, and the sub-domains, which are independent of each other. A pathway is the target readiness level, which measures machine-actionability: A/L1 a person finds and reads the dataset, B/L2 a pipeline loads it once someone prepares the load, C/L3 an automated or semi-automated workflow consumes it unattended. A sub-domain is the discipline and governance context, and it is NOT a level: human or biological data demands the same oversight evidence whether it is aimed at L1 or L3, so `sub_domains` sits at the top level here rather than inside Pathway C (where it lived until 0.6.0, which made governance a function of actionability \u2014 the conflation \u00a76.2 of the paper explicitly removes). Overlay criteria therefore carry the level of the base criterion they mirror and obey the same cumulative rule as the matrix: consent wording sits at L1 beside the base consent basis, a de-identification method at L2 beside the base method, oversight and access evidence at L3. Overlays are additive \u2014 nothing in matrix.json is removed or relaxed by a sub-domain. Renamed from 'ethics_overlay' in 0.2.0; hoisted and re-levelled in 0.6.0.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "pathways": [
     {
       "id": "A",

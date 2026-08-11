@@ -14,6 +14,10 @@ import {
 } from '../lib/pathway.js';
 import guidance from '../schema/guidance.json';
 import { validationResults } from '../lib/validation.js';
+import { artifactDegrees, unsupportedLevels } from '../lib/actionability.js';
+import { validateCroissant } from '../lib/croissantValidation.js';
+import { validateProvo } from '../lib/provoValidation.js';
+import { effectiveProvo } from '../generators/provo.js';
 import { effectiveCroissant } from '../generators/croissant.js';
 import { getStage, isUpcoming } from '../lib/stages.js';
 import { useAssessment } from '../state/assessment.jsx';
@@ -55,6 +59,21 @@ export default function Review() {
   // verdict above answers the narrower question of whether the whole tier is met.
   const profile = dimensionProfile(pathway, answers, subDomain, results, state.stage);
   const attainedOf = Object.fromEntries(profile.map((d) => [d.dimension, d]));
+
+  // An L3 claim rests on a released artifact reaching a rung of the machine-actionability
+  // ladder: the level axis and the artifact axis measure the same property. A criterion
+  // can be answered while the descriptor it depends on is still short of the rung, and
+  // the heatmap alone would not say so.
+  const croissant = effectiveCroissant(state);
+  const provo = effectiveProvo(state);
+  const blocked = unsupportedLevels(
+    artifactDegrees({
+      croissant,
+      croissantResult: validateCroissant(croissant),
+      provo,
+      provoResult: validateProvo(provo),
+    }),
+  ).filter((e) => attainedOf[e.dimension]?.levels?.[e.level] !== 'not-required');
 
   return (
     <section>
@@ -107,6 +126,7 @@ export default function Review() {
                   {l.id} · {l.name}
                 </th>
               ))}
+              <th className="px-2 text-left text-xs font-medium text-muted">Reaches</th>
             </tr>
           </thead>
           <tbody>
@@ -131,6 +151,23 @@ export default function Review() {
                     </td>
                   );
                 })}
+                {(() => {
+                  const d = attainedOf[dim];
+                  return (
+                    <td className="whitespace-nowrap pl-2 text-xs">
+                      {d?.attained ? (
+                        <span className="font-medium text-ink">{d.attained}</span>
+                      ) : (
+                        <span className="text-muted">&mdash;</span>
+                      )}
+                      {d?.notApplicableCount > 0 && (
+                        <span className="ml-1 text-faint">
+                          ({d.notApplicableCount} n/a)
+                        </span>
+                      )}
+                    </td>
+                  );
+                })()}
               </tr>
             ))}
           </tbody>
@@ -166,6 +203,36 @@ export default function Review() {
         </dl>
         <p className="mt-3 text-xs italic text-faint">{guidance.verification_modes.note}</p>
       </div>
+
+      {blocked.length > 0 && (
+        <div className="mt-6 border border-warn-line bg-warn-bg p-4">
+          <h3 className="text-sm font-semibold text-warn">
+            Bounded by the released artifacts
+          </h3>
+          <p className="mt-1 text-xs text-muted">
+            L3 means an automated or semi-automated workflow can consume the dataset without
+            anyone preparing it. That is a property of the artifacts you release, so these
+            claims are capped by how far up the machine-actionability ladder each one reaches,
+            whatever the criteria say.
+          </p>
+          <ul className="mt-2 grid gap-1.5 text-xs">
+            {blocked.map((e) => (
+              <li key={`${e.dimension}-${e.level}`}>
+                <span className="font-medium text-ink">
+                  {e.dimension} {e.level}
+                </span>{' '}
+                <span className="text-muted">{e.message}</span>{' '}
+                <Link
+                  to={`/export?tab=${e.artifact === 'provo' ? 'provo' : 'croissant'}`}
+                  className="text-link underline"
+                >
+                  Fix it on the {e.artifact === 'provo' ? 'Provenance' : 'Croissant'} tab
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Recommended-but-unmet */}
       {recommendedUnmet.length > 0 && (

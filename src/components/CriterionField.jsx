@@ -80,6 +80,13 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
   const [descriptorArtifact, descriptorTab] = DESCRIPTOR_DRIVEN[criterion.id] ?? [];
   const locked = isLocked(criterion, stage);
   const validators = validatorsFor(criterion);
+  // The note attached to whatever value is currently selected, and the candidate terms
+  // a free-text criterion suggests. Both read from vocabularies.json.
+  const selectedNote =
+    criterion.evidence_type === 'controlled_vocabulary'
+      ? vocabValues(criterion.vocabulary_key).find((v) => v.id === value)?.note
+      : undefined;
+  const suggestions = criterion.suggested_values ? vocabValues(criterion.suggested_values) : [];
 
   return (
     <div className="rounded-none border border-line bg-surface p-4">
@@ -138,6 +145,28 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
           before you answer. The sentence carries its own mode in its voice ("The
           tool checks…", "You declare…", "<role> confirms…"), which is enforced in
           matrix.test.js, so it doubles as the in-context gloss on the mode chip. */}
+      {/* Why this option, not just which. A pick-list of eight de-identification
+          methods with no explanation asks the user to already know the answer; the
+          notes come from the paper's own tables via vocabularies.json. */}
+      {selectedNote && (
+        <p className="mt-2 border-l-2 border-line pl-2 text-xs text-muted">{selectedNote}</p>
+      )}
+
+      {/* Candidate phrasings or vocabularies for a free-text criterion. Non-binding:
+          the answer stays free text, and these are the terms the field usually wants. */}
+      {suggestions.length > 0 && (
+        <p className="mt-2 flex flex-wrap items-baseline gap-1.5 text-xs">
+          <span className="font-mono text-[0.65rem] uppercase tracking-wider text-faint">
+            Usually one of
+          </span>
+          {suggestions.map((v) => (
+            <span key={v.id} title={v.note ?? ''} className="border border-line px-1.5 py-0.5 text-[0.7rem] text-muted">
+              {v.label}
+            </span>
+          ))}
+        </p>
+      )}
+
       {criterion.verification_hint && (
         <p className="mt-2 text-xs text-muted">
           <span className="mr-1 font-mono text-[0.65rem] uppercase tracking-wider text-faint">
@@ -148,7 +177,17 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
       )}
 
       {/* The tools whose report is the evidence for this row. Sourced from the
-          validator registry, which shipped unreachable until now. */}
+          validator registry, which shipped unreachable until now. Where the criterion
+          names none, an attested row still needs a report from somewhere, so point at
+          the lookup rather than leaving the question hanging. */}
+      {validators.length === 0 && criterion.verification === 'attested' && (
+        <p className="mt-1.5 text-xs text-muted">
+          <Link to="/validators" className="text-link underline">
+            Find a validator for your data
+          </Link>{' '}
+          to attach a report.
+        </p>
+      )}
       {validators.length > 0 && (
         <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
           <span className="font-mono text-[0.65rem] uppercase tracking-wider text-faint">

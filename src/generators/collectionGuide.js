@@ -169,6 +169,8 @@ export function buildCollectionGuide(record, opts = {}) {
       ...guidance.verification_modes,
       refs: resolve(guidance.verification_modes.references),
     },
+    validation: { ...guidance.validation, refs: resolve(guidance.validation.references) },
+    stewardship: { ...guidance.stewardship, refs: resolve(guidance.stewardship.references) },
     whQuestions: guidance.wh_questions,
     whQuestionsRefs: resolve(guidance.wh_questions_references),
     documentationInputs: {
@@ -194,6 +196,8 @@ export function buildCollectionGuide(record, opts = {}) {
         ...guidance.automation.references,
         ...guidance.degrees.references,
         ...guidance.verification_modes.references,
+        ...guidance.validation.references,
+        ...guidance.stewardship.references,
         ...guidance.wh_questions_references,
         ...guidance.documentation_inputs.references,
         ...guidance.ontology_examples_references,
@@ -277,6 +281,38 @@ export function generateCollectionGuide(record, opts = {}) {
   p();
   if (g.verificationModes.refs.length) {
     p(`_Sources: ${g.verificationModes.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}._`);
+    p();
+  }
+
+  p('## Validating before release');
+  p();
+  p(g.validation.lead);
+  p();
+  for (const c of g.validation.categories) {
+    p(`### ${c.name}`);
+    p();
+    p(c.check);
+    p();
+    p(`_${c.tools}_`);
+    p();
+  }
+  p(g.validation.report_note);
+  p();
+  p(g.validation.lookup_note);
+  p();
+  if (g.validation.refs.length) {
+    p(`_Sources: ${g.validation.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}._`);
+    p();
+  }
+
+  p('## After release');
+  p();
+  p(g.stewardship.lead);
+  p();
+  for (const x of g.stewardship.practices) p(`- **${x.name}.** ${x.what}`);
+  p();
+  if (g.stewardship.refs.length) {
+    p(`_Sources: ${g.stewardship.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}._`);
     p();
   }
 

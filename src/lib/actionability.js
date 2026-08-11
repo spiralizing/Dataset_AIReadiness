@@ -299,3 +299,57 @@ export function artifactDegrees(opts = {}) {
     }),
   };
 }
+
+// --- the level axis and the artifact axis, related --------------------------
+//
+// The paper defines L3 as machine-actionable enough that a workflow engine, an AutoML
+// system, or an instrumented laboratory can ingest the dataset and traverse its lineage
+// unattended. That is the same property the ladder above measures, seen from the level
+// axis instead of the artifact axis — so a descriptor stuck at schema-valid cannot
+// support a Computability L3 claim, however the criteria are answered.
+//
+// The correspondence itself lives in guidance.json (`degrees.supports`), because which
+// rung a level needs is a statement about the framework and not about this code.
+
+const DEGREE_RANK = new Map(DEGREE_IDS.map((id, i) => [id, i]));
+
+// Does an artifact's ladder reach at least `min`? 'out-of-scope' does not count as
+// reached: executable is never certified here, so a rung requiring it would never pass.
+export const reachesDegree = (degrees, min) => {
+  const target = DEGREE_RANK.get(min);
+  if (target === undefined) return false;
+  for (const id of DEGREE_IDS.slice(0, target + 1)) {
+    if (degrees?.[id]?.status !== 'pass') return false;
+  }
+  return true;
+};
+
+// For each declared correspondence, whether the artifact currently supports the claim.
+// `ladder` is the artifactDegrees() result: { croissant, provo }.
+export function levelSupport(ladder = {}) {
+  return (guidance.degrees.supports ?? []).map((entry) => {
+    const degrees = ladder[entry.artifact];
+    const required = getDegree(entry.min_degree);
+    const attained = degrees?.attained ?? null;
+    const ok = reachesDegree(degrees, entry.min_degree);
+    return {
+      ...entry,
+      requiredLabel: required?.label ?? entry.min_degree,
+      attained,
+      attainedLabel: attained ? (getDegree(attained)?.label ?? attained) : null,
+      ok,
+      message: ok
+        ? `The ${entry.artifact === 'provo' ? 'provenance record' : 'descriptor'} reaches ${
+            getDegree(attained)?.label ?? attained
+          }, which supports ${entry.dimension} ${entry.level}.`
+        : `${entry.dimension} ${entry.level} needs the ${
+            entry.artifact === 'provo' ? 'provenance record' : 'descriptor'
+          } at ${required?.label ?? entry.min_degree}; it reaches ${
+            attained ? (getDegree(attained)?.label ?? attained) : 'nothing yet'
+          }.`,
+    };
+  });
+}
+
+// The subset blocking a level claim, for the places that only surface problems.
+export const unsupportedLevels = (ladder = {}) => levelSupport(ladder).filter((e) => !e.ok);

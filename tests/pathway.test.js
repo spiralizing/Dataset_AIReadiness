@@ -17,6 +17,9 @@ import {
   criteriaForDimension,
   recommendedForDimension,
   requiredCriteria,
+  ALL_CRITERIA,
+  isCriterionNotApplicable,
+  dimensionProfile,
 } from '../src/lib/pathway.js';
 import { reducer, emptyRecord, RECORD_VERSION } from '../src/state/assessment.jsx';
 import { STAGES, getStage, isLocked, isUpcoming } from '../src/lib/stages.js';
@@ -337,4 +340,79 @@ test('label_overrides reword a base criterion without changing its identity', ()
     requiredCriteria('C', 'materials').find((c) => c.id === base.id).label,
     /core-hours/,
   );
+});
+
+// ---- not-applicable and the per-dimension profile -------------------------
+
+test('a declared non-applicability is its own state, not a satisfied requirement', () => {
+  // Non-human-subjects data has no consent basis to record. Reporting that as "met"
+  // would make a materials deposit indistinguishable from one carrying real IRB
+  // oversight; reporting it as "unmet" would penalise the honest answer.
+  const consent = ALL_CRITERIA.find((c) => c.id === 'ethics.l1.consent_basis_recorded');
+  assert.equal(isCriterionNotApplicable(consent, { value: 'NA_non_human_subjects' }), true);
+  assert.equal(isCriterionNotApplicable(consent, { value: 'documented_collection' }), false);
+
+  // Free text, where the criterion's own label permits it.
+  const dua = ALL_CRITERIA.find((c) => c.id === 'ethics.l3.dua_referenced');
+  assert.equal(isCriterionNotApplicable(dua, { value: 'N/A' }), true);
+  assert.equal(isCriterionNotApplicable(dua, { value: 'https://example.org/dua' }), false);
+
+  // A boolean has no third state, so it can never be N/A — a schema limit, recorded
+  // here so the behaviour is deliberate rather than incidental.
+  const deid = ALL_CRITERIA.find((c) => c.id === 'ethics.l1.de_identification_applied');
+  assert.equal(isCriterionNotApplicable(deid, { value: true }), false);
+
+  // And it still counts as satisfied, so no verdict changes.
+  assert.equal(isCriterionSatisfied(consent, { value: 'NA_non_human_subjects' }), true);
+});
+
+test('a cell of wholly not-applicable criteria reports as such', () => {
+  // Ethics × L2 for a materials deposit is exactly one criterion — the
+  // de-identification method — so declaring "none needed" makes the whole cell a
+  // documented non-applicability.
+  const answers = { 'ethics.l2.de_identification_method': { value: 'none-needed' } };
+  assert.equal(
+    cellStatus('Ethics', 'L2', 'C', answers, 'materials', undefined, 'upgrade'),
+    'not-applicable',
+  );
+  // With a real method named, the same cell is met.
+  assert.equal(
+    cellStatus('Ethics', 'L2', 'C', { 'ethics.l2.de_identification_method': { value: 'k-anonymity' } },
+      'materials', undefined, 'upgrade'),
+    'met',
+  );
+});
+
+test('dimensionProfile reports the level each dimension reaches, capped by what was asked', () => {
+  // The framework's actual claim: readiness is a per-dimension profile. A deposit can
+  // be L3 on some dimensions and L1 on others, which the single verdict cannot express.
+  const answers = satisfyAll(criteriaForPathway('C').filter((c) => c.dimension === 'FAIRness'));
+  const profile = dimensionProfile('C', answers, 'general', undefined, 'upgrade');
+  const by = Object.fromEntries(profile.map((d) => [d.dimension, d]));
+
+  assert.equal(by.FAIRness.attained, 'L3', 'all FAIRness levels satisfied');
+  assert.equal(by.Ethics.attained, null, 'nothing answered on Ethics');
+  assert.equal(profile.length, 7);
+
+  // Pathway A asks only about L1, so attained is capped there even when higher levels
+  // would pass — the tool reports what it assessed, not what might be true.
+  const aAnswers = satisfyAll(criteriaForPathway('A'));
+  const aProfile = dimensionProfile('A', aAnswers, null, undefined, 'upgrade');
+  assert.ok(aProfile.every((d) => d.attained === 'L1'), 'Pathway A caps at L1');
+  assert.ok(aProfile.every((d) => d.levels.L2 === 'not-required'));
+});
+
+test('the profile counts declared non-applicabilities per dimension', () => {
+  const answers = {
+    'ethics.l1.consent_basis_recorded': { value: 'NA_non_human_subjects' },
+    'ethics.l1.de_identification_applied': { value: true },
+    'ethics.l1.materials.source_data_licensing': { value: 'ICSD subscription terms; CC-BY for released files.' },
+  };
+  const profile = dimensionProfile('C', answers, 'materials', undefined, 'upgrade');
+  const ethics = profile.find((d) => d.dimension === 'Ethics');
+  assert.equal(ethics.attained, 'L1');
+  assert.equal(ethics.notApplicableCount, 1);
+  // Not wholly not-applicable: source-data licensing and de-identification still apply
+  // to a materials deposit, so the dimension is L1-with-an-N/A rather than N/A.
+  assert.equal(ethics.notApplicable, false);
 });

@@ -59,7 +59,10 @@ export function loadableCroissant({ name, description = '', license, url }) {
         name: 'data.parquet',
         contentUrl: `${url ?? 'https://example.org/dataset'}/data.parquet`,
         encodingFormat: 'application/vnd.apache.parquet',
-        sha256: '0'.repeat(64),
+        // A real-shaped digest, not the template's row of zeros: an example claiming
+        // Computability L3 needs a descriptor that could actually support an unattended
+        // load, and a placeholder checksum is what the `grounded` rung exists to catch.
+        sha256: '9f2c4e1b7a5d3086bcae5f4192d7c0b83e6a17f45c9d2be0813a6f4d5c7e29ab',
       },
     ],
     recordSet: [
