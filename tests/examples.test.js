@@ -13,9 +13,7 @@ import { validationResults } from '../src/lib/validation.js';
 import { effectiveCroissant, declaredMime } from '../src/generators/croissant.js';
 import { validateCroissant } from '../src/lib/croissantValidation.js';
 
-const overlayIds = pathwaysData.pathways
-  .find((p) => p.id === 'C')
-  .sub_domains.flatMap((s) => s.overlay.map((o) => o.id));
+const overlayIds = pathwaysData.sub_domains.flatMap((s) => s.overlay.map((o) => o.id));
 const validIds = new Set([...matrix.criteria.map((c) => c.id), ...overlayIds]);
 
 test('seven examples with unique ids and valid pathways/stage', () => {

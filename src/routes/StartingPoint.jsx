@@ -191,8 +191,13 @@ export default function StartingPoint() {
             AI-readiness is a graded property. Each dimension progresses through three levels,
             aligned to the Data Readiness Level bands (
             <a href="https://doi.org/10.48550/arXiv.1705.02245" target="_blank" rel="noreferrer" className="text-link underline">Lawrence, 2017</a>
-            ). L1 suits local or niche use; L2 is expected for broad reuse; L3 is reserved for
-            datasets that demand serious governance, such as human or biological data.
+            ). Each level is defined by what consumes the dataset. L1 suits local or niche
+            use, where a person finds it and reads it. L2 is expected for broad reuse through
+            discovery platforms, where a pipeline can load it once someone has prepared the
+            load. L3 is where an automated or semi-automated workflow consumes it unattended
+            &mdash; some steps, or in an instrumented laboratory the whole chain. The level
+            measures machine-actionability, not sensitivity: data needing strict access
+            control carries it at every level.
           </p>
 
           {/* Wide screens: the full matrix as a table */}

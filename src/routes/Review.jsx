@@ -10,6 +10,7 @@ import {
   recommendedForPathway,
   isCriterionSatisfied,
   requiredCriteria,
+  dimensionProfile,
 } from '../lib/pathway.js';
 import guidance from '../schema/guidance.json';
 import { validationResults } from '../lib/validation.js';
@@ -49,6 +50,11 @@ export default function Review() {
       satisfied: of.filter((c) => isCriterionSatisfied(c, answers[c.id], results)).length,
     };
   }).filter((m) => m.total > 0);
+
+  // The per-dimension profile: what the framework actually claims a dataset is. The
+  // verdict above answers the narrower question of whether the whole tier is met.
+  const profile = dimensionProfile(pathway, answers, subDomain, results, state.stage);
+  const attainedOf = Object.fromEntries(profile.map((d) => [d.dimension, d]));
 
   return (
     <section>
@@ -132,7 +138,8 @@ export default function Review() {
       </div>
 
       <div className="mt-3 flex gap-4 text-xs text-muted">
-        <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-ok-bg0 align-middle" />met</span>
+        <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-ok-bg align-middle" />met</span>
+        <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-idle-bg align-middle" />not applicable</span>
         <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-bad-bg align-middle" />unmet</span>
         <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-info-bg align-middle" />upcoming</span>
         <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-idle-bg align-middle" />not required</span>

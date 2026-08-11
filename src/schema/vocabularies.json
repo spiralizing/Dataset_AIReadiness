@@ -1,6 +1,6 @@
 {
-  "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 4, 7, 9, 11, and 14 of González-Espinoza et al. (2026); each 'source' below names the table number in the current draft together with its LaTeX label, because float numbers move whenever a section is inserted and the label does not; the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
-  "version": "0.5.0",
+  "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 4, 7, 9, 11, and 14 of González-Espinoza et al. (2026); each 'source' below names the table number in the current draft together with its LaTeX label, because float numbers move whenever a section is inserted and the label does not; the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. A value carrying 'not_applicable': true declares that the criterion does not apply to this dataset rather than answering it — a documented not-applicable attestation, which the assessment reports as its own cell state instead of as a satisfied requirement. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
+  "version": "0.6.0",
   "vocabularies": {
     "licenses": {
       "label": "License",
@@ -184,8 +184,8 @@
         { "id": "granular_per_use", "label": "Granular per-use consent" },
         { "id": "broad_research_use", "label": "Broad consent for research use" },
         { "id": "waiver_of_consent", "label": "IRB-approved waiver of consent" },
-        { "id": "NA_non_human_subjects", "label": "Not applicable — non-human-subjects data" },
-        { "id": "NA_public_data", "label": "Not applicable — already-public data" }
+        { "id": "NA_non_human_subjects", "label": "Not applicable — non-human-subjects data", "not_applicable": true },
+        { "id": "NA_public_data", "label": "Not applicable — already-public data", "not_applicable": true }
       ]
     },
     "de_id_methods": {
@@ -199,7 +199,7 @@
         { "id": "t-closeness", "label": "t-closeness" },
         { "id": "differential-privacy", "label": "Differential privacy" },
         { "id": "pseudonymization", "label": "Pseudonymization with key escrow" },
-        { "id": "none-needed", "label": "None needed (non-personal data)" }
+        { "id": "none-needed", "label": "None needed (non-personal data)", "not_applicable": true }
       ]
     },
     "access_governance": {

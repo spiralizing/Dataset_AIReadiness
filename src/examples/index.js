@@ -143,11 +143,11 @@ export const EXAMPLES = [
         // The six materials overlays, answered the way the guidance describes.
         'fairness.l3.materials.domain_repository': 'MaterialsCloud',
         'fairness.l3.materials.encoding_standard': 'CIF',
-        'fairness.l3.materials.ontology_mapping': 'EMMO',
+        'fairness.l2.materials.ontology_mapping': 'EMMO',
         'provenance.l3.materials.apriori_capture': 'AiiDA',
         'characterization.l3.materials.acquisition_parameters':
           'XRD: Rigaku SmartLab (inst-0217), Cu Kα, 40 kV / 30 mA, 2θ 10–80°, room temperature, powder mount, operator ORCID 0000-0002-1825-0097, 2024-10-09. DFT: Quantum ESPRESSO 7.2, PBE, SSSP-efficiency pseudopotentials, k-points 6×6×6, ecutwfc 60 Ry, ecutrho 480 Ry, force threshold 1e-4 Ry/bohr.',
-        'ethics.l3.materials.source_data_licensing':
+        'ethics.l1.materials.source_data_licensing':
           'No third-party database content is redistributed: the structure was refined in-house, not drawn from ICSD. Released under CC-BY-4.0 (SPDX: CC-BY-4.0). No export-control or dual-use restriction applies; no industrial embargo.',
         // Reworded for this sub-domain via label_overrides — answered in kind.
         'sustainability.l3.compute_cost_reported':

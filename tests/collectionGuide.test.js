@@ -14,7 +14,7 @@ import {
   citationHref,
   captureKind,
 } from '../src/generators/collectionGuide.js';
-import { requiredCriteria, ALL_CRITERIA, subDomainsForC } from '../src/lib/pathway.js';
+import { requiredCriteria, ALL_CRITERIA, subDomains } from '../src/lib/pathway.js';
 
 const FIXED = '2026-08-07T00:00:00Z';
 const rec = (pathway, subDomain = null, extra = {}) => ({
@@ -80,7 +80,7 @@ test('every L3 criterion and overlay carries a collection hint', () => {
   for (const c of ALL_CRITERIA.filter((x) => x.level === 'L3')) {
     assert.ok(hasCollectionHint(c), `${c.id} has no collection_hint`);
   }
-  for (const sub of subDomainsForC()) {
+  for (const sub of subDomains()) {
     for (const o of sub.overlay) {
       assert.ok(hasCollectionHint(o), `overlay ${o.id} has no collection_hint`);
     }

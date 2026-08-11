@@ -15,7 +15,7 @@ export const emptyRecord = () => ({
   schema_version: RECORD_VERSION,
   stage: null, // lifecycle intake: 'plan' | 'prepare' | 'upgrade'
   pathway: null, // 'A' | 'B' | 'C'
-  sub_domain: null, // Pathway C only
+  sub_domain: null, // discipline/governance context; independent of the pathway
   started_at: null,
   answers: {}, // { [criterionId]: { value, notes } }
   dataset: { name: '', description: '', version: '' }, // dataset-level metadata for the Croissant descriptor
@@ -49,10 +49,13 @@ export function reducer(state, action) {
         started_at: state.started_at ?? new Date().toISOString(),
       };
     case 'SET_PATHWAY':
+      // The sub-domain describes the data and its governance context, so it survives
+      // a change of target level. Before 0.6.0 this cleared it whenever the pathway
+      // was not C, which is why governance evidence was unreachable at A and B.
       return {
         ...state,
         pathway: action.pathway,
-        sub_domain: action.pathway === 'C' ? (state.sub_domain ?? 'general') : null,
+        sub_domain: state.sub_domain ?? 'general',
         started_at: state.started_at ?? new Date().toISOString(),
       };
     case 'SET_SUB_DOMAIN':
@@ -93,13 +96,40 @@ export function normalize(record) {
   return isRedundantOverride(record) ? { ...record, croissant: null } : record;
 }
 
+// Overlay criteria whose id changed when they were re-levelled in schema 0.6.0: the
+// id encodes the level, and six overlays moved off L3 onto the level of the base
+// criterion they mirror. The answers are still valid facts — an IRB protocol number
+// does not change because the criterion moved — so a stored record is migrated rather
+// than discarded.
+const RENAMED_CRITERIA = {
+  'ethics.l3.genomic.consent_type': 'ethics.l1.genomic.consent_type',
+  'ethics.l3.voice.speaker_consent': 'ethics.l1.voice.speaker_consent',
+  'ethics.l3.materials.source_data_licensing': 'ethics.l1.materials.source_data_licensing',
+  'ethics.l3.clinical.hipaa_method': 'ethics.l2.clinical.hipaa_method',
+  'ethics.l3.genomic.reid_risk': 'ethics.l2.genomic.reid_risk',
+  'fairness.l3.materials.ontology_mapping': 'fairness.l2.materials.ontology_mapping',
+};
+
+function migrate(record) {
+  const answers = { ...(record.answers ?? {}) };
+  let moved = 0;
+  for (const [from, to] of Object.entries(RENAMED_CRITERIA)) {
+    if (answers[from] !== undefined) {
+      answers[to] ??= answers[from];
+      delete answers[from];
+      moved += 1;
+    }
+  }
+  return moved > 0 ? { ...record, answers } : record;
+}
+
 function init() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.schema_version === RECORD_VERSION) {
-        return normalize({ ...emptyRecord(), ...parsed });
+        return normalize(migrate({ ...emptyRecord(), ...parsed }));
       }
     }
   } catch {

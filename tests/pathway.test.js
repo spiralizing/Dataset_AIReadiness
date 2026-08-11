@@ -12,7 +12,7 @@ import {
   cellStatus,
   pathwayVerdict,
   getPathway,
-  subDomainsForC,
+  subDomains,
   overlaysFor,
   criteriaForDimension,
   recommendedForDimension,
@@ -99,16 +99,44 @@ test('pathwayVerdict: unmet with no answers, met when all required satisfied', (
 
 // ---- pathways + dimension gathering + overlays ----------------------------
 
-test('getPathway and subDomainsForC resolve schema metadata', () => {
+test('getPathway and subDomains resolve schema metadata', () => {
   assert.equal(getPathway('A').name, 'Accessible');
   assert.equal(getPathway('Z'), null);
-  assert.equal(subDomainsForC().length, 6);
+  assert.equal(subDomains().length, 6);
 });
 
-test('overlaysFor is empty except for Pathway C with a sub-domain', () => {
-  assert.deepEqual(overlaysFor('A', 'clinical'), []);
+test('overlays follow the sub-domain at any pathway, filtered by the cumulative rule', () => {
+  // The point of decoupling: governance evidence is required by the discipline, not
+  // by the target level. A genomic dataset owes its consent-type row at L1.
+  assert.deepEqual(overlaysFor('A', null), []);
   assert.deepEqual(overlaysFor('C', null), []);
+
+  assert.deepEqual(
+    overlaysFor('A', 'genomic').map((o) => o.id),
+    ['ethics.l1.genomic.consent_type'],
+  );
+  assert.deepEqual(
+    overlaysFor('B', 'genomic').map((o) => o.id).sort(),
+    ['ethics.l1.genomic.consent_type', 'ethics.l2.genomic.reid_risk'],
+  );
+  assert.equal(overlaysFor('C', 'genomic').length, 3);
+
+  // Clinical's only sub-L3 obligation is the de-identification method, at L2 beside
+  // the base criterion it mirrors.
+  assert.deepEqual(overlaysFor('A', 'clinical'), []);
+  assert.deepEqual(
+    overlaysFor('B', 'clinical').map((o) => o.id),
+    ['ethics.l2.clinical.hipaa_method'],
+  );
   assert.equal(overlaysFor('C', 'clinical').length, 3);
+
+  // Materials: rights to third-party inputs are an L1 obligation — you cannot
+  // release what you have no licence to release, at any level.
+  assert.deepEqual(
+    overlaysFor('A', 'materials').map((o) => o.id),
+    ['ethics.l1.materials.source_data_licensing'],
+  );
+  assert.equal(overlaysFor('B', 'materials').length, 2);
   assert.equal(overlaysFor('C', 'materials').length, 6);
 });
 
@@ -188,15 +216,21 @@ test('cellStatus returns "upcoming" for an all-deferred cell in Plan', () => {
 
 // ---- reducer --------------------------------------------------------------
 
-test('reducer SET_PATHWAY stamps started_at and defaults sub_domain for C', () => {
+test('reducer SET_PATHWAY stamps started_at and keeps the sub-domain', () => {
   const s0 = emptyRecord();
   const a = reducer(s0, { type: 'SET_PATHWAY', pathway: 'A' });
   assert.equal(a.pathway, 'A');
-  assert.equal(a.sub_domain, null);
+  assert.equal(a.sub_domain, 'general');
   assert.ok(typeof a.started_at === 'string' && a.started_at.length > 0);
 
-  const c = reducer(s0, { type: 'SET_PATHWAY', pathway: 'C' });
-  assert.equal(c.sub_domain, 'general');
+  // A sub-domain describes the data and its governance context, so changing the
+  // target level must not discard it. Before 0.6.0 this cleared sub_domain whenever
+  // the pathway was not C, which is why a human-subjects dataset aimed at L2 lost
+  // its oversight criteria on the way to the dimension pages.
+  const clinical = reducer(s0, { type: 'SET_SUB_DOMAIN', sub_domain: 'clinical' });
+  const downgraded = reducer(clinical, { type: 'SET_PATHWAY', pathway: 'B' });
+  assert.equal(downgraded.sub_domain, 'clinical');
+  assert.equal(reducer(downgraded, { type: 'SET_PATHWAY', pathway: 'C' }).sub_domain, 'clinical');
 });
 
 test('lifecycle stages: three defined; getStage resolves; reducer SET_STAGE stamps started_at', () => {
@@ -246,21 +280,21 @@ test('overlays lock and defer with the lifecycle stage, uniformly across sub-dom
   assert.ok(isLocked(materials['provenance.l3.materials.apriori_capture'], 'upgrade'));
   assert.ok(isLocked(materials['characterization.l3.materials.acquisition_parameters'], 'upgrade'));
   assert.ok(isLocked(clinical['ethics.l3.clinical.irb_protocol_id'], 'upgrade'));
-  assert.ok(isLocked(clinical['ethics.l3.clinical.hipaa_method'], 'upgrade'));
+  assert.ok(isLocked(clinical['ethics.l2.clinical.hipaa_method'], 'upgrade'));
   // Governance and documentation stay actionable after publication.
-  assert.ok(!isLocked(materials['ethics.l3.materials.source_data_licensing'], 'upgrade'));
+  assert.ok(!isLocked(materials['ethics.l1.materials.source_data_licensing'], 'upgrade'));
   assert.ok(!isLocked(materials['fairness.l3.materials.encoding_standard'], 'upgrade'));
   assert.ok(!isLocked(clinical['ethics.l3.clinical.dua_template'], 'upgrade'));
 
   // Prepare (collected, not yet published): only acquisition is fixed.
   assert.ok(isLocked(clinical['ethics.l3.clinical.irb_protocol_id'], 'prepare'));
-  assert.ok(!isLocked(clinical['ethics.l3.clinical.hipaa_method'], 'prepare'));
+  assert.ok(!isLocked(clinical['ethics.l2.clinical.hipaa_method'], 'prepare'));
 
   // Plan (still collecting): nothing is locked, and post-acquisition work is
   // upcoming rather than an outstanding failure.
   assert.ok(!isLocked(materials['provenance.l3.materials.apriori_capture'], 'plan'));
   assert.ok(!isUpcoming(materials['provenance.l3.materials.apriori_capture'], 'plan'));
-  assert.ok(isUpcoming(materials['ethics.l3.materials.source_data_licensing'], 'plan'));
+  assert.ok(isUpcoming(materials['ethics.l1.materials.source_data_licensing'], 'plan'));
 });
 
 test('upcoming overlays drop out of the Plan-stage verdict', () => {

@@ -8,7 +8,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 
 import { depositionTargets } from '../src/lib/depositionTargets.js';
-import { ALL_CRITERIA, subDomainsForC } from '../src/lib/pathway.js';
+import { ALL_CRITERIA, subDomains } from '../src/lib/pathway.js';
 
 const criterion = ALL_CRITERIA.find((c) => c.id === 'fairness.l3.deposition_target');
 const ids = (r) => r.values.map((v) => v.id);
@@ -67,7 +67,7 @@ test('falls back to the pathway vocabulary, then to the criterion key', () => {
 });
 
 test('every Pathway C sub-domain resolves to a non-empty option list', () => {
-  for (const sub of subDomainsForC()) {
+  for (const sub of subDomains()) {
     const r = depositionTargets(criterion, 'C', sub.id);
     assert.ok(r.values.length > 0, `sub-domain ${sub.id} resolves to no deposition targets`);
     // Every id in the declared filter must survive resolution.

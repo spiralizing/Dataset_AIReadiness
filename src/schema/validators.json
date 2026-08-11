@@ -1,6 +1,6 @@
 {
   "$comment": "Discipline-specific validator registry (app_design.md §7.4). The tool's core validation (Croissant structural+referential, SHACL for PROV-O, identifier grounding) is general; this registry catalogues field-specific validators surfaced by declared format / Pathway-C sub-domain. 'execution' controls integration: 'in-browser' validators can run in place and mark a criterion automated; 'cli'/'web-service' validators are referenced and their outcome recorded as attested evidence. 'applies_to' is open-world (free tags: format names and/or sub-domain ids), not validated against vocabularies.json. For disciplines outside this seeded set, the 'registries' below are the authoritative lookup.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "validators": [
     {
       "id": "bids-validator",

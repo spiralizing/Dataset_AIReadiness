@@ -2,7 +2,12 @@
 // Pure function: wraps the record with the computed verdict and generation
 // metadata. Kept separate from the datasheet (human-readable) generator.
 
-import { pathwayVerdict, requiredCriteria, isCriterionSatisfied } from './pathway.js';
+import {
+  pathwayVerdict,
+  requiredCriteria,
+  isCriterionSatisfied,
+  dimensionProfile,
+} from './pathway.js';
 import { validationResults, AUTOMATED_WITH_VALIDATOR } from './validation.js';
 import { isUpcoming } from './stages.js';
 import { generateCroissant } from '../generators/croissant.js';
@@ -42,6 +47,10 @@ export function buildAssessmentReport(record, opts = {}) {
       satisfied_count: verdict.satisfiedCount,
       bottlenecks: verdict.bottlenecks,
     },
+    // Readiness is a per-dimension profile, not a single score: a deposit can be L3 on
+    // four dimensions and L1 on two, and only this says so. `verdict` above answers the
+    // narrower question of whether the whole target tier is met.
+    profile: dimensionProfile(pathway, answers, subDomain, results, record.stage),
     answers,
   };
 }

@@ -8,8 +8,9 @@
 // `deposition_targets_filter`) in pathways.json; until now nothing read them.
 //
 // Resolution, most specific first:
-//   * Pathway C with a sub-domain -> the sub-domain's vocabulary
-//   * otherwise                   -> the pathway's vocabulary
+//   * a sub-domain is set -> the sub-domain's vocabulary (at any pathway: where a
+//                            discipline deposits does not depend on the level)
+//   * otherwise           -> the pathway's vocabulary
 //   * neither declared            -> the criterion's own key
 //
 // `deposition_targets_filter` names the targets recommended for a sub-domain. Its
@@ -41,7 +42,7 @@ const findRepository = (id) => {
 // Returns { key, values, recommended } — `key` is the resolved vocabulary (for
 // reporting), `values` the ordered option list, `recommended` the subset to mark.
 export function depositionTargets(criterion, pathway, subDomain) {
-  const sub = pathway === 'C' && subDomain ? getSubDomain(subDomain) : null;
+  const sub = subDomain ? getSubDomain(subDomain) : null;
   const key =
     sub?.deposition_targets_vocabulary ??
     getPathway(pathway)?.deposition_targets_vocabulary ??

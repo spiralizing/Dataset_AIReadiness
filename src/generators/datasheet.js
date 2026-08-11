@@ -96,7 +96,7 @@ export function generateDatasheet(record, opts = {}) {
   lines.push(
     `- **Assessment pathway:** ${pathway} — ${meta?.name ?? '?'} (${meta?.level ?? '?'})`,
   );
-  if (pathway === 'C' && subDomain) lines.push(`- **Sub-domain:** ${subDomain}`);
+  if (subDomain) lines.push(`- **Sub-domain:** ${subDomain}`);
   lines.push(`- **Generated:** ${now}`);
   lines.push(
     `- **Verdict:** ${

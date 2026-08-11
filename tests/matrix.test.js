@@ -202,7 +202,7 @@ test('collection_hint, when present, is prose distinct from remediation', () => 
   };
   for (const c of matrix.criteria) check(c, 'criterion');
   const cPath = pathways.pathways.find((p) => p.id === 'C');
-  for (const sub of cPath.sub_domains) for (const o of sub.overlay) check(o, 'overlay');
+  for (const sub of pathways.sub_domains) for (const o of sub.overlay) check(o, 'overlay');
 });
 
 test('vocabulary_scope, when present, names a supported resolver', () => {
@@ -231,7 +231,7 @@ test('sub-domain deposition_targets_filter ids resolve in some repositories_* vo
       .flatMap(([, v]) => v.values.map((x) => x.id)),
   );
   const c = pathways.pathways.find((p) => p.id === 'C');
-  for (const sub of c.sub_domains) {
+  for (const sub of pathways.sub_domains) {
     for (const id of sub.deposition_targets_filter ?? []) {
       assert.ok(
         repoIds.has(id),
@@ -257,9 +257,7 @@ test('every criterion declares a capture moment or states its absence', () => {
   // fixing a release, printed in a worksheet about what to write down beforehand.
   // Exactly one of the two fields, so "nothing to capture" is a decision on record
   // rather than an omission.
-  const overlays = pathways.pathways
-    .flatMap((p) => p.sub_domains ?? [])
-    .flatMap((s) => s.overlay ?? []);
+  const overlays = pathways.sub_domains.flatMap((s) => s.overlay ?? []);
 
   for (const c of [...matrix.criteria, ...overlays]) {
     const hasHint = typeof c.collection_hint === 'string';
@@ -292,9 +290,7 @@ test('every criterion says what would confirm it', () => {
   // The schema had a capture axis (collection_hint: what to record) and no
   // verification axis, so 59 of 72 criteria declared a mode and named no check.
   // A chip reading "attested" without this is a label, not guidance.
-  const overlays = pathways.pathways
-    .flatMap((p) => p.sub_domains ?? [])
-    .flatMap((s) => s.overlay ?? []);
+  const overlays = pathways.sub_domains.flatMap((s) => s.overlay ?? []);
 
   for (const c of [...matrix.criteria, ...overlays]) {
     assert.ok(
@@ -322,9 +318,7 @@ test('validators named by a criterion resolve in the registry', () => {
   // Same contract as `references`: a link to a tool that is not in validators.json
   // would render as a suggestion the user cannot act on.
   const known = new Set(validators.validators.map((v) => v.id));
-  const overlays = pathways.pathways
-    .flatMap((p) => p.sub_domains ?? [])
-    .flatMap((s) => s.overlay ?? []);
+  const overlays = pathways.sub_domains.flatMap((s) => s.overlay ?? []);
 
   let linked = 0;
   for (const c of [...matrix.criteria, ...overlays]) {
@@ -345,9 +339,7 @@ test('every automated criterion has a wired check, overlays included', async () 
   // those checks is ever removed, the badge would keep claiming a validator that
   // no longer exists.
   const { AUTOMATED_WITH_VALIDATOR } = await import('../src/lib/validation.js');
-  const overlays = pathways.pathways
-    .flatMap((p) => p.sub_domains ?? [])
-    .flatMap((s) => s.overlay ?? []);
+  const overlays = pathways.sub_domains.flatMap((s) => s.overlay ?? []);
 
   for (const c of [...matrix.criteria, ...overlays]) {
     if (c.verification !== 'automated') continue;
@@ -466,8 +458,8 @@ test('pathway deposition_targets_vocabulary keys resolve in vocabularies.json', 
 test('Pathway C declares six sub-domains including the resolved set', () => {
   const c = pathways.pathways.find((p) => p.id === 'C');
   assert.ok(c, 'Pathway C missing');
-  assert.equal(c.sub_domains.length, 6, 'expected exactly six Pathway C sub-domains');
-  const ids = c.sub_domains.map((s) => s.id).sort();
+  assert.equal(pathways.sub_domains.length, 6, 'expected exactly six sub-domains');
+  const ids = pathways.sub_domains.map((s) => s.id).sort();
   assert.deepEqual(
     ids,
     ['clinical', 'general', 'genomic', 'institutional', 'materials', 'voice'],
@@ -481,14 +473,28 @@ test('Pathway C declares six sub-domains including the resolved set', () => {
 
 test('Pathway C overlays sit at L3, in a known dimension, and resolve their vocabulary and citations', () => {
   const c = pathways.pathways.find((p) => p.id === 'C');
-  for (const sub of c.sub_domains) {
+  for (const sub of pathways.sub_domains) {
     assert.ok(Array.isArray(sub.overlay), `sub-domain ${sub.id} has no overlay array`);
     for (const o of sub.overlay) {
       assert.ok(
         REQUIRED_DIMENSIONS.includes(o.dimension),
         `overlay ${o.id} (sub-domain ${sub.id}) declares unknown dimension ${o.dimension}`,
       );
-      assert.equal(o.level, 'L3', `overlay ${o.id} (sub-domain ${sub.id}) is not L3`);
+      // Overlays used to be L3-only, which tied a discipline's governance evidence
+      // to the actionability level. Since 0.6.0 each takes the level of the base
+      // criterion it mirrors and obeys the same cumulative rule, so a clinical
+      // dataset aimed at L2 picks up its L1 and L2 obligations and not the L3 ones.
+      assert.ok(VALID_LEVELS.has(o.level), `overlay ${o.id} has an unknown level ${o.level}`);
+      assert.deepEqual(
+        [...o.required_in_pathways].sort(),
+        cumulativeExpected(o.level),
+        `overlay ${o.id} (level ${o.level}) breaks the cumulative rule`,
+      );
+      // The id encodes the level, for overlays as for base criteria.
+      assert.ok(
+        o.id.includes(`.${o.level.toLowerCase()}.`),
+        `overlay ${o.id} does not carry its level ${o.level} in its id`,
+      );
       // Overlays declare a lifecycle stage like every matrix criterion, so the
       // stage-aware locked/upcoming logic treats them the same way. Uniform
       // across all sub-domains: a locked badge appearing under one discipline
@@ -497,7 +503,6 @@ test('Pathway C overlays sit at L3, in a known dimension, and resolve their voca
         VALID_LIFECYCLE_STAGE.has(o.lifecycle_stage),
         `overlay ${o.id} has invalid or missing lifecycle_stage: ${o.lifecycle_stage}`,
       );
-      assert.deepEqual(o.required_in_pathways, ['C'], `overlay ${o.id} should be required only in Pathway C`);
       assert.ok(VALID_EVIDENCE_TYPES.has(o.evidence_type), `overlay ${o.id} evidence_type invalid`);
       // Every overlay declares a mode, like every matrix criterion. This was
       // optional until 0.5.0, and eleven overlays fell through the gap and
@@ -542,7 +547,7 @@ test('Pathway C overlays sit at L3, in a known dimension, and resolve their voca
 
 test('sub-domain deposition_targets_vocabulary keys resolve in vocabularies.json', () => {
   const c = pathways.pathways.find((p) => p.id === 'C');
-  for (const sub of c.sub_domains) {
+  for (const sub of pathways.sub_domains) {
     if (!sub.deposition_targets_vocabulary) continue;
     assert.ok(
       Object.prototype.hasOwnProperty.call(vocabularies.vocabularies, sub.deposition_targets_vocabulary),
@@ -555,7 +560,7 @@ test('Pathway C overlay ids are unique across all sub-domains and do not collide
   const matrixIds = new Set(matrix.criteria.map((c) => c.id));
   const c = pathways.pathways.find((p) => p.id === 'C');
   const seen = new Set();
-  for (const sub of c.sub_domains) {
+  for (const sub of pathways.sub_domains) {
     for (const o of sub.overlay) {
       assert.ok(!seen.has(o.id), `duplicate overlay id ${o.id}`);
       seen.add(o.id);
@@ -600,7 +605,7 @@ test('label_overrides target real criteria and only reword them', () => {
   const ids = new Set(matrix.criteria.map((c) => c.id));
   const c = pathways.pathways.find((p) => p.id === 'C');
   const REWORDABLE = new Set(['label', 'remediation']);
-  for (const sub of c.sub_domains) {
+  for (const sub of pathways.sub_domains) {
     for (const [id, patch] of Object.entries(sub.label_overrides ?? {})) {
       assert.ok(ids.has(id), `sub-domain ${sub.id} overrides unknown criterion ${id}`);
       for (const key of Object.keys(patch)) {

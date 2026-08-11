@@ -1,6 +1,6 @@
 {
   "$comment": "Standing guidance content for the collection guide and the intro cards: the notes-to-actionable ladder, the wh-questions crosswalk, the per-run log template, worked ontology examples, and the burden-reduction landscape. Held here rather than inline in components so the cards on the start page and the generated guide cannot drift apart. Prose, not criteria — nothing here affects a verdict. Citation keys in any 'references' array resolve in references.json, the same registry the matrix uses; matrix.test.js enforces it.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "ladder": [
     {
       "rung": "Paper notebook",
@@ -228,11 +228,11 @@
     ]
   },
   "levels": {
-    "lead": "Every worksheet row is tagged with the readiness level it belongs to. The levels are cumulative, so a row tagged L1 is required at every tier, L2 from Faithful upward, and L3 only for Task-ready. Names and DRL bands come from the assessment matrix; the sentence is what each level is for.",
+    "lead": "Every worksheet row is tagged with the readiness level it belongs to. The levels are cumulative, so a row tagged L1 is required at every tier, L2 from Faithful upward, and L3 only for Task-ready. Names and DRL bands come from the assessment matrix; the sentence is what each level is for. The levels measure machine-actionability, which is independent of the governance a dataset needs: sensitive data carries access controls at every level, and clearing them does not raise the level.",
     "meaning": {
-      "L1": "Someone can find the dataset, obtain it, and know what they are allowed to do with it.",
-      "L2": "A pipeline can load it without guesswork: schema, distributions, and transformations are all declared.",
-      "L3": "It can carry the weight of training a model where being wrong matters: full lineage, bias audit, and ethics recorded as metadata."
+      "L1": "A person can find the dataset, obtain it, and know what they are allowed to do with it. The consumer is a reader.",
+      "L2": "A pipeline can load it once someone has prepared the load: schema, distributions, and transformations are all declared, and a person still mediates the final step.",
+      "L3": "An automated or semi-automated machine-learning workflow can consume it without anyone preparing the data first — a workflow engine, an AutoML system, or an instrumented laboratory. Some pipelines automate a few steps and some run end to end; either way, the dataset is not what stops them."
     }
   },
   "run_log_fields": [

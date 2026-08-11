@@ -3,7 +3,7 @@
 // Continue button routes to the first dimension.
 
 import { Navigate, useNavigate } from 'react-router-dom';
-import { PATHWAYS, subDomainsForC } from '../lib/pathway.js';
+import { PATHWAYS, subDomains } from '../lib/pathway.js';
 import { DIMENSIONS, slugify } from '../lib/dimensions.js';
 import { useAssessment } from '../state/assessment.jsx';
 
@@ -52,33 +52,42 @@ export default function AudienceSelector() {
         ))}
       </div>
 
-      {state.pathway === 'C' && (
-        <div className="mt-6">
-          <h3 className="text-sm font-semibold">Sub-domain</h3>
-          <p className="mt-1 text-xs text-muted">
-            Adds discipline-specific L3 criteria — ethics evidence for the biomedical
-            sub-domains, and also encoding, interoperability, and provenance for Materials
-            science — and sets the datasheet template. Defaults to General.
-          </p>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            {subDomainsForC().map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => dispatch({ type: 'SET_SUB_DOMAIN', sub_domain: s.id })}
-                className={`text-left rounded-none border p-3 text-sm transition-colors ${
-                  state.sub_domain === s.id
-                    ? 'border-ink ring-1 ring-ink'
-                    : 'border-line hover:border-muted'
-                }`}
-              >
-                <span className="font-medium">{s.name}</span>
-                <p className="mt-0.5 text-xs text-muted">{s.description}</p>
-              </button>
-            ))}
-          </div>
+      {/* The sub-domain is independent of the pathway above: the pathway is the target
+          level, which measures machine-actionability, while the sub-domain is the
+          discipline and governance context, which the level does not decide. Human or
+          biological data owes the same oversight evidence whether it is aimed at L1 or
+          L3, so this selector is shown at every pathway. Until schema 0.6.0 it appeared
+          only under Pathway C, which made governance a function of actionability. */}
+      <div className="mt-8 border-t border-line pt-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="text-sm font-semibold">Discipline and governance context</h3>
+          <span className="text-xs text-faint">independent of the level above</span>
         </div>
-      )}
+        <p className="mt-1 text-xs text-muted">
+          Adds the evidence a discipline expects — oversight and consent for the
+          human-subjects sub-domains, encoding, interoperability, and provenance for
+          Materials science — and selects the documentation template. Each added
+          criterion carries its own level, so it becomes required at the tier that
+          matches it rather than only at Task-ready. Defaults to General.
+        </p>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          {subDomains().map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => dispatch({ type: 'SET_SUB_DOMAIN', sub_domain: s.id })}
+              className={`text-left rounded-none border p-3 text-sm transition-colors ${
+                state.sub_domain === s.id
+                  ? 'border-ink ring-1 ring-ink'
+                  : 'border-line hover:border-muted'
+              }`}
+            >
+              <span className="font-medium">{s.name}</span>
+              <p className="mt-0.5 text-xs text-muted">{s.description}</p>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {state.pathway && (
         <div className="mt-6">
