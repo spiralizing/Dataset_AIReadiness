@@ -12,6 +12,7 @@ import {
   whatToRecord,
   hasCollectionHint,
   citationHref,
+  captureKind,
 } from '../src/generators/collectionGuide.js';
 import { requiredCriteria, ALL_CRITERIA, subDomainsForC } from '../src/lib/pathway.js';
 
@@ -86,15 +87,32 @@ test('every L3 criterion and overlay carries a collection hint', () => {
   }
 });
 
-test('criteria without a hint fall back to remediation rather than blanking', () => {
-  const l1 = ALL_CRITERIA.find((c) => c.id === 'fairness.l1.persistent_id');
-  assert.ok(!hasCollectionHint(l1), 'fixture assumes L1 has no hint yet');
-  assert.equal(whatToRecord(l1), l1.remediation);
+test('no row borrows remediation text; each declares a capture moment or its absence', () => {
+  // The regression this replaces: whatToRecord used to fall back to `remediation`
+  // for 32 of 72 criteria, printing reviewer-voice text ("Mint a DOI … before
+  // publishing") in a worksheet about what to write down beforehand. Both halves of
+  // the invariant matter — that every row says something, and that what it says was
+  // written for this document.
+  for (const c of ALL_CRITERIA) {
+    assert.notEqual(
+      captureKind(c),
+      'fallback',
+      `${c.id} declares neither collection_hint nor no_capture, so the guide borrows its remediation`,
+    );
+    assert.notEqual(whatToRecord(c), c.remediation, `${c.id} is showing remediation text`);
+  }
 
-  // So a Pathway A guide still has something to say on every row.
+  // A criterion assigned by the repository at deposit says so, rather than being
+  // given a capture instruction it cannot honour.
+  const pid = ALL_CRITERIA.find((c) => c.id === 'fairness.l1.persistent_id');
+  assert.equal(captureKind(pid), 'none');
+  assert.match(whatToRecord(pid), /Assigned by the repository at deposit/);
+
+  // And every rendered row still has something to say.
   const g = buildCollectionGuide(rec('A'), { now: FIXED });
   for (const row of g.groups.flatMap((x) => x.rows)) {
     assert.ok(row.record.length > 0, `${row.id} has nothing to record`);
+    assert.ok(['record', 'none'].includes(row.recordKind), `${row.id}: ${row.recordKind}`);
   }
 });
 

@@ -2,7 +2,7 @@
 // Pure function: wraps the record with the computed verdict and generation
 // metadata. Kept separate from the datasheet (human-readable) generator.
 
-import { pathwayVerdict, requiredCriteria } from './pathway.js';
+import { pathwayVerdict, requiredCriteria, isCriterionSatisfied } from './pathway.js';
 import { validationResults, AUTOMATED_WITH_VALIDATOR } from './validation.js';
 import { isUpcoming } from './stages.js';
 import { generateCroissant } from '../generators/croissant.js';
@@ -17,9 +17,11 @@ import { citeThisWorkShort } from './thisWork.js';
 const FRAMEWORK = citeThisWorkShort();
 
 export const REPORT_VERSION = 'assessment_report_v0';
-// v1 adds `ladder`: the degree of machine-actionability reached by each generated
-// artifact, in the paper's vocabulary. Additive — every v0 key is unchanged.
-export const CONFORMANCE_VERSION = 'conformance_report_v1';
+// v1 added `ladder`: the degree of machine-actionability reached by each generated
+// artifact. v2 replaces the automated-only `checks` array with `criteria`, covering
+// every required criterion under a per-mode status vocabulary. Breaking, and gated
+// by this field — nothing downstream consumed v1.
+export const CONFORMANCE_VERSION = 'conformance_report_v2';
 
 export function buildAssessmentReport(record, opts = {}) {
   const { pathway, sub_domain: subDomain, started_at, answers = {} } = record;
@@ -44,9 +46,21 @@ export function buildAssessmentReport(record, opts = {}) {
   };
 }
 
-// The conformance report — the machine-readable record of which automated
-// checks passed, plus the Croissant validation detail. Named .json for now; the
-// RDF/JSON-LD form (a SHACL validation report) arrives with Phase 4.
+// The conformance report — the machine-readable record of how every criterion in
+// the assessment is confirmed, not only the ones a validator can settle.
+//
+// v2 covers all required criteria rather than the automated subset, and gives each
+// mode its own status vocabulary:
+//
+//   automated   pass | fail | pending      a check ran (or is not wired yet)
+//   attested    declared | undeclared      the depositor stated it; evidence optional
+//   manual      recorded | unrecorded      a human judgement was written down
+//   any mode    upcoming                   not due at this lifecycle stage
+//
+// Reusing 'pass' for a declaration would assert that something was verified when
+// nobody verified anything, which is the one thing the framework asks the tool not
+// to do. Distinct words let a consumer separate a validated criterion from a
+// claimed one without interpreting the mode field.
 export function buildConformanceReport(record, opts = {}) {
   const { pathway, sub_domain: subDomain } = record;
   const now = opts.now ?? new Date().toISOString();
@@ -67,21 +81,57 @@ export function buildConformanceReport(record, opts = {}) {
     shacl: opts.shacl,
   });
 
-  const checks = requiredCriteria(pathway, subDomain)
-    .filter((c) => c.verification === 'automated' && !isUpcoming(c, record.stage))
-    .map((c) => {
+  const answers = record.answers ?? {};
+
+  const criteria = requiredCriteria(pathway, subDomain).map((c) => {
+    const entry = {
+      criterion: c.id,
+      label: c.label,
+      dimension: c.dimension,
+      level: c.level,
+      mode: c.verification,
+      // The sentence saying what confirms this criterion travels with the report,
+      // on the same principle as the ladder's rung descriptions: a consumer should
+      // not need the paper open to read the verdict.
+      confirms: c.verification_hint ?? '',
+    };
+    if (c.validators?.length) entry.validators = c.validators;
+
+    if (isUpcoming(c, record.stage)) {
+      entry.status = 'upcoming';
+      entry.message = `Not due at this stage; belongs to ${c.lifecycle_stage}.`;
+      return entry;
+    }
+
+    if (c.verification === 'automated') {
       const hasValidator = AUTOMATED_WITH_VALIDATOR.has(c.id);
       const res = results[c.id];
-      const status = !hasValidator ? 'pending' : res?.ok ? 'pass' : 'fail';
-      return {
-        criterion: c.id,
-        label: c.label,
-        status,
-        message: hasValidator ? (res?.message ?? '') : 'validator pending (Phase 4)',
-      };
-    });
+      entry.status = !hasValidator ? 'pending' : res?.ok ? 'pass' : 'fail';
+      entry.message = hasValidator ? (res?.message ?? '') : 'No validator wired for this criterion.';
+      return entry;
+    }
 
-  const count = (s) => checks.filter((c) => c.status === s).length;
+    // Attested and manual: the record is the answer itself, and for attested the
+    // note field is where the backing report is linked.
+    const answered = isCriterionSatisfied(c, answers[c.id], results);
+    const note = String(answers[c.id]?.notes ?? '').trim();
+    if (c.verification === 'attested') {
+      entry.status = answered ? 'declared' : 'undeclared';
+      if (note) entry.evidence = note;
+    } else {
+      entry.status = answered ? 'recorded' : 'unrecorded';
+      if (note) entry.note = note;
+    }
+    return entry;
+  });
+
+  const tallyFor = (mode, statuses) => {
+    const of = criteria.filter((c) => c.mode === mode);
+    const out = { total: of.length };
+    for (const st of statuses) out[st] = of.filter((c) => c.status === st).length;
+    if (mode === 'attested') out.with_evidence = of.filter((c) => c.evidence).length;
+    return out;
+  };
 
   return {
     schema_version: CONFORMANCE_VERSION,
@@ -102,12 +152,13 @@ export function buildConformanceReport(record, opts = {}) {
       croissant: ladder.croissant,
       provo: ladder.provo,
     },
-    checks,
+    criteria,
     summary: {
-      automated: checks.length,
-      pass: count('pass'),
-      fail: count('fail'),
-      pending: count('pending'),
+      total: criteria.length,
+      upcoming: criteria.filter((c) => c.status === 'upcoming').length,
+      automated: tallyFor('automated', ['pass', 'fail', 'pending', 'upcoming']),
+      attested: tallyFor('attested', ['declared', 'undeclared', 'upcoming']),
+      manual: tallyFor('manual', ['recorded', 'unrecorded', 'upcoming']),
     },
   };
 }

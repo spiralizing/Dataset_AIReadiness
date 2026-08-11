@@ -251,6 +251,43 @@ test('every references[] citation key resolves in references.json', () => {
   }
 });
 
+test('every criterion declares a capture moment or states its absence', () => {
+  // The capture axis, made total. Before this, 32 of 72 criteria declared neither and
+  // the guide silently substituted `remediation` — text addressed to a reviewer
+  // fixing a release, printed in a worksheet about what to write down beforehand.
+  // Exactly one of the two fields, so "nothing to capture" is a decision on record
+  // rather than an omission.
+  const overlays = pathways.pathways
+    .flatMap((p) => p.sub_domains ?? [])
+    .flatMap((s) => s.overlay ?? []);
+
+  for (const c of [...matrix.criteria, ...overlays]) {
+    const hasHint = typeof c.collection_hint === 'string';
+    const hasNone = typeof c.no_capture === 'string';
+    assert.ok(
+      hasHint !== hasNone,
+      `${c.id} must declare either collection_hint or no_capture, not ${hasHint ? 'both' : 'neither'}`,
+    );
+    if (hasNone) {
+      assert.ok(
+        c.no_capture.trim().length > 20,
+        `${c.id} no_capture must say why there is nothing to record`,
+      );
+      assert.notEqual(c.no_capture.trim(), (c.remediation ?? '').trim());
+      // The capture axis and the verification axis are independent: a record count is
+      // human-confirmed against the released files and still has nothing to capture
+      // during collection. What a stated absence cannot be is a criterion at the
+      // acquisition or curation stage, because those are the moments the guide calls
+      // irrecoverable — if the observation is only available while the work happens,
+      // there is by definition something to write down.
+      assert.ok(
+        !['acquisition', 'curation'].includes(c.lifecycle_stage),
+        `${c.id} sits at the ${c.lifecycle_stage} stage, which cannot be revisited, so it needs a collection_hint`,
+      );
+    }
+  }
+});
+
 test('every criterion says what would confirm it', () => {
   // The schema had a capture axis (collection_hint: what to record) and no
   // verification axis, so 59 of 72 criteria declared a mode and named no check.

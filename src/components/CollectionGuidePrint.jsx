@@ -295,7 +295,17 @@ export default function CollectionGuidePrint({ record }) {
                       {r.label} <span className="gp-tag">{r.level}</span>{' '}
                       <span className="gp-note">{r.dimension}</span>
                     </p>
-                    {r.record && <p className="gp-detail">{r.record}</p>}
+                    {r.record && (
+                      <p className="gp-detail">
+                        <b>{r.recordKind === 'none' ? 'Nothing to record in advance.' : 'Record.'}</b>{' '}
+                        {r.record}
+                      </p>
+                    )}
+                    {r.confirms && (
+                      <p className="gp-detail">
+                        <b>Confirmed by ({r.mode}).</b> {r.confirms}
+                      </p>
+                    )}
                     <p className="gp-detail gp-italic">Answer format: {r.constraint}.</p>
                   </div>
                 </li>

@@ -11,8 +11,8 @@
       "validator_name": "BIDS Validator",
       "validator_url": "https://bids-standard.github.io/bids-validator/",
       "reference_doi": "10.1038/sdata.2016.44",
-      "execution": "in-browser",
-      "note": "Deno/JS build runs in the browser; can execute in place and mark the criterion automated."
+      "execution": "web-service",
+      "note": "The BIDS Validator runs in your browser at its own site: point it at the dataset directory and record the report as attested evidence. A JS/Deno build exists and could one day run inside this tool, which does not embed it today."
     },
     {
       "id": "frictionless",
@@ -22,8 +22,8 @@
       "standard_url": "https://frictionlessdata.io/",
       "validator_name": "Frictionless",
       "validator_url": "https://framework.frictionlessdata.io/",
-      "execution": "in-browser",
-      "note": "JavaScript port available; can validate a tabular resource in place. General-purpose, so it applies across disciplines."
+      "execution": "cli",
+      "note": "Run frictionless validate over the data package and record the report as attested evidence. General-purpose, so it applies across disciplines. A JavaScript port exists; this tool does not embed it."
     },
     {
       "id": "shacl",

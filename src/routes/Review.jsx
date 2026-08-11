@@ -9,10 +9,12 @@ import {
   pathwayVerdict,
   recommendedForPathway,
   isCriterionSatisfied,
+  requiredCriteria,
 } from '../lib/pathway.js';
+import guidance from '../schema/guidance.json';
 import { validationResults } from '../lib/validation.js';
 import { effectiveCroissant } from '../generators/croissant.js';
-import { getStage } from '../lib/stages.js';
+import { getStage, isUpcoming } from '../lib/stages.js';
 import { useAssessment } from '../state/assessment.jsx';
 
 const CELL = {
@@ -33,6 +35,20 @@ export default function Review() {
   const recommendedUnmet = recommendedForPathway(pathway).filter(
     (c) => !isCriterionSatisfied(c, answers[c.id], results),
   );
+
+  // How much of this assessment a validator can settle, and how much rests on a
+  // declaration or a judgement. The heatmap alone reads as though every tick were
+  // the same kind of fact; these three are not interchangeable, and the split is
+  // worth seeing before the verdict is taken as a measurement.
+  const due = requiredCriteria(pathway, subDomain).filter((c) => !isUpcoming(c, state.stage));
+  const byMode = guidance.verification_modes.modes.map((m) => {
+    const of = due.filter((c) => c.verification === m.id);
+    return {
+      ...m,
+      total: of.length,
+      satisfied: of.filter((c) => isCriterionSatisfied(c, answers[c.id], results)).length,
+    };
+  }).filter((m) => m.total > 0);
 
   return (
     <section>
@@ -120,6 +136,28 @@ export default function Review() {
         <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-bad-bg align-middle" />unmet</span>
         <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-info-bg align-middle" />upcoming</span>
         <span><span className="mr-1 inline-block h-3 w-3 rounded-none bg-idle-bg align-middle" />not required</span>
+      </div>
+
+      <div className="mt-6 border border-line bg-surface-2 p-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="text-sm font-semibold text-ink">How these are confirmed</h3>
+          <span className="text-xs text-faint">{due.length} criteria due at this stage</span>
+        </div>
+        <p className="mt-1 text-xs text-muted">{guidance.verification_modes.lead}</p>
+        <dl className="mt-3 grid gap-2">
+          {byMode.map((m) => (
+            <div key={m.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <dt className="shrink-0">
+                <span className={`px-1.5 py-0.5 text-[0.65rem] font-medium ${m.tone}`}>{m.label}</span>
+              </dt>
+              <dd className="shrink-0 font-mono text-xs tabular-nums text-ink">
+                {m.satisfied}/{m.total}
+              </dd>
+              <dd className="min-w-0 flex-1 text-xs text-muted">{m.definition}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-3 text-xs italic text-faint">{guidance.verification_modes.note}</p>
       </div>
 
       {/* Recommended-but-unmet */}

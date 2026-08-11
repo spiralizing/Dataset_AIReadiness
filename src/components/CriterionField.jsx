@@ -11,6 +11,7 @@ import vocabularies from '../schema/vocabularies.json';
 import guidance from '../schema/guidance.json';
 import { isLocked } from '../lib/stages.js';
 import { depositionTargets } from '../lib/depositionTargets.js';
+import { validatorsFor, executionNote } from '../lib/validators.js';
 
 // The three modes, their wording, and their definitions come from guidance.json,
 // so the chip here, the legend on the dimension page, and the collection guide
@@ -78,6 +79,7 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
   const pending = automated && !result;
   const [descriptorArtifact, descriptorTab] = DESCRIPTOR_DRIVEN[criterion.id] ?? [];
   const locked = isLocked(criterion, stage);
+  const validators = validatorsFor(criterion);
 
   return (
     <div className="rounded-none border border-line bg-surface p-4">
@@ -130,6 +132,43 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
         <p className="mt-1 text-xs text-bad">{result.message}</p>
       )}
 
+      {/* What would confirm this row. Visible rather than folded into the Guidance
+          details below, because it says what "done" means, where remediation says
+          how to close a gap — different questions, and only one of them is needed
+          before you answer. The sentence carries its own mode in its voice ("The
+          tool checks…", "You declare…", "<role> confirms…"), which is enforced in
+          matrix.test.js, so it doubles as the in-context gloss on the mode chip. */}
+      {criterion.verification_hint && (
+        <p className="mt-2 text-xs text-muted">
+          <span className="mr-1 font-mono text-[0.65rem] uppercase tracking-wider text-faint">
+            Confirms
+          </span>
+          {criterion.verification_hint}
+        </p>
+      )}
+
+      {/* The tools whose report is the evidence for this row. Sourced from the
+          validator registry, which shipped unreachable until now. */}
+      {validators.length > 0 && (
+        <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="font-mono text-[0.65rem] uppercase tracking-wider text-faint">
+            Report from
+          </span>
+          {validators.map((v) => (
+            <a
+              key={v.id}
+              href={v.validator_url}
+              target="_blank"
+              rel="noreferrer"
+              className="border border-line px-1.5 py-0.5 text-[0.7rem] text-ink hover:border-muted"
+            >
+              {v.validator_name}
+              <span className="ml-1 text-[0.62rem] text-faint">{executionNote(v)}</span>
+            </a>
+          ))}
+        </p>
+      )}
+
       {locked && (
         <p className="mt-1 text-xs text-warn">
           Reflects a past {criterion.lifecycle_stage} decision. Record what was done; if it falls
@@ -149,7 +188,7 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
           onChange={(e) => onChange({ notes: e.target.value })}
           placeholder={
             criterion.verification === 'attested'
-              ? 'Evidence link or note (optional)'
+              ? 'Link the report that backs this (optional)'
               : 'Note (optional)'
           }
           className="mt-2 w-full rounded-none border border-line px-2 py-1 text-xs"

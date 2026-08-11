@@ -74,10 +74,29 @@ const STAGE_NOTES = {
   release: 'Assigned or fixed at deposit; nothing to capture beforehand beyond the intent.',
 };
 
-// What to write down for a criterion: the collection hint when one exists, else
-// the remediation text as a serviceable stand-in.
+// What to write down for a criterion — and, where there is nothing to write down in
+// advance, why not.
+//
+// This used to fall back to `remediation` when no hint existed, which covered 32 of
+// 72 rows with text written for a reviewer closing a gap after the fact: past tense,
+// addressed to someone fixing a release, printed inside a worksheet about what to
+// capture beforehand. A third of the guide spoke in the wrong voice. Every criterion
+// now declares either a capture moment or its absence, and matrix.test.js keeps it
+// that way; the remediation fallback remains only so a hand-added criterion renders
+// something rather than a blank.
 export const whatToRecord = (criterion) =>
-  criterion?.collection_hint ?? criterion?.remediation ?? '';
+  criterion?.collection_hint ?? criterion?.no_capture ?? criterion?.remediation ?? '';
+
+// Which of the two a row is showing, so the renderers can label it honestly instead
+// of presenting "nothing to record" under a heading that says Record.
+//   'record'   — there is something to capture, and whatToRecord says what
+//   'none'     — nothing to capture in advance, and whatToRecord says why
+//   'fallback' — neither declared; the criterion is incomplete
+export const captureKind = (criterion) => {
+  if (criterion?.collection_hint) return 'record';
+  if (criterion?.no_capture) return 'none';
+  return 'fallback';
+};
 
 export const hasCollectionHint = (criterion) => Boolean(criterion?.collection_hint);
 
@@ -113,6 +132,12 @@ export function buildCollectionGuide(record, opts = {}) {
         dimension: c.dimension,
         level: c.level,
         record: whatToRecord(c),
+        recordKind: captureKind(c),
+        // The other axis of the row: what to write down, and what will confirm it.
+        // A row nobody can settle mechanically is worth knowing about while you are
+        // still deciding how much effort to spend capturing it.
+        mode: c.verification,
+        confirms: c.verification_hint ?? '',
         constraint: constraintFor(c),
         satisfied: isCriterionSatisfied(c, answers[c.id], results),
       })),
@@ -308,7 +333,10 @@ export function generateCollectionGuide(record, opts = {}) {
     p();
     for (const r of grp.rows) {
       p(`- [${r.satisfied ? 'x' : ' '}] **${r.label}** _(${r.dimension} · ${r.level})_`);
-      if (r.record) p(`  - ${r.record}`);
+      if (r.record) {
+        p(`  - **${r.recordKind === 'none' ? 'Nothing to record in advance' : 'Record'}.** ${r.record}`);
+      }
+      if (r.confirms) p(`  - **Confirmed by (${r.mode}).** ${r.confirms}`);
       p(`  - _Answer format: ${r.constraint}._`);
     }
     p();

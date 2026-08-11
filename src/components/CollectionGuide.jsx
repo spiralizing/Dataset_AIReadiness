@@ -12,6 +12,7 @@
 // moment either changed, and there is nothing to validate it against.
 
 import { buildCollectionGuide, citationHref, citationText } from '../generators/collectionGuide.js';
+import guidanceDoc from '../schema/guidance.json';
 import {
   LadderStrip,
   AutomationNote,
@@ -21,6 +22,12 @@ import {
   WhQuestions,
   DocumentationInputs,
 } from './guidance.jsx';
+
+// Mode tones come from guidance.json, the same source the chips on every criterion
+// and the scorecard panel read, so one row cannot disagree with another.
+const MODE_TAG = Object.fromEntries(
+  guidanceDoc.verification_modes.modes.map((m) => [m.id, m.tone]),
+);
 
 const LEVEL_TAG = {
   L1: 'bg-idle-bg text-idle',
@@ -183,9 +190,27 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
                         <span className={`px-1 py-0.5 text-[0.65rem] font-medium ${LEVEL_TAG[r.level] ?? ''}`}>
                           {r.level}
                         </span>
+                        <span className={`px-1 py-0.5 text-[0.65rem] font-medium ${MODE_TAG[r.mode] ?? ''}`}>
+                          {r.mode}
+                        </span>
                         <span className="text-[0.7rem] text-faint">{r.dimension}</span>
                       </div>
-                      {r.record && <p className="mt-1 text-xs text-muted">{r.record}</p>}
+                      {r.record && (
+                        <p className="mt-1 text-xs text-muted">
+                          <span className="mr-1 font-mono text-[0.65rem] uppercase tracking-wider text-faint">
+                            {r.recordKind === 'none' ? 'Nothing to record yet' : 'Record'}
+                          </span>
+                          {r.record}
+                        </p>
+                      )}
+                      {r.confirms && (
+                        <p className="mt-1 text-xs text-muted">
+                          <span className="mr-1 font-mono text-[0.65rem] uppercase tracking-wider text-faint">
+                            Confirmed by
+                          </span>
+                          {r.confirms}
+                        </p>
+                      )}
                       <p className="mt-1 text-[0.7rem] italic text-faint">Answer format: {r.constraint}.</p>
                     </div>
                   </div>

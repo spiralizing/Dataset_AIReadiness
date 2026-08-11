@@ -141,3 +141,51 @@ test('buildAssessmentReport wraps record with verdict and metadata', () => {
   assert.equal(report.verdict.met, false);
   assert.deepEqual(report.answers, {});
 });
+
+test('each answer states the basis it is given on, and an unmet one claims none', () => {
+  // A datasheet is read by someone deciding whether to trust the dataset, so
+  // "a validator confirmed this" and "the depositor says so" cannot look the same.
+  const md = generateDatasheet(
+    {
+      pathway: 'C',
+      sub_domain: 'general',
+      stage: 'upgrade',
+      answers: {
+        'fairness.l1.persistent_id': { value: '10.5281/zenodo.123' },
+        'characterization.l3.bias_audit': { value: 'Audited', notes: 'https://example.org/bias.html' },
+        'ethics.l3.oversight_documented': { value: 'IRB 2024-1183' },
+      },
+    },
+    { now: FIXED },
+  );
+
+  assert.match(md, /Persistent identifier[^\n]*— _validator-checked_/);
+  assert.match(md, /Bias audit[^\n]*— _attested; evidence: https:\/\/example\.org\/bias\.html_/);
+  assert.match(md, /Ethics oversight[^\n]*— _human judgement_/);
+
+  // The honesty case: an unanswered criterion has no basis. Tagging it with its
+  // mode would assert a judgement nobody made.
+  assert.match(md, /Missingness rates per variable:\*\* _not provided_ — _not yet recorded_/);
+  // An automated criterion that is simply failing says so rather than going quiet.
+  assert.match(md, /Landing page[^\n]*— _validator check not passing_/);
+
+  // And the tags are defined in the document, using the same terms.
+  assert.match(md, /## How to read this datasheet/);
+  assert.match(md, /\*\*validator-checked\*\* \(automated\)/);
+  assert.match(md, /\*\*not yet recorded\*\*/);
+});
+
+test('an attested note is the evidence and is not also printed as a remark', () => {
+  const md = generateDatasheet(
+    {
+      pathway: 'C',
+      sub_domain: 'general',
+      stage: 'upgrade',
+      answers: { 'characterization.l3.bias_audit': { value: 'Audited', notes: 'report.pdf' } },
+    },
+    { now: FIXED },
+  );
+  const line = md.split('\n').find((l) => l.includes('Bias audit'));
+  assert.match(line, /evidence: report\.pdf/);
+  assert.ok(!line.includes('(note: report.pdf)'), 'the note is printed twice');
+});
