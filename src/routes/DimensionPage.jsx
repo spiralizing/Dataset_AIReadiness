@@ -11,6 +11,7 @@ import { validationResults } from '../lib/validation.js';
 import { effectiveCroissant } from '../generators/croissant.js';
 import { useAssessment } from '../state/assessment.jsx';
 import CriterionField from '../components/CriterionField.jsx';
+import guidance from '../schema/guidance.json';
 
 const LEVEL_NAMES = {
   L1: 'L1 — Accessible',
@@ -92,6 +93,25 @@ export default function DimensionPage() {
       {state.stage && STAGE_HINT[state.stage] && (
         <p className="mt-1 text-xs text-muted">{STAGE_HINT[state.stage]}</p>
       )}
+
+      {/* Every criterion below carries a mode chip. The chips were unexplained
+          until now, so the legend sits above the first one — collapsed, since it is
+          reference material a returning user does not need to re-read. */}
+      <details className="mt-3 border border-line bg-surface-2 p-3">
+        <summary className="cursor-pointer text-xs text-muted">
+          Each row is tagged {guidance.verification_modes.modes.map((m) => m.label).join(', ')} —
+          what these mean
+        </summary>
+        <p className="mt-2 text-xs text-muted">{guidance.verification_modes.lead}</p>
+        <ul className="mt-2 grid gap-1.5">
+          {guidance.verification_modes.modes.map((m) => (
+            <li key={m.id} className="text-xs text-muted">
+              <span className={`px-1 py-0.5 text-[0.65rem] font-medium ${m.tone}`}>{m.label}</span>{' '}
+              {m.definition}
+            </li>
+          ))}
+        </ul>
+      </details>
 
       {['L1', 'L2', 'L3'].map(
         (lvl) =>

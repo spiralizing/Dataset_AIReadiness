@@ -34,7 +34,7 @@ const title = (t) => at(`>${t}</h2>`);
 
 test('slides run problem, then tool, then outputs', () => {
   const order = [
-    at('Make a dataset AI-ready'),
+    at('Make a dataset machine-learning-ready'),
     ...[
       'The seven dimensions',
       'The three readiness levels',
@@ -111,4 +111,20 @@ test('the Start here cue sits at the bottom of the last slide', () => {
 
   // The other slides keep the plain layout.
   assert.equal(html.split('bg-surface p-8 flex flex-col').length - 1, 1);
+});
+
+test('the matrix renders from the schema, with the out-of-cell criteria attributed', () => {
+  // The cell wording used to live in a constant in this component, which is exactly
+  // the drift the schema now prevents: these strings are Table 13's, and they are
+  // rendered from matrix.json.
+  for (const cell of ['FAIR F+A indicators', 'Storage footprint reported', 'Full pipeline provenance (W3C PROV)']) {
+    at(cell);
+  }
+
+  // The 21 cells expand to more criteria than that, and the ones the cell wording
+  // does not name are disclosed with their source rather than left to be noticed.
+  at('ask for something the cell wording does not name');
+  at('Maintenance stated'); // the L2 addition drawn from §2.7
+  assert.ok(html.includes('tab:release-components') || html.includes('§2.7'),
+    'out-of-cell criteria are listed without their attribution');
 });

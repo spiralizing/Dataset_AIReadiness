@@ -16,6 +16,17 @@ export const ALL_CRITERIA = matrix.criteria;
 export const LEVELS = matrix.levels;
 export const PATHWAYS = pathwaysData.pathways;
 
+// The 21 cell texts of the paper's assessment matrix, keyed dimension -> level.
+// Rendered wherever the matrix itself is shown, so the wording and the criteria
+// that operationalise it come from one file.
+export const CELLS = matrix.cells;
+export const cellText = (dimension, level) => CELLS?.[dimension]?.[level] ?? '';
+
+// Criteria whose requirement the cell text does not name, with the attribution
+// saying where in the paper they come from. This is the crosswalk a reader needs
+// when the criterion count (larger) is compared with the cell count (21).
+export const beyondCellCriteria = () => ALL_CRITERIA.filter((c) => c.beyond_cell);
+
 export const getPathway = (id) => PATHWAYS.find((p) => p.id === id) ?? null;
 export const subDomainsForC = () => getPathway('C')?.sub_domains ?? [];
 export const getSubDomain = (subId) =>

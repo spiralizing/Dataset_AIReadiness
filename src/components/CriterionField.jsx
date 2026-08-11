@@ -8,14 +8,20 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import vocabularies from '../schema/vocabularies.json';
+import guidance from '../schema/guidance.json';
 import { isLocked } from '../lib/stages.js';
 import { depositionTargets } from '../lib/depositionTargets.js';
 
-const VERIFICATION_BADGE = {
-  automated: { label: 'automated', cls: 'bg-ok-bg text-ok' },
-  attested: { label: 'attested', cls: 'bg-warn-bg text-warn' },
-  manual: { label: 'manual', cls: 'bg-idle-bg text-idle' },
-};
+// The three modes, their wording, and their definitions come from guidance.json,
+// so the chip here, the legend on the dimension page, and the collection guide
+// cannot disagree about what "attested" means. The definition rides along as the
+// chip's tooltip: the label alone never said what the mode required of the user.
+const VERIFICATION_BADGE = Object.fromEntries(
+  guidance.verification_modes.modes.map((m) => [
+    m.id,
+    { label: m.label, cls: m.tone, definition: m.definition },
+  ]),
+);
 
 const vocabValues = (key) => vocabularies.vocabularies[key]?.values ?? [];
 
@@ -89,7 +95,10 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
             </span>
           )}
           {automated && <StatusPill pending={pending} result={result} />}
-          <span className={`rounded-none px-1.5 py-0.5 text-[0.65rem] font-medium ${badge.cls}`}>
+          <span
+            title={badge.definition}
+            className={`rounded-none px-1.5 py-0.5 text-[0.65rem] font-medium ${badge.cls}`}
+          >
             {badge.label}
           </span>
         </div>
@@ -124,7 +133,7 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
       {locked && (
         <p className="mt-1 text-xs text-warn">
           Reflects a past {criterion.lifecycle_stage} decision. Record what was done; if it falls
-          short, document it as a known limitation rather than a gap to fix.
+          short, document it as a known limitation of the release.
         </p>
       )}
 

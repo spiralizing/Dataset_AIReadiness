@@ -20,7 +20,7 @@ export const STAGES = [
   {
     id: 'upgrade',
     title: 'Published dataset',
-    question: 'I have a published dataset and want to make it AI-ready.',
+    question: 'I have a published dataset and want to make it machine-learning-ready.',
     suggestedPathway: 'C',
   },
 ];

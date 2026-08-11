@@ -1,6 +1,6 @@
 {
   "$comment": "Standing guidance content for the collection guide and the intro cards: the notes-to-actionable ladder, the wh-questions crosswalk, the per-run log template, worked ontology examples, and the burden-reduction landscape. Held here rather than inline in components so the cards on the start page and the generated guide cannot drift apart. Prose, not criteria — nothing here affects a verdict. Citation keys in any 'references' array resolve in references.json, the same registry the matrix uses; matrix.test.js enforces it.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "ladder": [
     {
       "rung": "Paper notebook",
@@ -24,7 +24,7 @@
       "sample": "Sample      quartz-03\nPrepared    A. González · 2024-10-09\nInstrument  Rigaku SmartLab (inst-0217)\nConditions  Cu Kα · 40 kV / 30 mA · RT\nNote        re-polished; strong peak ~26.6° 2θ",
       "gains": "Timestamps, search, backup, and shared access.",
       "out_of_reach": "Extraction of a value without a human reader; the content is still prose.",
-      "standards": "An established container is preferable to an invented one. Keep the entry organised around fields you will reuse across runs, rather than free narrative."
+      "standards": "An established container is preferable to an invented one. Keep the entry organised around fields you will reuse across runs."
     },
     {
       "rung": "Structured capture",
@@ -63,6 +63,78 @@
     "references": [
       "Huber2020",
       "Pizzi2016"
+    ]
+  },
+  "degrees": {
+    "lead": "The four forms above describe laboratory practice. These five degrees describe the file that comes out of it, and the two ladders meet end to end: a record that parses as JSON or RDF has already passed through all four forms. Each degree has one check that certifies it.",
+    "scope_note": "The assessment certifies the first four offline. Executable is reported as out of scope, because certifying it means round-tripping the artifact through the tool that will consume it and dereferencing every identifier over the network. The Export page names the check to run yourself.",
+    "rungs": [
+      {
+        "id": "well_formed",
+        "label": "Well-formed",
+        "check": "Parses as JSON or RDF",
+        "tone": "border-line bg-surface-2",
+        "means": "The file is syntactically valid, so a tool can open it at all. This is the floor, and it says nothing about whether the contents make sense."
+      },
+      {
+        "id": "schema_valid",
+        "label": "Schema-valid",
+        "check": "Validates against a schema",
+        "tone": "border-warn-line bg-warn-bg",
+        "means": "The required properties are present and correctly typed, so a consumer expecting Croissant 1.0 finds the shape it expects. A descriptor can be schema-valid and still describe nothing useful."
+      },
+      {
+        "id": "referentially_sound",
+        "label": "Referentially sound",
+        "check": "Internal references resolve; SHACL shape constraints hold",
+        "tone": "border-info-line bg-info-bg",
+        "means": "The pointers inside the file resolve: every field source names a declared file, every identifier is unique, and for a provenance graph the shape constraints hold. This is the rung hand-written descriptors most often miss."
+      },
+      {
+        "id": "grounded",
+        "label": "Grounded",
+        "check": "Values are resolvable identifiers, not free text",
+        "tone": "border-ok-line bg-ok-bg",
+        "means": "The values a consumer has to dereference are identifiers instead of labels: an SPDX licence, a DOI, an ORCID, a media type, a real checksum. A grounded file lets a stranger's tool act on it without asking you anything."
+      },
+      {
+        "id": "executable",
+        "label": "Executable",
+        "check": "A target tool ingests and acts on it",
+        "tone": "border-dashed border-line bg-surface-2",
+        "means": "The tool that will consume the data has actually loaded it. Verify this yourself before release, with mlcroissant for a descriptor or your triple store for a provenance graph."
+      }
+    ],
+    "references": [
+      "Akhtar2024",
+      "Knublauch2017"
+    ]
+  },
+  "verification_modes": {
+    "lead": "Every row in the assessment carries one of three modes. The mode says what would confirm the row, and the tool holds itself to it: an automated row is only ticked when its validator passes, and the other two are recorded as what they are.",
+    "modes": [
+      {
+        "id": "automated",
+        "label": "automated",
+        "definition": "Confirmed by a validator that must pass. The tool runs the check and reports the result; a claim on its own does not satisfy the row.",
+        "tone": "bg-ok-bg text-ok"
+      },
+      {
+        "id": "attested",
+        "label": "attested",
+        "definition": "Your declaration, which can be accompanied by an external validator's report. Use the note field to link the report that backs it.",
+        "tone": "bg-warn-bg text-warn"
+      },
+      {
+        "id": "manual",
+        "label": "manual",
+        "definition": "A recorded human judgement, as for the adequacy of an ethics review. No validator can settle it, so the record is the judgement and who made it.",
+        "tone": "bg-idle-bg text-idle"
+      }
+    ],
+    "note": "Where a criterion cannot be checked mechanically, the honest position is to record it as an attested or human-judged statement. A verdict simulated by the tool would read as evidence to a downstream user.",
+    "references": [
+      "Clark2026"
     ]
   },
   "wh_questions": [
@@ -180,14 +252,14 @@
       "as_collected": "age (yrs)",
       "problem": "The unit is in the column name, where no parser will look for it; \"age\" at what moment is unstated; and the type is whatever the file happens to contain.",
       "actionable": "name: age_at_collection · dataType: sc:Integer · unit: UCUM `a` · description: \"Participant age in whole years at the date of sample collection.\"",
-      "why": "Units and definitions belong in the schema, not in the header text. The rename is the smallest possible change that makes the column comparable to someone else's."
+      "why": "Units and definitions belong in the schema, where a parser will look for them. The rename is the smallest possible change that makes the column comparable to someone else's."
     },
     {
       "title": "A local code that nobody else can read",
       "as_collected": "status: pos / neg / unk",
       "problem": "Three strings whose meaning lives in the analyst's head. A second dataset using `positive` / `negative` cannot be joined to this one without a human deciding they match.",
       "actionable": "An enumerated value set shipped with the data: each code, its definition, and — where one exists — the term it maps to in a shared vocabulary (SNOMED CT, an OBO ontology, or a project vocabulary published with a stable URI).",
-      "why": "Local codes are fine. Local codes without a published mapping are a private language. The mapping is the deliverable, not the coding scheme."
+      "why": "Local codes are fine. Local codes without a published mapping are a private language. The mapping is the deliverable."
     },
     {
       "title": "A disciplinary record, end to end",
@@ -205,7 +277,7 @@
     {
       "effect": "removes",
       "title": "Let the workflow engine write it",
-      "what": "Run the analysis through an engine that records inputs, steps, and outputs as a side effect. The provenance graph is a by-product of running, not a task after it.",
+      "what": "Run the analysis through an engine that records inputs, steps, and outputs as a side effect. The provenance graph comes out as a by-product of the run.",
       "examples": "AiiDA · Nextflow with nf-prov · Snakemake · CWLProv · signac · FireWorks / atomate",
       "references": [
         "Huber2020",
@@ -251,7 +323,7 @@
     },
     {
       "effect": "reduces",
-      "title": "Fill a template, not a blank page",
+      "title": "Start from a template",
       "what": "A constrained form with the right fields already named beats free text, for the same reason this tool's builders beat hand-written JSON.",
       "examples": "CEDAR Workbench (ontology autocompletion) · ISA-Tab / ISA-JSON · LinkML · DataHarmonizer · Frictionless Data Package",
       "references": [
@@ -287,7 +359,7 @@
     {
       "effect": "reduces",
       "title": "Have a model structure existing notes",
-      "what": "A generative model can turn a pile of free-text notes into draft structured records. It is a probabilistic generator: the same prompt can produce different output, and it can be wrong. Record the model, version, parameters, and the exact prompt, and check every field. That makes the step transparent, not reproducible.",
+      "what": "A generative model can turn a pile of free-text notes into draft structured records. It is a probabilistic generator: the same prompt can produce different output, and it can be wrong. Record the model, version, parameters, and the exact prompt, and check every field. That buys transparency; reproducibility stays out of reach for a stochastic generator.",
       "examples": "Any general-purpose assistant, with the run documented as a method",
       "references": [
         "Mitchell2019"

@@ -43,10 +43,10 @@ test('slugify and dimensionBySlug round-trip every dimension', () => {
 
 // ---- pathway membership (cumulative) --------------------------------------
 
-test('criteriaForPathway respects cumulative counts (A=16, B=32, C=53)', () => {
+test('criteriaForPathway respects cumulative counts (A=16, B=33, C=55)', () => {
   assert.equal(criteriaForPathway('A').length, 16);
-  assert.equal(criteriaForPathway('B').length, 32);
-  assert.equal(criteriaForPathway('C').length, 53);
+  assert.equal(criteriaForPathway('B').length, 33);
+  assert.equal(criteriaForPathway('C').length, 55);
 });
 
 test('Pathway A is pure L1; Pathway B is L1+L2 only', () => {
@@ -113,10 +113,12 @@ test('overlaysFor is empty except for Pathway C with a sub-domain', () => {
 });
 
 test('criteriaForDimension merges each overlay into the dimension it declares', () => {
-  // Base Ethics required for C = 2 (L1) + 1 (L2) + 4 (L3) = 7.
-  assert.equal(criteriaForDimension('Ethics', 'C', 'general').length, 7);
+  // Base Ethics required for C = 2 (L1) + 1 (L2) + 5 (L3) = 8.
+  assert.equal(criteriaForDimension('Ethics', 'C', 'general').length, 8);
   const clinical = criteriaForDimension('Ethics', 'C', 'clinical');
-  assert.equal(clinical.length, 10); // 7 base + 3 clinical overlays
+  // Stated relative to the base, like the materials assertions below, so adding a
+  // base criterion does not look like an overlay regression.
+  assert.equal(clinical.length, criteriaForDimension('Ethics', 'C', 'general').length + 3);
   assert.ok(clinical.some((c) => c.id === 'ethics.l3.clinical.irb_protocol_id'));
   // A biomedical sub-domain overlays Ethics only — other dimensions are untouched.
   assert.equal(criteriaForDimension('FAIRness', 'C', 'clinical').length,
@@ -129,7 +131,7 @@ test('criteriaForDimension merges each overlay into the dimension it declares', 
     criteriaForDimension('Provenance', 'C', 'general').length + 1);
   assert.equal(criteriaForDimension('Characterization', 'C', 'materials').length,
     criteriaForDimension('Characterization', 'C', 'general').length + 1);
-  assert.equal(criteriaForDimension('Ethics', 'C', 'materials').length, 8);
+  assert.equal(criteriaForDimension('Ethics', 'C', 'materials').length, 9);
   // Overlays never leak into a dimension they do not declare.
   assert.equal(criteriaForDimension('Computability', 'C', 'materials').length,
     criteriaForDimension('Computability', 'C', 'general').length);

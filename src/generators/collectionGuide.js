@@ -136,6 +136,14 @@ export function buildCollectionGuide(record, opts = {}) {
     ladder: guidance.ladder,
     ladderRefs: resolve(guidance.ladder_references),
     automation: { ...guidance.automation, refs: resolve(guidance.automation.references) },
+    // The degrees pick up where the four forms end; the modes explain the tags on
+    // every worksheet row. Both are prose from the schema, so the printed guide,
+    // the web guide, and the Export ladder read from one source.
+    degrees: { ...guidance.degrees, refs: resolve(guidance.degrees.references) },
+    verificationModes: {
+      ...guidance.verification_modes,
+      refs: resolve(guidance.verification_modes.references),
+    },
     whQuestions: guidance.wh_questions,
     whQuestionsRefs: resolve(guidance.wh_questions_references),
     documentationInputs: {
@@ -159,6 +167,8 @@ export function buildCollectionGuide(record, opts = {}) {
       const used = new Set([
         ...guidance.ladder_references,
         ...guidance.automation.references,
+        ...guidance.degrees.references,
+        ...guidance.verification_modes.references,
         ...guidance.wh_questions_references,
         ...guidance.documentation_inputs.references,
         ...guidance.ontology_examples_references,
@@ -216,6 +226,34 @@ export function generateCollectionGuide(record, opts = {}) {
   p();
   if (g.ladderRefs.length) p(`_Sources: ${g.ladderRefs.map((c) => `${c.authors} (${c.year})`).join('; ')}._`);
   if (g.ladderRefs.length) p();
+
+  p('## Degrees of machine-actionability');
+  p();
+  p(g.degrees.lead);
+  p();
+  for (const r of g.degrees.rungs) {
+    p(`- **${r.label}** — _${r.check}._ ${r.means}`);
+  }
+  p();
+  p(g.degrees.scope_note);
+  p();
+  if (g.degrees.refs.length) {
+    p(`_Sources: ${g.degrees.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}._`);
+    p();
+  }
+
+  p('## How each row is confirmed');
+  p();
+  p(g.verificationModes.lead);
+  p();
+  for (const m of g.verificationModes.modes) p(`- **${m.label}** — ${m.definition}`);
+  p();
+  p(`_${g.verificationModes.note}_`);
+  p();
+  if (g.verificationModes.refs.length) {
+    p(`_Sources: ${g.verificationModes.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}._`);
+    p();
+  }
 
   p('## The six questions');
   p();

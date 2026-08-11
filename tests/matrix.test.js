@@ -251,6 +251,122 @@ test('every references[] citation key resolves in references.json', () => {
   }
 });
 
+test('every criterion says what would confirm it', () => {
+  // The schema had a capture axis (collection_hint: what to record) and no
+  // verification axis, so 59 of 72 criteria declared a mode and named no check.
+  // A chip reading "attested" without this is a label, not guidance.
+  const overlays = pathways.pathways
+    .flatMap((p) => p.sub_domains ?? [])
+    .flatMap((s) => s.overlay ?? []);
+
+  for (const c of [...matrix.criteria, ...overlays]) {
+    assert.ok(
+      typeof c.verification_hint === 'string' && c.verification_hint.trim().length > 30,
+      `${c.id} has no verification_hint`,
+    );
+    // The hint has to speak in the voice of its mode, or the three modes collapse
+    // back into an undifferentiated chip.
+    if (c.verification === 'automated') {
+      assert.match(c.verification_hint, /^The tool checks|^The tool infers|^The tool validates|^The tool counts/,
+        `${c.id} is automated; its hint should state what the tool checks`);
+    }
+    if (c.verification === 'attested') {
+      assert.match(c.verification_hint, /You declare/,
+        `${c.id} is attested; its hint should name the evidence backing the declaration`);
+    }
+    if (c.verification === 'manual') {
+      assert.match(c.verification_hint, /confirms|agree on/,
+        `${c.id} is manual; its hint should name who confirms it and how`);
+    }
+  }
+});
+
+test('validators named by a criterion resolve in the registry', () => {
+  // Same contract as `references`: a link to a tool that is not in validators.json
+  // would render as a suggestion the user cannot act on.
+  const known = new Set(validators.validators.map((v) => v.id));
+  const overlays = pathways.pathways
+    .flatMap((p) => p.sub_domains ?? [])
+    .flatMap((s) => s.overlay ?? []);
+
+  let linked = 0;
+  for (const c of [...matrix.criteria, ...overlays]) {
+    if (!c.validators) continue;
+    assert.ok(Array.isArray(c.validators) && c.validators.length > 0, `${c.id} has an empty validators array`);
+    for (const v of c.validators) {
+      assert.ok(known.has(v), `${c.id} names unknown validator "${v}"`);
+    }
+    linked += 1;
+  }
+  // A guard against the field silently falling out of use as criteria are edited.
+  assert.ok(linked >= 8, `only ${linked} criteria link a validator; the registry is going unused`);
+});
+
+test('every automated criterion has a wired check, overlays included', async () => {
+  // 'automated' is a promise that something runs. Three overlay criteria were
+  // promoted to automated in 0.5.0 on the strength of a syntactic check; if one of
+  // those checks is ever removed, the badge would keep claiming a validator that
+  // no longer exists.
+  const { AUTOMATED_WITH_VALIDATOR } = await import('../src/lib/validation.js');
+  const overlays = pathways.pathways
+    .flatMap((p) => p.sub_domains ?? [])
+    .flatMap((s) => s.overlay ?? []);
+
+  for (const c of [...matrix.criteria, ...overlays]) {
+    if (c.verification !== 'automated') continue;
+    assert.ok(
+      AUTOMATED_WITH_VALIDATOR.has(c.id),
+      `${c.id} is marked automated but no check is wired in lib/validation.js`,
+    );
+  }
+});
+
+test('every cell of the paper matrix has text, and every criterion lands in one', () => {
+  // The matrix has 21 cells and more criteria than that, so the expansion has to
+  // be auditable in both directions: no cell without criteria (a requirement the
+  // paper states and the tool never asks about) and no criterion outside a
+  // declared cell (a requirement the tool invents).
+  const dimensions = matrix.dimensions;
+  const levels = matrix.levels.map((l) => l.id);
+
+  assert.equal(Object.keys(matrix.cells).length, dimensions.length);
+  for (const d of dimensions) {
+    assert.ok(matrix.cells[d], `no cells declared for ${d}`);
+    for (const l of levels) {
+      const text = matrix.cells[d][l];
+      assert.ok(typeof text === 'string' && text.trim() !== '', `cell ${d}/${l} has no text`);
+    }
+  }
+
+  const populated = new Set();
+  for (const c of matrix.criteria) {
+    assert.ok(matrix.cells[c.dimension]?.[c.level], `${c.id} sits outside any declared cell`);
+    populated.add(`${c.dimension}/${c.level}`);
+  }
+  const empty = dimensions
+    .flatMap((d) => levels.map((l) => `${d}/${l}`))
+    .filter((cell) => !populated.has(cell));
+  assert.deepEqual(empty, [], `cells with no criteria: ${empty.join(', ')}`);
+});
+
+test('a criterion the cell text does not name is attributed to the paper', () => {
+  // `beyond_cell` is the audit trail: it says where a requirement comes from when
+  // the matrix cell does not name it. Attribution is mandatory — an unexplained
+  // extra requirement is indistinguishable from scope creep.
+  for (const c of matrix.criteria) {
+    if (!c.beyond_cell) continue;
+    const { source, note } = c.beyond_cell;
+    assert.ok(
+      typeof source === 'string' && /Table|Figure|§/.test(source),
+      `${c.id} beyond_cell.source must point at a table, figure, or section: ${source}`,
+    );
+    assert.ok(
+      typeof note === 'string' && note.trim().length > 40,
+      `${c.id} beyond_cell.note must say why the criterion exists`,
+    );
+  }
+});
+
 test('reference numbering is contiguous and mirrors the paper bibliography', () => {
   // The References page sorts on `ref`, and the rendered <ol> markers only agree
   // with the paper's bracketed numbers while these are 1..N with no gaps. They
@@ -346,15 +462,25 @@ test('Pathway C overlays sit at L3, in a known dimension, and resolve their voca
       );
       assert.deepEqual(o.required_in_pathways, ['C'], `overlay ${o.id} should be required only in Pathway C`);
       assert.ok(VALID_EVIDENCE_TYPES.has(o.evidence_type), `overlay ${o.id} evidence_type invalid`);
-      if (o.verification !== undefined) {
+      // Every overlay declares a mode, like every matrix criterion. This was
+      // optional until 0.5.0, and eleven overlays fell through the gap and
+      // rendered as 'manual' because that is CriterionField's fallback — the mode
+      // was an accident of the default rather than a decision.
+      assert.ok(
+        VALID_VERIFICATION.has(o.verification),
+        `overlay ${o.id} has invalid or missing verification mode: ${o.verification}`,
+      );
+      // Ethics *adequacy* is human-judged and never automated: no validator settles
+      // whether a consent basis is sufficient or a review was thorough. What may be
+      // automated is the syntax of an identifier or a link the ethics evidence points
+      // at — a dbGaP accession, a DUA URL — which is a check on the pointer, not on
+      // the judgement. So the constraint is scoped to the evidence type rather than
+      // to the dimension.
+      if (o.dimension === 'Ethics' && o.verification === 'automated') {
         assert.ok(
-          VALID_VERIFICATION.has(o.verification),
-          `overlay ${o.id} has invalid verification mode: ${o.verification}`,
+          ['identifier', 'uri'].includes(o.evidence_type),
+          `overlay ${o.id} is automated but its evidence (${o.evidence_type}) is a judgement, not a checkable pointer`,
         );
-      }
-      // Same invariant as the matrix: ethics adequacy is human-judged, never automated.
-      if (o.dimension === 'Ethics') {
-        assert.notEqual(o.verification, 'automated', `overlay ${o.id} is an Ethics criterion marked automated`);
       }
       assert.ok(
         typeof o.label === 'string' && o.label.length > 0 &&

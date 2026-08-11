@@ -48,6 +48,25 @@ export const isRor = (value) =>
     ? ok()
     : bad('Not a ROR id (https://ror.org/0XXXXXXXX).');
 
+// Some criteria are explicitly conditional — "if applicable; mark N/A otherwise".
+// An automated check on one of those has to accept the declared non-applicability,
+// or it fails every dataset the criterion was never aimed at. Accepted spellings are
+// deliberately narrow: a bare "no" or an empty box is an unanswered question, not a
+// statement that the criterion does not apply.
+const NOT_APPLICABLE = /^(n\/?a|not applicable|none|not required)$/i;
+export const isNotApplicable = (value) => NOT_APPLICABLE.test(str(value));
+
+// dbGaP study accession: phs###### with optional version and participant-set
+// suffixes (phs000001.v3.p1). Studies are registered before they are versioned, so
+// the suffixes stay optional.
+export const isDbGaPAccession = (value) => {
+  const v = str(value);
+  if (isNotApplicable(v)) return ok('Declared not applicable.');
+  return /^phs\d{6}(\.v\d+)?(\.p\d+)?$/i.test(v)
+    ? ok('dbGaP accession')
+    : bad('Not a dbGaP accession (expected phs000000, optionally .v1.p1), and not marked N/A.');
+};
+
 // License: value must be a recognised id in the bundled licenses vocabulary
 // (SPDX-style ids: CC-BY-4.0, CC0-1.0, MIT, Apache-2.0, ODbL-1.0, …).
 const LICENSE_IDS = new Set((vocabularies.vocabularies.licenses?.values ?? []).map((v) => v.id));

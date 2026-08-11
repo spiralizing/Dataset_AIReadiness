@@ -24,6 +24,8 @@ import { citeThisWork } from '../lib/thisWork.js';
 const useSections = (g) =>
   [
     { id: 'forms', title: 'The four forms of a record' },
+    { id: 'degrees', title: 'Degrees of machine-actionability' },
+    { id: 'verification', title: 'How each row is confirmed' },
     { id: 'questions', title: 'The six questions' },
     { id: 'layers', title: 'What builds each documentation layer' },
     { id: 'runlog', title: 'Per-run log' },
@@ -145,7 +147,45 @@ export default function CollectionGuidePrint({ record }) {
         </p>
       </section>
 
-      {/* 2 — wh-questions */}
+      {/* the degrees ladder — where the four forms end */}
+      <section className="gp-section">
+        <h2>{n('degrees')}. Degrees of machine-actionability</h2>
+        <p>{g.degrees.lead}</p>
+        <dl className="gp-defs">
+          {g.degrees.rungs.map((r) => (
+            <div key={r.id}>
+              <dt>{r.label}</dt>
+              <dd>
+                <em>{r.check}.</em> {r.means}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p>{g.degrees.scope_note}</p>
+        <p className="gp-note">
+          Sources: {g.degrees.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+        </p>
+      </section>
+
+      {/* the three verification modes the worksheet rows are tagged with */}
+      <section className="gp-section">
+        <h2>{n('verification')}. How each row is confirmed</h2>
+        <p>{g.verificationModes.lead}</p>
+        <dl className="gp-defs">
+          {g.verificationModes.modes.map((m) => (
+            <div key={m.id}>
+              <dt>{m.label}</dt>
+              <dd>{m.definition}</dd>
+            </div>
+          ))}
+        </dl>
+        <p>{g.verificationModes.note}</p>
+        <p className="gp-note">
+          Sources: {g.verificationModes.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
+        </p>
+      </section>
+
+      {/* wh-questions */}
       <section className="gp-section">
         <h2>{n('questions')}. The six questions</h2>
         <p>
@@ -205,7 +245,7 @@ export default function CollectionGuidePrint({ record }) {
       {/* 4 — run log */}
       <section className="gp-section">
         <h2>{n('runlog')}. Per-run log</h2>
-        <p>Repeat once per run, sample, or job. Fill it as the work happens, not afterwards.</p>
+        <p>Repeat once per run, sample, or job. Fill it while the work is happening.</p>
         <ul className="gp-fill">
           {g.runLogFields.map((f) => (
             <li key={f}>

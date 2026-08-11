@@ -22,6 +22,7 @@ import { validateProvo } from '../lib/provoValidation.js';
 import { validationResults } from '../lib/validation.js';
 import { buildAssessmentReport, buildConformanceReport } from '../lib/report.js';
 import { validateProvoShacl, serializeReport, provoToTurtle } from '../lib/shacl.js';
+import { DEGREES, croissantDegrees, provoDegrees, getDegree } from '../lib/actionability.js';
 import { generateCollectionGuide } from '../generators/collectionGuide.js';
 import { download, guideFilename } from '../lib/download.js';
 import CroissantBuilder from '../components/CroissantBuilder.jsx';
@@ -83,6 +84,61 @@ const DownloadBtn = ({ onClick, children }) => (
   </button>
 );
 
+// The actionability ladder for one artifact: five rungs, each with the check that
+// certifies it. Rendered as a row so the distance between "it parses" and "a tool
+// can act on it" is visible at a glance — the point of the ladder. `executable` is
+// always out-of-scope here, and is shown greyed rather than hidden, because a
+// reader needs to know it was not checked rather than assume it passed.
+const DEGREE_TONE = {
+  pass: 'border-ok-line bg-ok-bg text-ok',
+  fail: 'border-warn-line bg-warn-bg text-warn',
+  'out-of-scope': 'border-dashed border-line bg-surface-2 text-faint',
+};
+const DEGREE_MARK = { pass: '✓', fail: '×', 'out-of-scope': '–' };
+
+const DegreeLadder = ({ degrees, artifact }) => {
+  const attained = degrees.attained ? getDegree(degrees.attained)?.label : null;
+  return (
+    <div className="mt-3">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-faint">
+          Machine-actionability
+        </span>
+        <span className="text-xs text-muted">
+          {attained ? (
+            <>
+              {artifact} reaches <span className="font-medium text-ink">{attained}</span>
+            </>
+          ) : (
+            <span className="text-warn">{artifact} is not yet well-formed</span>
+          )}
+        </span>
+      </div>
+      <ol className="mt-2 flex flex-wrap gap-1.5">
+        {DEGREES.map((d) => {
+          const r = degrees[d.id];
+          return (
+            <li
+              key={d.id}
+              title={`${d.check} — ${r.message}`}
+              className={`border px-2 py-1 text-[0.7rem] ${DEGREE_TONE[r.status]}`}
+            >
+              <span aria-hidden="true">{DEGREE_MARK[r.status]}</span> {d.label}
+            </li>
+          );
+        })}
+      </ol>
+      <ul className="mt-2 space-y-0.5 text-xs text-muted">
+        {DEGREES.filter((d) => degrees[d.id].status !== 'pass').map((d) => (
+          <li key={d.id}>
+            <span className="font-medium text-ink">{d.label}:</span> {degrees[d.id].message}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const editorClass = 'mt-2 w-full rounded-none border border-line p-3 font-mono text-xs';
 const previewClass = 'mt-2 max-h-[28rem] overflow-auto rounded-none border border-line bg-surface-2 p-3 font-mono text-xs whitespace-pre-wrap';
 
@@ -129,6 +185,16 @@ export default function ExportPage() {
   const provoJson = JSON.stringify(provoDoc, null, 2);
   const overrideActive = Boolean(state.provo);
 
+  // Ladder positions for both machine-actionable artifacts. The PROV ladder folds
+  // in the SHACL report once Deep validate has run, so the referential rung moves
+  // from "not certified" to conforming (or fails) in place.
+  const croissantLadder = croissantDegrees(croissantParse.value, croissantResult, {
+    parseError: croissantParse.error,
+  });
+  const provoLadder = provoDegrees(provoDoc, provoResult, {
+    shacl: shacl && !shacl.loading && !shacl.error ? shacl : undefined,
+  });
+
   const template = templateForRecord(state);
   const datasheetName = template === 'healthsheet' ? 'healthsheet.md' : 'datasheet.md';
   const rdfExt = rdfFormat === 'turtle' ? 'ttl' : 'jsonld';
@@ -138,7 +204,14 @@ export default function ExportPage() {
 
   const bundleOpts = () => {
     const croissant = effectiveCroissant(state);
-    return { results: validationResults(state, { croissant, provo: provoDoc }), croissant };
+    return {
+      results: validationResults(state, { croissant, provo: provoDoc }),
+      croissant,
+      provo: provoDoc,
+      // Present only after Deep validate, so a report generated before it records
+      // the referential rung as uncertified rather than claiming conformance.
+      shacl: shacl && !shacl.loading && !shacl.error ? shacl : undefined,
+    };
   };
 
   // Dataset details feed generateCroissant, so no descriptor write is needed —
@@ -349,6 +422,8 @@ export default function ExportPage() {
               <CroissantBuilder />
             )}
 
+            <DegreeLadder degrees={croissantLadder} artifact="This descriptor" />
+
             {/* Validator output — errors, warnings, and what "directly loadable"
                 is still missing. Sits directly under the builder so the effect of
                 a change is visible without opening the raw descriptor. */}
@@ -365,7 +440,7 @@ export default function ExportPage() {
                     {croissantResult.valid
                       ? croissantResult.loadable
                         ? '✓ Valid and directly loadable.'
-                        : '✓ Valid — metadata only, not yet directly loadable.'
+                        : '✓ Valid — metadata only; declare files and fields to make it directly loadable.'
                       : `× Not valid: ${croissantResult.errors.length} problem(s) to fix.`}
                   </p>
 
@@ -590,18 +665,22 @@ export default function ExportPage() {
             <div className="mt-4 border border-line bg-surface p-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">PROV-O record</h3>
-                <span className={`text-xs ${provoResult.valid ? 'text-ok' : 'text-bad'}`}>
-                  {provoResult.valid ? '✓ well-formed' : '× not well-formed'} · {provoResult.variableEntityCount} variables ·{' '}
-                  {provoResult.derivationIntact ? 'lineage intact' : 'lineage incomplete'}
+                <span className="text-xs text-muted">
+                  {provoResult.variableEntityCount} variables ·{' '}
+                  <span className={provoResult.derivationIntact ? 'text-ok' : 'text-warn'}>
+                    {provoResult.derivationIntact ? 'lineage intact' : 'lineage incomplete'}
+                  </span>
                 </span>
               </div>
+
+              <DegreeLadder degrees={provoLadder} artifact="This record" />
 
               <div className="mt-3">
                 <p className="mb-2 text-xs text-muted">
                   Deep validation checks the record against a formal PROV-O SHACL shape (the same
                   structural rules a downstream tool applies when it ingests lineage), catching
-                  problems like a missing agent or a broken derivation chain before you publish
-                  rather than after.
+                  problems like a missing agent or a broken derivation chain while you can still fix
+                  them.
                 </p>
                 <button type="button" onClick={runDeepValidate} className="rounded-none bg-brand-btn px-3 py-1.5 text-sm font-medium text-surface hover:opacity-90">
                   {shacl?.loading ? 'Validating…' : 'Deep validate (SHACL)'}
@@ -699,8 +778,21 @@ export default function ExportPage() {
                   </DownloadBtn>
                 </div>
                 <p className="mt-1 text-xs text-muted">
-                  Which automated checks passed (read-only). The RDF/SHACL form is under the
+                  Which automated checks passed, and how far up the machine-actionability ladder
+                  each generated artifact reaches (read-only). The RDF/SHACL form is under the
                   Provenance tab (Deep validate).
+                </p>
+
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <DegreeLadder degrees={croissantLadder} artifact="croissant.json" />
+                  <DegreeLadder degrees={provoLadder} artifact="prov.jsonld" />
+                </div>
+                <p className="mt-3 border-l-2 border-line pl-3 text-xs text-muted">
+                  <span className="font-medium text-ink">Executable</span> is the one rung this tool
+                  does not certify: it would mean round-tripping each artifact through the tool that
+                  will consume it, and dereferencing every identifier over the network. Both are out
+                  of reach offline, so the report names the check that would certify the rung and
+                  marks it out-of-scope.
                 </p>
                 <pre className={previewClass}>{json}</pre>
               </div>

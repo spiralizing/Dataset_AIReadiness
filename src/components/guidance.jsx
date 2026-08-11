@@ -85,6 +85,70 @@ export function LadderDetail({ className = '', slice }) {
   );
 }
 
+// The five degrees of machine-actionability, which pick up where the four forms
+// leave off: the forms describe laboratory practice, the degrees describe the file
+// that comes out of it. Rendered directly under the ladder for that reason — the
+// bridge between the two is the point, and separating them would lose it. The
+// Export page shows the same five rungs as a live verdict per artifact.
+export function DegreesStrip({ className = '' }) {
+  const { lead, scope_note: scopeNote, rungs } = guidance.degrees;
+  return (
+    <div className={className}>
+      <p className="text-sm text-muted">{lead}</p>
+      <div className="mt-3 overflow-x-auto">
+        <div className="flex min-w-[40rem] items-stretch gap-1">
+          {rungs.map((r, i) => (
+            <Fragment key={r.id}>
+              {i > 0 && (
+                <div className="flex w-6 shrink-0 items-center justify-center">
+                  <span className="text-lg leading-none text-accent" aria-hidden="true">→</span>
+                </div>
+              )}
+              <div className={`flex-1 border p-3 ${r.tone}`}>
+                <div className="text-xs font-semibold text-ink">{r.label}</div>
+                <div className="mt-1 border-t border-line pt-1 text-[0.65rem] leading-tight text-muted">
+                  {r.check}
+                </div>
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2">
+        {rungs.map((r) => (
+          <p key={r.id} className="break-inside-avoid text-xs text-muted">
+            <span className="font-medium text-ink">{r.label}.</span> {r.means}
+          </p>
+        ))}
+      </div>
+      <p className="mt-3 border border-dashed border-line bg-surface-2 p-3 text-xs text-muted">
+        {scopeNote}
+      </p>
+    </div>
+  );
+}
+
+// The three verification modes and what each requires of the user. The chips on
+// every criterion carry these labels; until this block existed, nothing said what
+// they meant.
+export function VerificationModes({ className = '' }) {
+  const { lead, modes, note } = guidance.verification_modes;
+  return (
+    <div className={className}>
+      <p className="text-sm text-muted">{lead}</p>
+      <div className="mt-3 grid gap-2">
+        {modes.map((m) => (
+          <div key={m.id} className="break-inside-avoid border border-line p-3">
+            <span className={`px-1.5 py-0.5 text-[0.65rem] font-medium ${m.tone}`}>{m.label}</span>
+            <p className="mt-1.5 text-xs text-muted">{m.definition}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-xs italic text-faint">{note}</p>
+    </div>
+  );
+}
+
 // The six wh-questions and the artifact each answer lands in.
 export function WhQuestions({ className = '' }) {
   return (

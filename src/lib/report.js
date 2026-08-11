@@ -6,7 +6,10 @@ import { pathwayVerdict, requiredCriteria } from './pathway.js';
 import { validationResults, AUTOMATED_WITH_VALIDATOR } from './validation.js';
 import { isUpcoming } from './stages.js';
 import { generateCroissant } from '../generators/croissant.js';
+import { effectiveProvo } from '../generators/provo.js';
 import { validateCroissant } from './croissantValidation.js';
+import { validateProvo } from './provoValidation.js';
+import { artifactDegrees, DEGREES } from './actionability.js';
 import { citeThisWorkShort } from './thisWork.js';
 
 // One-line citation of the framework this tool implements, embedded in every
@@ -14,7 +17,9 @@ import { citeThisWorkShort } from './thisWork.js';
 const FRAMEWORK = citeThisWorkShort();
 
 export const REPORT_VERSION = 'assessment_report_v0';
-export const CONFORMANCE_VERSION = 'conformance_report_v0';
+// v1 adds `ladder`: the degree of machine-actionability reached by each generated
+// artifact, in the paper's vocabulary. Additive — every v0 key is unchanged.
+export const CONFORMANCE_VERSION = 'conformance_report_v1';
 
 export function buildAssessmentReport(record, opts = {}) {
   const { pathway, sub_domain: subDomain, started_at, answers = {} } = record;
@@ -47,7 +52,20 @@ export function buildConformanceReport(record, opts = {}) {
   const now = opts.now ?? new Date().toISOString();
   const croissant = opts.croissant ?? generateCroissant(record);
   const croissantResult = validateCroissant(croissant);
+  const provo = opts.provo ?? effectiveProvo(record);
+  const provoResult = validateProvo(provo);
   const results = opts.results ?? validationResults(record, { croissant });
+
+  // Degrees of machine-actionability per artifact. `opts.shacl` is threaded
+  // through when the user has run Deep validate, so a report downloaded after
+  // that pass records the SHACL verdict rather than "not run".
+  const ladder = artifactDegrees({
+    croissant,
+    croissantResult,
+    provo,
+    provoResult,
+    shacl: opts.shacl,
+  });
 
   const checks = requiredCriteria(pathway, subDomain)
     .filter((c) => c.verification === 'automated' && !isUpcoming(c, record.stage))
@@ -76,6 +94,13 @@ export function buildConformanceReport(record, opts = {}) {
       loadable: croissantResult.loadable,
       errors: croissantResult.errors,
       warnings: croissantResult.warnings,
+    },
+    ladder: {
+      // The rungs and their certifying checks travel with the report, so a
+      // consumer reads the verdict without holding the paper.
+      degrees: DEGREES,
+      croissant: ladder.croissant,
+      provo: ladder.provo,
     },
     checks,
     summary: {

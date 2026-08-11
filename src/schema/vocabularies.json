@@ -1,6 +1,6 @@
 {
   "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 4, 7, 9, 11, and 14 of González-Espinoza et al. (2026); each 'source' below names the table number in the current draft together with its LaTeX label, because float numbers move whenever a section is inserted and the label does not; the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "vocabularies": {
     "licenses": {
       "label": "License",

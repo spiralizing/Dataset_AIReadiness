@@ -12,6 +12,7 @@ import {
   isSpdxLicense,
   isOpenFormat,
   isWellFormedUri,
+  isDbGaPAccession,
 } from '../src/lib/grounding.js';
 
 test('isDoi accepts bare and URL forms, rejects non-DOIs', () => {
@@ -55,4 +56,23 @@ test('isOpenFormat checks the bundled format vocabularies', () => {
 test('isWellFormedUri', () => {
   assert.ok(isWellFormedUri('https://example.org/dataset').ok);
   assert.ok(!isWellFormedUri('not a uri').ok);
+});
+
+test('dbGaP accessions are checked, and a declared N/A is accepted', () => {
+  // The criterion says "if applicable; mark N/A otherwise", so a strict format
+  // check alone would fail every genomic dataset that was never deposited in
+  // dbGaP — the check would be punishing the honest answer.
+  assert.ok(isDbGaPAccession('phs000001.v3.p1').ok);
+  assert.ok(isDbGaPAccession('phs002204').ok, 'a study registered but not yet versioned');
+  assert.ok(isDbGaPAccession('PHS000001.V1.P1').ok, 'case-insensitive');
+
+  for (const na of ['N/A', 'n/a', 'NA', 'not applicable', 'none']) {
+    assert.ok(isDbGaPAccession(na).ok, `${na} should count as a declared non-applicability`);
+  }
+
+  // A DOI is a perfectly good identifier and is not this identifier.
+  assert.ok(!isDbGaPAccession('10.5281/zenodo.1234567').ok);
+  assert.ok(!isDbGaPAccession('phs1234').ok, 'too few digits');
+  assert.ok(!isDbGaPAccession('').ok, 'an empty box is an unanswered question');
+  assert.ok(!isDbGaPAccession('no').ok, 'a bare no is not a declared N/A');
 });

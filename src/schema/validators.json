@@ -1,6 +1,6 @@
 {
   "$comment": "Discipline-specific validator registry (app_design.md §7.4). The tool's core validation (Croissant structural+referential, SHACL for PROV-O, identifier grounding) is general; this registry catalogues field-specific validators surfaced by declared format / Pathway-C sub-domain. 'execution' controls integration: 'in-browser' validators can run in place and mark a criterion automated; 'cli'/'web-service' validators are referenced and their outcome recorded as attested evidence. 'applies_to' is open-world (free tags: format names and/or sub-domain ids), not validated against vocabularies.json. For disciplines outside this seeded set, the 'registries' below are the authoritative lookup.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "validators": [
     {
       "id": "bids-validator",
@@ -23,7 +23,7 @@
       "validator_name": "Frictionless",
       "validator_url": "https://framework.frictionlessdata.io/",
       "execution": "in-browser",
-      "note": "JavaScript port available; can validate a tabular resource in place. General-purpose, not discipline-locked."
+      "note": "JavaScript port available; can validate a tabular resource in place. General-purpose, so it applies across disciplines."
     },
     {
       "id": "shacl",
@@ -35,6 +35,61 @@
       "validator_url": "https://github.com/zazuko/rdf-validate-shacl",
       "execution": "in-browser",
       "note": "The tool's own engine for graph-level validation; used for the PROV-O record and any RDF release. Listed here to document the general RDF option."
+    },
+    {
+      "id": "great-expectations",
+      "discipline": "Tabular / statistical (general)",
+      "applies_to": ["CSV", "TSV", "Parquet", "tabular", "statistical"],
+      "standard": "Declarative expectation suites",
+      "standard_url": "https://greatexpectations.io/",
+      "validator_name": "Great Expectations",
+      "validator_url": "https://github.com/great-expectations/great_expectations",
+      "execution": "cli",
+      "note": "Expresses distribution, missingness, range, and uniqueness checks as a suite that runs in CI. Produces the profiling report that backs the L2 characterization rows."
+    },
+    {
+      "id": "pandera",
+      "discipline": "Tabular / statistical (general)",
+      "applies_to": ["CSV", "Parquet", "tabular", "statistical", "pandas"],
+      "standard": "Dataframe schema and statistical checks",
+      "standard_url": "https://pandera.readthedocs.io/",
+      "validator_name": "Pandera",
+      "validator_url": "https://github.com/unionai-oss/pandera",
+      "execution": "cli",
+      "note": "Schema and hypothesis checks against a dataframe, in the pipeline that produced it. Lighter to adopt than a full expectation suite."
+    },
+    {
+      "id": "deequ",
+      "discipline": "Tabular at scale",
+      "applies_to": ["Parquet", "tabular", "statistical", "Spark"],
+      "standard": "Data-quality constraints on Spark",
+      "standard_url": "https://github.com/awslabs/deequ",
+      "validator_name": "Deequ",
+      "validator_url": "https://github.com/awslabs/deequ",
+      "execution": "cli",
+      "note": "The same class of statistical and structural checks for datasets too large to profile on one machine."
+    },
+    {
+      "id": "aequitas",
+      "discipline": "Bias and fairness audit",
+      "applies_to": ["tabular", "bias", "protected attributes", "human subjects"],
+      "standard": "Bias and fairness audit report",
+      "standard_url": "http://aequitas.dssg.io/",
+      "validator_name": "Aequitas",
+      "validator_url": "https://github.com/dssg/aequitas",
+      "execution": "cli",
+      "note": "Representation and parity metrics across protected attributes. Produces the report that is the evidence for the L3 bias-audit row; compare before and after curation, not only the released state."
+    },
+    {
+      "id": "fairlearn",
+      "discipline": "Bias and fairness audit",
+      "applies_to": ["tabular", "bias", "protected attributes", "human subjects"],
+      "standard": "Fairness assessment metrics",
+      "standard_url": "https://fairlearn.org/",
+      "validator_name": "Fairlearn",
+      "validator_url": "https://github.com/fairlearn/fairlearn",
+      "execution": "cli",
+      "note": "Group-fairness metrics and a dashboard. Overlaps Aequitas; either satisfies the bias-audit evidence."
     },
     {
       "id": "cf-checker",
@@ -93,7 +148,7 @@
       "validator_url": "https://github.com/Materials-Consortia/optimade-python-tools",
       "reference_doi": "10.1038/s41597-021-00974-z",
       "execution": "cli",
-      "note": "Python CLI; validates an OPTIMADE endpoint against the specification. Applies when the dataset is served from a queryable API rather than deposited as files."
+      "note": "Python CLI; validates an OPTIMADE endpoint against the specification. Applies when the dataset is served from a queryable endpoint."
     },
     {
       "id": "nexus-validate",

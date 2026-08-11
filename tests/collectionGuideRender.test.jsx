@@ -182,3 +182,26 @@ test('the guide has a nav entry of its own, beside Export', () => {
   assert.ok(html.includes('What to collect'));
   assert.ok(html.includes('Save as PDF') && html.includes('Download .md'));
 });
+
+test('the guide bridges the two ladders and explains the three modes', () => {
+  // The four forms describe practice; the five degrees describe the file. The paper
+  // joins them explicitly ("the four forms end where the degrees begin"), so the
+  // guide must carry both, adjacent, with the degrees after the forms.
+  const html = render(Guide, '/guide');
+
+  const iForms = html.indexOf('From notes to machine-actionable');
+  const iDegrees = html.indexOf('Degrees of machine-actionability');
+  const iModes = html.indexOf('How each row is confirmed');
+  assert.ok(iForms > -1 && iDegrees > iForms, 'degrees must follow the four forms');
+  assert.ok(iModes > iDegrees, 'the verification modes come after the ladders');
+
+  for (const rung of ['Well-formed', 'Schema-valid', 'Referentially sound', 'Grounded', 'Executable']) {
+    assert.ok(html.includes(rung), `guide is missing the ${rung} rung`);
+  }
+  // The ceiling is disclosed in the guide, not only on the Export page.
+  assert.ok(html.includes('reported as out of scope'), 'guide does not state the tool ceiling');
+
+  // Each mode with its definition, so a chip elsewhere in the app is legible.
+  assert.ok(html.includes('can be accompanied by an external'));
+  assert.ok(html.includes('A recorded human judgement'));
+});

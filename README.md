@@ -1,6 +1,6 @@
 # AI-Readiness Assessment & Documentation builder
 
-An interactive, browser-based tool that helps researchers assess whether their datasets are ready for publication, community sharing, or AI/ML training. The app implements the tiered assessment framework from *A framework for assessing and documenting research data for machine learning reuse* (González-Espinoza et al., 2026), combining the seven pre-model dimensions of the Bridge2AI Standards Working Group, the Data Readiness Levels of Lawrence, and the FAIR Maturity Indicators.
+An interactive, browser-based tool that helps researchers assess whether their datasets are ready for publication, community sharing, or model training. The app implements the tiered assessment framework from *A framework for assessing and documenting research data for machine learning reuse* (González-Espinoza et al., 2026), combining the seven pre-model dimensions of the Bridge2AI Standards Working Group, the Data Readiness Levels of Lawrence, and the FAIR Maturity Indicators.
 
 🔗 **Live app:** https://spiralizing.github.io/Dataset_AIReadiness/
 
@@ -50,6 +50,8 @@ The review screen shows a 7×3 heatmap. A cell turns green only when all its req
 - **Wizard flow** — starting point → audience selector → seven dimension pages → review/scorecard → export, with the collection guide reachable at any time
 - **Prefilled options** drawn from controlled vocabularies in the source paper: licenses (CC-BY, CC0, ODbL), formats (Parquet, HDF5, NetCDF, Zarr, DICOM, NIfTI), repositories by tier — L1 (Figshare, Zenodo, institutional, GitHub), L2 (Hugging Face, Kaggle, OpenML, Dataverse, Dryad), L3 generic (PhysioNet, NIH Data Commons, dbGaP, ICPSR, GenBank), L3 Bridge2AI Grand Challenges (CM4AI, CHoRUS, Bridge2AI-Voice, AI-READI). Discipline vocabularies extend the same mechanism — Materials science adds repositories (NOMAD, Materials Cloud, OQMD, ICSD), encoding standards (CIF, NeXus, CML), an interoperability layer (EMMO, OPTIMADE, NOMAD Metainfo), and provenance engines (AiiDA, FireWorks, signac, nf-prov, CWLProv). "Custom" entry always available.
 - **Binary checkmark heatmap** — pass/fail per cell, optional-criteria list below the heatmap
+- **Cell-to-criterion crosswalk** — the 21 cell texts of the paper's assessment matrix live in `matrix.json`, alongside the criteria that operationalise them, and each expands to one to five checkable criteria. Where a criterion asks for something the cell wording does not name, it carries a `beyond_cell` attribution saying which table, figure, or section of the paper it comes from; `tests/matrix.test.js` asserts every cell is populated, no criterion sits outside a declared cell, and every extension is attributed. Seven criteria currently carry one, listed on the start page under the matrix
+- **Degrees of machine-actionability** — explained in the collection guide, where the four forms of a record end, and computed per artifact on the Export page. Both read the five rungs from `guidance.json`, so the explanation and the verdict cannot drift. The ladder from the source paper: well-formed → schema-valid → referentially sound → grounded → executable. *Machine-readable* and *machine-actionable* are not the same property, and the ladder is what separates them: a descriptor can validate against the schema while a field source points at an undeclared file (not referentially sound), or resolve perfectly while its checksum is still the template's row of zeros and its licence is free text (not grounded). The Croissant and PROV-O tabs show the rung reached and what is blocking the next one; `conformance-report.json` records the same verdict per artifact. **Executable is deliberately not certified** — it would mean round-tripping each artifact through the tool that will consume it and dereferencing identifiers over the network, neither of which an offline checker can do, so the report names the check that would certify it and marks the rung out-of-scope
 - **Three template generators** — Croissant, PROV-O, datasheet/healthsheet. The datasheet is editable before download; the Croissant descriptor and PROV-O record are composed from their builders, with raw JSON-LD editing available as an explicit, reversible override
 - **Inlined seeded examples** — seven reference datasets shipped with the bundle:
   - Tabular Zenodo dataset (Pathway A)
@@ -60,6 +62,7 @@ The review screen shows a 7×3 heatmap. A cell turns green only when all its req
   - α-quartz XRD + DFT relaxation (Pathway C → Materials science; built through the Croissant builder)
   - High-energy physics ROOT example (illustrates FAIR-for-models linkage)
 - **Collection guide** — a printable worksheet of what to observe and when, generated from the same criteria (see below)
+- **Verification modes explained** — every criterion carries an `automated` / `attested` / `manual` chip, and what each mode asks of the user is now stated: as the chip's tooltip, as a legend on each dimension page, and as a section of the collection guide. One definition in `guidance.json` feeds all three
 - **Two authoring builders** — files and columns compose the Croissant descriptor; sources and steps compose the PROV-O record, so neither requires hand-written JSON-LD
 - **Offline-capable** — once loaded, the app runs entirely in the browser with no external runtime calls
 
@@ -140,6 +143,7 @@ Dataset_AIReadiness/
 │   │   ├── dimensions.js · pathway.js · stages.js
 │   │   ├── depositionTargets.js     # pathway/sub-domain-scoped repository options
 │   │   ├── grounding.js · croissantValidation.js · provoValidation.js · validation.js
+│   │   ├── actionability.js         # degrees of machine-actionability per artifact
 │   │   ├── shacl.js · report.js · thisWork.js · download.js
 │   ├── generators/
 │   │   └── croissant.js · provo.js · datasheet.js · todo.js · collectionGuide.js

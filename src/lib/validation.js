@@ -9,7 +9,13 @@ import { effectiveCroissant, declaredMime } from '../generators/croissant.js';
 import { effectiveProvo } from '../generators/provo.js';
 import { validateCroissant } from './croissantValidation.js';
 import { validateProvo } from './provoValidation.js';
-import { isPersistentId, isWellFormedUri, isSpdxLicense, isOpenFormat } from './grounding.js';
+import {
+  isPersistentId,
+  isWellFormedUri,
+  isSpdxLicense,
+  isOpenFormat,
+  isDbGaPAccession,
+} from './grounding.js';
 
 // Each check: (ctx) => { ok, message }. ctx = { value(id), croissant, croissantResult }.
 const CHECKS = {
@@ -17,6 +23,16 @@ const CHECKS = {
   'fairness.l1.landing_page': (ctx) => isWellFormedUri(ctx.value('fairness.l1.landing_page')),
   'fairness.l1.license_explicit': (ctx) => isSpdxLicense(ctx.value('fairness.l1.license_explicit')),
   'sustainability.l1.open_format': (ctx) => isOpenFormat(ctx.value('sustainability.l1.open_format')),
+  // --- Pathway-C overlay criteria whose evidence is syntactically checkable ---
+  // Only the syntax is checked. A resolvable-looking URL is not proof that the
+  // document behind it is a data-use agreement or an access policy; the check
+  // catches the typo'd and half-pasted link, which is what it is for.
+  'ethics.l3.genomic.dbgap_accession': (ctx) =>
+    isDbGaPAccession(ctx.value('ethics.l3.genomic.dbgap_accession')),
+  'ethics.l3.clinical.dua_template': (ctx) =>
+    isWellFormedUri(ctx.value('ethics.l3.clinical.dua_template')),
+  'ethics.l3.institutional.tiered_access_policy': (ctx) =>
+    isWellFormedUri(ctx.value('ethics.l3.institutional.tiered_access_policy')),
   'computability.l1.loadable_standard_env': (ctx) => {
     const fmt = ctx.value('sustainability.l1.open_format');
     const r = isOpenFormat(fmt);

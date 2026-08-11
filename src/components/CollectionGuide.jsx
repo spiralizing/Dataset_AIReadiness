@@ -12,7 +12,15 @@
 // moment either changed, and there is nothing to validate it against.
 
 import { buildCollectionGuide, citationHref, citationText } from '../generators/collectionGuide.js';
-import { LadderStrip, AutomationNote, LadderDetail, WhQuestions, DocumentationInputs } from './guidance.jsx';
+import {
+  LadderStrip,
+  AutomationNote,
+  LadderDetail,
+  DegreesStrip,
+  VerificationModes,
+  WhQuestions,
+  DocumentationInputs,
+} from './guidance.jsx';
 
 const LEVEL_TAG = {
   L1: 'bg-idle-bg text-idle',
@@ -85,6 +93,24 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
       </Section>
 
       <Section
+        id="degrees"
+        title="Degrees of machine-actionability"
+        lead="Where the four forms end, five degrees of the resulting file begin. The Export page reports these per artifact once you have one."
+      >
+        <DegreesStrip className="mt-4" />
+        <Sources refs={g.degrees.refs} />
+      </Section>
+
+      <Section
+        id="verification"
+        title="How each row is confirmed"
+        lead="The worksheet below tags every row with one of three modes. This is what each one asks of you."
+      >
+        <VerificationModes className="mt-4" />
+        <Sources refs={g.verificationModes.refs} />
+      </Section>
+
+      <Section
         id="questions"
         title="The six questions"
         lead="These cover almost everything the assessment will ask for later. Each answer lands in a different artifact, which is why the tool produces more than one."
@@ -105,7 +131,7 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
       <Section
         id="run-log"
         title="Per-run log"
-        lead="Repeat once per run, sample, or job. Fill it as the work happens, not afterwards."
+        lead="Repeat once per run, sample, or job. Fill it while the work is happening."
       >
         <ul className="mt-4 grid gap-2">
           {g.runLogFields.map((f) => (
@@ -174,7 +200,7 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
         <Section
           id="ontology"
           title="Binding terms to shared vocabularies"
-          lead="At L3 a field name is not enough: a consumer has to know what your column means, not only what you called it."
+          lead="At L3 the consumer needs the meaning of your column, which a field name alone cannot carry."
         >
           <div className="mt-4 grid gap-3">
             {g.ontology.examples.map((ex) => (

@@ -14,13 +14,13 @@ const FIXED = '2026-07-16T00:00:00.000Z';
 
 test('requiredCriteria adds Pathway-C overlays for the chosen sub-domain', () => {
   assert.equal(requiredCriteria('A').length, 16);
-  assert.equal(requiredCriteria('C', 'general').length, 53);
-  assert.equal(requiredCriteria('C', 'clinical').length, 56); // 53 + 3 overlays
+  assert.equal(requiredCriteria('C', 'general').length, 55);
+  assert.equal(requiredCriteria('C', 'clinical').length, 58); // 55 + 3 overlays
 });
 
 test('pathwayVerdict counts overlays for Pathway C clinical', () => {
   const v = pathwayVerdict('C', {}, 'clinical');
-  assert.equal(v.requiredCount, 56);
+  assert.equal(v.requiredCount, 58);
   assert.equal(v.met, false);
 });
 
@@ -52,6 +52,34 @@ test('generateDatasheet renders header, sections, and not-provided placeholders'
   assert.match(md, /## FAIRness/);
   assert.match(md, /Persistent identifier assigned[^\n]*10\.5281\/zenodo\.123/);
   assert.match(md, /_not provided_/); // unanswered criteria flagged
+});
+
+test('maintenance criteria render once, in their own section after the dimensions', () => {
+  // Gebru's template has a Maintenance group, and a reader looks for it by name.
+  // Versioning and long-term access are filed under FAIRness and Sustainability in
+  // the matrix, so the generator regroups them — without printing them twice,
+  // which is the failure mode the dimension-ordered layout exists to avoid.
+  const md = generateDatasheet(
+    {
+      pathway: 'C',
+      sub_domain: 'general',
+      answers: {
+        'sustainability.l2.maintenance_plan': { value: 'Annual refresh; superseded versions kept and marked deprecated; errata to the study inbox.' },
+        'fairness.l3.versioned_release': { value: 'Concept DOI plus per-version DOIs on Zenodo.' },
+      },
+    },
+    { now: FIXED },
+  );
+
+  const iMaint = md.indexOf('## Maintenance');
+  assert.ok(iMaint > -1, 'no Maintenance section');
+  assert.ok(iMaint > md.indexOf('## Ethics'), 'Maintenance should follow the dimension sections');
+
+  for (const label of ['Maintenance stated', 'Versioned release', 'Long-term access plan']) {
+    const hits = md.split(label).length - 1;
+    assert.equal(hits, 1, `"${label}" appears ${hits} times, expected exactly once`);
+  }
+  assert.match(md, /Annual refresh/);
 });
 
 test('generateDatasheet orders Characterization before FAIRness before Ethics', () => {

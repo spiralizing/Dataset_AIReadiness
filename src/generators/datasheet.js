@@ -28,6 +28,21 @@ const SECTION_ORDER = [
   'Ethics',
 ];
 
+// A few criteria answer a question a datasheet reader looks for under a heading of
+// its own rather than under a dimension. Gebru's template has a Maintenance group,
+// and versioning, long-term access, and the update/deprecation/erratum plan belong
+// together there even though the matrix files them under FAIRness and
+// Sustainability. A criterion declaring `datasheet_section` is rendered in that
+// section and omitted from its dimension, so it still appears exactly once — the
+// one-criterion-one-place rule this generator is built on. Assessment pages are
+// unaffected: the field is read here only.
+const THEMED_SECTIONS = ['Maintenance'];
+
+const THEMED_LEAD = {
+  Maintenance:
+    'How this release is kept: versioning, long-term access, and what happens after publication.',
+};
+
 const formatValue = (criterion, answer) => {
   if (criterion.evidence_type === 'boolean') {
     if (answer?.value === true) return 'Yes';
@@ -71,19 +86,38 @@ export function generateDatasheet(record, opts = {}) {
   lines.push(`> Implements the framework of ${citeThisWorkShort()}`);
   lines.push('');
 
+  const criterionLine = (c) => {
+    const answer = answers[c.id];
+    let line = `- **${c.label}:** ${formatValue(c, answer)}`;
+    if (answer?.notes && String(answer.notes).trim() !== '') {
+      line += ` _(note: ${String(answer.notes).trim()})_`;
+    }
+    return line;
+  };
+
   for (const dimension of SECTION_ORDER) {
-    const criteria = criteriaForDimension(dimension, pathway, subDomain);
+    const criteria = criteriaForDimension(dimension, pathway, subDomain).filter(
+      (c) => !c.datasheet_section,
+    );
     if (criteria.length === 0) continue;
     lines.push(`## ${dimension}`);
     lines.push('');
-    for (const c of criteria) {
-      const answer = answers[c.id];
-      let line = `- **${c.label}:** ${formatValue(c, answer)}`;
-      if (answer?.notes && String(answer.notes).trim() !== '') {
-        line += ` _(note: ${String(answer.notes).trim()})_`;
-      }
-      lines.push(line);
+    for (const c of criteria) lines.push(criterionLine(c));
+    lines.push('');
+  }
+
+  // Themed sections, after the dimensions: the criteria pulled out above.
+  const required = requiredCriteria(pathway, subDomain);
+  for (const section of THEMED_SECTIONS) {
+    const criteria = required.filter((c) => c.datasheet_section === section);
+    if (criteria.length === 0) continue;
+    lines.push(`## ${section}`);
+    lines.push('');
+    if (THEMED_LEAD[section]) {
+      lines.push(`_${THEMED_LEAD[section]}_`);
+      lines.push('');
     }
+    for (const c of criteria) lines.push(criterionLine(c));
     lines.push('');
   }
 

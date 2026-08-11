@@ -62,3 +62,30 @@ test('Export opens the tab named in the query param', () => {
   assert.ok(at('/export').includes('# Dataset datasheet'));
   assert.ok(at('/export?tab=nonsense').includes('# Dataset datasheet'));
 });
+
+test('the actionability ladder renders on every tab that reports one', () => {
+  // Three call sites, one of them inside the conformance tab's IIFE, so a unit
+  // test on the degree logic would pass while a tab rendered nothing.
+  const at = (entry) =>
+    renderToStaticMarkup(
+      <MemoryRouter initialEntries={[entry]}>
+        <AssessmentProvider>
+          <ExportPage />
+        </AssessmentProvider>
+      </MemoryRouter>,
+    );
+
+  for (const entry of ['/export?tab=croissant', '/export?tab=provo', '/export?tab=conformance']) {
+    const html = at(entry);
+    assert.ok(html.includes('Machine-actionability'), `${entry} has no ladder`);
+    for (const rung of ['Well-formed', 'Schema-valid', 'Referentially sound', 'Grounded', 'Executable']) {
+      assert.ok(html.includes(rung), `${entry} is missing the ${rung} rung`);
+    }
+  }
+
+  // The empty-answers record is not grounded, and the page says which rung it
+  // reached rather than only that something is wrong.
+  assert.ok(at('/export?tab=croissant').includes('reaches'));
+  // Executable is disclosed as unchecked, not silently omitted.
+  assert.ok(at('/export?tab=conformance').includes('does not certify'));
+});

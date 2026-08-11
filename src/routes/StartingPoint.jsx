@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { STAGES } from '../lib/stages.js';
 import { THIS_WORK } from '../lib/thisWork.js';
 import { LEVELS } from '../lib/dimensions.js';
+import { cellText, beyondCellCriteria } from '../lib/pathway.js';
 import { useAssessment } from '../state/assessment.jsx';
 import Carousel from '../components/Carousel.jsx';
 import {
@@ -33,52 +34,10 @@ const DIMENSIONS = [
   ['Provenance', 'Sources, transformations, and versions: how the data came to be.'],
   ['Characterization', 'Distributions, coverage, missingness, and known limitations of the sample.'],
   ['Ethics', 'Consent, privacy, de-identification, licensing, and legitimate use.'],
-  ['Pre-model Explainability', 'Variable meanings, units, encodings, and traceability to source.'],
-  ['Sustainability', 'Long-term access, governance, and the compute cost of using the data.'],
+  ['Pre-model Explainability', 'Semantics of variables, units, encodings, and missingness before any model is fit.'],
+  ['Sustainability', 'Long-term access, governance, and the environmental cost of training on the data.'],
   ['Computability', 'Machine-actionable schema and metadata for direct ingestion by ML pipelines.'],
 ];
-
-// Compact per-cell summaries transcribed from the paper's AI-readiness
-// assessment matrix (§6, tab:assessment-matrix). Level headers and DRL bands
-// come from LEVELS so the schema stays the source of truth; only these
-// phrasings, which the schema doesn't carry, live here.
-const LEVEL_CELLS = {
-  FAIRness: {
-    L1: 'FAIR F+A indicators',
-    L2: 'FAIR I+R indicators; Croissant descriptor present',
-    L3: 'Croissant with responsible-AI annotations; persistent identifier; versioned release',
-  },
-  Provenance: {
-    L1: 'Source documented',
-    L2: 'Transformations logged',
-    L3: 'Full pipeline provenance (W3C PROV)',
-  },
-  Characterization: {
-    L1: 'Schema declared',
-    L2: 'Missingness, errors, distributions reported',
-    L3: 'Bias audit, coverage analysis, scope declared',
-  },
-  Ethics: {
-    L1: 'Consent basis recorded; de-identification applied',
-    L2: 'De-identification applied; method recorded',
-    L3: 'Ethical oversight documented as metadata; access governance in place',
-  },
-  'Pre-model Explainability': {
-    L1: 'Variable definitions stated',
-    L2: 'Variables traceable to source',
-    L3: 'Feature lineage intact, linked to model cards',
-  },
-  Sustainability: {
-    L1: 'Format preserved',
-    L2: 'Storage footprint reported',
-    L3: 'Data-centric efficiency applied',
-  },
-  Computability: {
-    L1: 'Loadable in a standard environment',
-    L2: 'Controlled vocabularies, linked schemas',
-    L3: 'Direct load into ML frameworks',
-  },
-};
 
 // Only the selector below the carousel uses this now; the muted variant went
 // with the slide eyebrows.
@@ -129,7 +88,8 @@ function Node({ tone, icon, label, sub }) {
   );
 }
 
-// The "FAIR-published + docs -> AI-ready" node diagram, on the overview slide.
+// The "FAIR-published + docs -> machine-learning-ready" node diagram, on the
+// overview slide.
 // "Three steps" used to reuse it; it now carries DocumentationInputs, which
 // says something the numbered steps do not.
 function ReadinessDiagram({ className = '' }) {
@@ -138,13 +98,13 @@ function ReadinessDiagram({ className = '' }) {
       <div
         className="flex flex-wrap items-center justify-center gap-3"
         role="img"
-        aria-label="A FAIR-published but ML-closed dataset, plus documentation layers, becomes AI-ready: reusable by people and pipelines"
+        aria-label="A FAIR-published but ML-closed dataset, plus documentation layers, becomes machine-learning-ready: reusable by people and pipelines"
       >
         <Node tone="closed" icon="🔒" label="FAIR-published" sub="findable & accessible, but ML-closed" />
         <span className="shrink-0 text-2xl font-light leading-none text-accent" aria-hidden="true">+</span>
         <Node tone="docs" icon="📑" label="Documentation layers" sub="datasheet · Croissant · PROV-O" />
         <span className="shrink-0 text-2xl leading-none text-accent" aria-hidden="true">→</span>
-        <Node tone="ready" icon="✓" label="AI-ready" sub="reusable by people & pipelines" />
+        <Node tone="ready" icon="✓" label="ML-ready" sub="reusable by people & pipelines" />
       </div>
     </div>
   );
@@ -180,7 +140,7 @@ export default function StartingPoint() {
         {/* Overview — full-width text, diagram below a rule */}
         <Slide>
           <h1 className="text-3xl font-bold leading-tight tracking-tight text-ink text-balance">
-            Make a dataset AI-ready: plan it, prepare it, or upgrade it
+            Make a dataset machine-learning-ready: plan it, prepare it, or upgrade it
           </h1>
           <p className="mt-4 text-base leading-relaxed text-muted">
             Use it at any point in the lifecycle: while <span className="font-medium text-ink">planning</span>{' '}
@@ -228,7 +188,7 @@ export default function StartingPoint() {
         <Slide>
           <SlideHead title="The three readiness levels" />
           <p className="mt-4 text-xs text-muted">
-            AI-readiness is graded, not binary. Each dimension progresses through three levels,
+            AI-readiness is a graded property. Each dimension progresses through three levels,
             aligned to the Data Readiness Level bands (
             <a href="https://doi.org/10.48550/arXiv.1705.02245" target="_blank" rel="noreferrer" className="text-link underline">Lawrence, 2017</a>
             ). L1 suits local or niche use; L2 is expected for broad reuse; L3 is reserved for
@@ -257,7 +217,7 @@ export default function StartingPoint() {
                     </th>
                     {LEVELS.map((l) => (
                       <td key={l.id} className="border border-line p-2 align-top text-muted">
-                        {LEVEL_CELLS[name][l.id]}
+                        {cellText(name, l.id)}
                       </td>
                     ))}
                   </tr>
@@ -278,7 +238,7 @@ export default function StartingPoint() {
                   {DIMENSIONS.map(([name]) => (
                     <div key={name}>
                       <dt className="text-[0.7rem] font-semibold text-ink">{name}</dt>
-                      <dd className="text-[0.7rem] text-muted">{LEVEL_CELLS[name][l.id]}</dd>
+                      <dd className="text-[0.7rem] text-muted">{cellText(name, l.id)}</dd>
                     </div>
                   ))}
                 </dl>
@@ -290,6 +250,26 @@ export default function StartingPoint() {
             Adapted from the AI-readiness assessment matrix in{' '}
             <span className="text-ink">{THIS_WORK.authors}</span> ({THIS_WORK.year}).
           </p>
+
+          {/* Each cell above expands to several checkable criteria. A few of those
+              ask for something the cell wording does not name, so the extras are
+              attributed here rather than left for a reader to spot. */}
+          {beyondCellCriteria().length > 0 && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-[0.7rem] text-muted">
+                Each cell expands to several criteria in the assessment —{' '}
+                {beyondCellCriteria().length} ask for something the cell wording does not name
+              </summary>
+              <ul className="mt-2 space-y-1.5 text-[0.7rem] text-muted">
+                {beyondCellCriteria().map((c) => (
+                  <li key={c.id}>
+                    <span className="text-ink">{c.label}</span> ({c.dimension} · {c.level}) —{' '}
+                    {c.beyond_cell.note} <span className="text-faint">{c.beyond_cell.source}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
         </Slide>
 
         {/* How it works */}
@@ -353,7 +333,7 @@ export default function StartingPoint() {
           <p className="mt-3 text-xs text-muted">
             Captured while the run happens, this record is a flight recorder. Reconstructed
             afterwards it is a witness statement, and at high throughput, where nobody is taking
-            notes, not even that. The{' '}
+            notes, it is silence. The{' '}
             <Link to="/guide" className="text-link underline">collection guide</Link> lists every
             observation this assessment will ask for, grouped by when it is still capturable:{' '}
             <a href="https://doi.org/10.1038/s41597-020-00638-4" target="_blank" rel="noreferrer" className="text-link underline">
@@ -381,7 +361,7 @@ export default function StartingPoint() {
         <Slide fill>
           <SlideHead title="The documentation layers" />
           <p className="mt-4 text-sm text-muted">
-            Three machine-readable layers compose into an AI-ready dataset. Each answers a different
+            Three machine-readable layers compose into a machine-learning-ready dataset. Each answers a different
             question, and none replaces the others.
           </p>
           <div className="mt-4 grid gap-2">

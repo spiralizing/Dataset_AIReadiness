@@ -11,7 +11,19 @@ import { CROISSANT_CONTEXT, CROISSANT_CONFORMS_TO } from '../generators/croissan
 const RECORD_VERSION = 'assessment_record_v0';
 const firstVocab = (key) => vocabularies.vocabularies[key]?.values?.[0]?.id ?? 'custom';
 
+// Criteria whose automated check constrains the format more tightly than the
+// generic evidence_type sample below. A DOI is a fine stand-in for "identifier"
+// in general and is not a dbGaP accession, so without these the examples would
+// fail a check that is working correctly.
+const SAMPLE_BY_ID = {
+  'ethics.l3.genomic.dbgap_accession': 'phs002204.v1.p1',
+  'ethics.l3.clinical.dua_template': 'https://physionet.org/content/mimiciv/view-dua/',
+  'ethics.l3.institutional.tiered_access_policy':
+    'https://www.icpsr.umich.edu/web/pages/ICPSR/access/restricted/',
+};
+
 function sampleValue(c) {
+  if (SAMPLE_BY_ID[c.id]) return SAMPLE_BY_ID[c.id];
   switch (c.evidence_type) {
     case 'boolean':
       return true;

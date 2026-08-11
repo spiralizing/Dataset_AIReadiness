@@ -1,6 +1,6 @@
 {
-  "$comment": "AI-readiness assessment matrix derived from the assessment matrix of González-Espinoza et al. (2026) — Table 13 (tab:assessment-matrix) in the current draft. Pointers into the paper are given as LaTeX labels with the number of the current draft, because float numbers move whenever a section is inserted; the label does not. 7 Bridge2AI dimensions × 3 readiness levels (L1/L2/L3 ↔ DRL bands C/B/A). Cumulative semantics: Pathway A requires every L1 criterion; Pathway B requires every L1 + L2; Pathway C requires every L1 + L2 + L3. Each matrix cell expands to one to five independently checkable criteria, so the criterion count is larger than the 21 cells. The Croissant descriptor lives at L2 but is marked recommended at L1 to keep upgrades frictionless. Pathway C sub-domain overlays live in pathways.json, not here — they may target any dimension, and a sub-domain may also reword a criterion below via 'label_overrides' (wording only; id, evidence_type, and pathway membership are never changed). All six schema files move in lockstep from 0.4.0; 1.0.0 is cut when the criterion ids are considered stable.",
-  "version": "0.4.0",
+  "$comment": "AI-readiness assessment matrix derived from the assessment matrix of González-Espinoza et al. (2026) — Table 13 (tab:assessment-matrix) in the current draft. Pointers into the paper are given as LaTeX labels with the number of the current draft, because float numbers move whenever a section is inserted; the label does not. 7 Bridge2AI dimensions × 3 readiness levels (L1/L2/L3 ↔ DRL bands C/B/A). Cumulative semantics: Pathway A requires every L1 criterion; Pathway B requires every L1 + L2; Pathway C requires every L1 + L2 + L3. Each matrix cell expands to one to five independently checkable criteria, so the criterion count is larger than the 21 cells. The Croissant descriptor lives at L2 but is marked recommended at L1 to keep upgrades frictionless. Pathway C sub-domain overlays live in pathways.json, not here — they may target any dimension, and a sub-domain may also reword a criterion below via 'label_overrides' (wording only; id, evidence_type, and pathway membership are never changed). All six schema files move in lockstep from 0.5.0; 1.0.0 is cut when the criterion ids are considered stable.",
+  "version": "0.5.0",
   "dimensions": [
     "FAIRness",
     "Provenance",
@@ -15,6 +15,44 @@
     { "id": "L2", "name": "Faithful", "drl_band": "B" },
     { "id": "L3", "name": "Task-ready", "drl_band": "A" }
   ],
+  "$cells_comment": "The 21 cells of the paper's assessment matrix (Table 13, tab:assessment-matrix), quoted verbatim. Held here rather than in a UI constant so the cell wording and the criteria that operationalise it cannot drift apart; the start page and any crosswalk render from this. Each cell expands to one to five criteria below. A criterion whose requirement the cell text does not name carries a 'beyond_cell' object saying where in the paper it does come from — matrix.test.js asserts every cell is populated, every criterion lands in a declared cell, and every extension is attributed.",
+  "cells": {
+    "FAIRness": {
+      "L1": "FAIR F+A indicators",
+      "L2": "FAIR I+R indicators; Croissant descriptor present",
+      "L3": "Croissant with responsible-AI annotations; persistent identifier; versioned release"
+    },
+    "Provenance": {
+      "L1": "Source documented",
+      "L2": "Transformations logged",
+      "L3": "Full pipeline provenance (W3C PROV)"
+    },
+    "Characterization": {
+      "L1": "Schema declared",
+      "L2": "Missingness, errors, distributions reported",
+      "L3": "Bias audit, coverage analysis, scope declared"
+    },
+    "Ethics": {
+      "L1": "Consent basis recorded; de-identification applied",
+      "L2": "De-identification applied; method recorded",
+      "L3": "Ethical oversight documented as metadata; access governance in place"
+    },
+    "Pre-model Explainability": {
+      "L1": "Variable definitions stated",
+      "L2": "Variables traceable to source",
+      "L3": "Feature lineage intact, linked to model cards"
+    },
+    "Sustainability": {
+      "L1": "Format preserved",
+      "L2": "Storage footprint reported",
+      "L3": "Data-centric efficiency applied"
+    },
+    "Computability": {
+      "L1": "Loadable in a standard environment",
+      "L2": "Controlled vocabularies, linked schemas",
+      "L3": "Direct load into ML frameworks"
+    }
+  },
   "criteria": [
     {
       "id": "fairness.l1.persistent_id",
@@ -26,7 +64,8 @@
       "lifecycle_stage": "release",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016", "Bahim2020", "Clark2026"],
-      "remediation": "Mint a DOI via Zenodo, DataCite, or your institutional repository before publishing. The identifier must resolve to a landing page, not directly to a file."
+      "remediation": "Mint a DOI via Zenodo, DataCite, or your institutional repository before publishing. The identifier must resolve to a landing page that describes the dataset.",
+      "verification_hint": "The tool checks the syntax: a DOI (10.NNNN/suffix) or an ARK. Whether it resolves is not checked offline, so confirm the landing page loads before you deposit."
     },
     {
       "id": "fairness.l1.landing_page",
@@ -38,7 +77,8 @@
       "lifecycle_stage": "release",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016", "Bahim2020"],
-      "remediation": "Most repositories generate a landing page automatically when you mint a DOI. Confirm the page is publicly resolvable."
+      "remediation": "Most repositories generate a landing page automatically when you mint a DOI. Confirm the page is publicly resolvable.",
+      "verification_hint": "The tool checks that the value is an absolute, well-formed URL. That the page is public and describes the dataset is yours to confirm."
     },
     {
       "id": "fairness.l1.metadata_machine_readable",
@@ -50,7 +90,8 @@
       "lifecycle_stage": "release",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016", "Bahim2020"],
-      "remediation": "Confirm the landing page emits DataCite metadata or schema.org/Dataset JSON-LD. Most generalist repositories do this by default."
+      "remediation": "Confirm the landing page emits DataCite metadata or schema.org/Dataset JSON-LD. Most generalist repositories do this by default.",
+      "verification_hint": "You declare this; the evidence is the landing page itself. View its source for DataCite or schema.org/Dataset JSON-LD, or run it through a structured-data testing tool."
     },
     {
       "id": "fairness.l1.access_documented",
@@ -62,7 +103,8 @@
       "lifecycle_stage": "governance",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016"],
-      "remediation": "State explicitly how a user obtains the data: open download, registration, DUA, or DAC review."
+      "remediation": "State explicitly how a user obtains the data: open download, registration, DUA, or DAC review.",
+      "verification_hint": "The data steward confirms this by reading the access statement as a stranger would, and checking it names the actual route: a download link, a request form, or the committee that reviews requests."
     },
     {
       "id": "fairness.l1.license_explicit",
@@ -75,7 +117,12 @@
       "lifecycle_stage": "governance",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Wilkinson2016", "Bahim2020"],
-      "remediation": "Pick a Creative Commons or Open Data Commons license. 'No license' defaults to all-rights-reserved and blocks reuse."
+      "beyond_cell": {
+        "source": "Table 4 (tab:release-components), paper §2.6; Table 9 (tab:ethics-requirements)",
+        "note": "The cell names FAIR F+A indicators, and an explicit licence is R1.1. It is required at L1 because a release without one defaults to all-rights-reserved, which blocks the reuse every higher level assumes; the paper lists it as a release component and as an ethical condition of use."
+      },
+      "remediation": "Pick a Creative Commons or Open Data Commons license. 'No license' defaults to all-rights-reserved and blocks reuse.",
+      "verification_hint": "The tool checks the value against the bundled SPDX and Creative Commons identifiers, so a free-text licence name fails here."
     },
     {
       "id": "fairness.l2.croissant_descriptor",
@@ -88,7 +135,8 @@
       "required_in_pathways": ["B", "C"],
       "recommended_in_pathways": ["A"],
       "references": ["Akhtar2024", "Clark2026"],
-      "remediation": "Use the in-app Croissant generator. Including a descriptor at L1 makes the dataset directly ML-loadable today and trivially upgradable to L2."
+      "remediation": "Use the in-app Croissant generator. Including a descriptor at L1 makes the dataset directly ML-loadable today and trivially upgradable to L2.",
+      "verification_hint": "The tool validates the descriptor against the Croissant 1.0 structure and reports any open recommendations. The Export page shows which rung of the machine-actionability ladder it reaches."
     },
     {
       "id": "fairness.l2.controlled_vocabularies",
@@ -100,7 +148,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Wilkinson2016", "Blatter2022", "Sansone2019"],
-      "remediation": "Map clinical fields to LOINC/SNOMED, units to UCUM, climate vars to CF, etc. Document the mapping in the Croissant descriptor. Where the right vocabulary for your field is not obvious, look it up in FAIRsharing, the DCC Disciplinary Metadata Catalogue, or the RDA Metadata Standards Catalog rather than inventing terms."
+      "remediation": "Map clinical fields to LOINC/SNOMED, units to UCUM, climate vars to CF, etc. Document the mapping in the Croissant descriptor. Where the right vocabulary for your field is not obvious, look it up in FAIRsharing, the DCC Disciplinary Metadata Catalogue, or the RDA Metadata Standards Catalog before coining your own.",
+      "verification_hint": "The domain expert confirms that each term comes from a published vocabulary and that its version is recorded. Which vocabulary applies is a disciplinary judgement, so look it up in FAIRsharing before coining a term."
     },
     {
       "id": "fairness.l2.cross_dataset_links",
@@ -112,7 +161,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Wilkinson2016", "Bahim2020"],
-      "remediation": "Include `isVersionOf`, `isPartOf`, `references`, or schema.org/sameAs links so machines can navigate between related artefacts."
+      "remediation": "Include `isVersionOf`, `isPartOf`, `references`, or schema.org/sameAs links so machines can navigate between related artefacts.",
+      "verification_hint": "The data steward confirms this by following every link and checking it resolves to the artifact the relation claims it does."
     },
     {
       "id": "fairness.l3.responsible_ai_annotations",
@@ -125,12 +175,14 @@
       "required_in_pathways": ["C"],
       "references": ["Akhtar2024", "Clark2026"],
       "collection_hint": "While you are deciding what the data is for, write the one-line intended use and the uses you would object to. Both are easier to state before there are results to defend.",
-      "remediation": "Populate the Croissant `rai:` namespace fields. The in-app generator surfaces them when Pathway C is selected."
+      "remediation": "Populate the Croissant `rai:` namespace fields. The in-app generator surfaces them when Pathway C is selected.",
+      "verification_hint": "The tool checks that at least one rai: field in the descriptor carries content. Whether the intended use is stated well enough is covered by the scope and bias-audit rows."
     },
     {
       "id": "fairness.l3.versioned_release",
       "dimension": "FAIRness",
       "level": "L3",
+      "datasheet_section": "Maintenance",
       "label": "Versioned release with concept-level and version-level identifiers; immutable per version",
       "evidence_type": "text",
       "verification": "manual",
@@ -138,7 +190,8 @@
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "Bahim2020"],
       "collection_hint": "Fix the version string for this cut of the data, and note what would make you cut the next one.",
-      "remediation": "Use a repository that mints both a concept DOI (resolves to latest) and version-specific DOIs (Zenodo and DataCite both support this)."
+      "remediation": "Use a repository that mints both a concept DOI (resolves to latest) and version-specific DOIs (Zenodo and DataCite both support this).",
+      "verification_hint": "The data steward confirms that the repository minted both a concept DOI and a version DOI, and that the files behind this version are frozen."
     },
     {
       "id": "fairness.l3.deposition_target",
@@ -153,7 +206,12 @@
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "collection_hint": "Pick the target repository early and read its submission requirements: some constrain formats, consent wording, or file layout in ways that are cheap to satisfy before collection and expensive after.",
-      "remediation": "The options are scoped to your pathway and, in Pathway C, to your sub-domain — a domain repository is preferred over a generalist one, and any target recommended for your sub-domain is listed first. Record the repository you will deposit in and the access tier it will carry (open, registered, restricted, controlled, or embargoed). If the right repository is not listed, use Custom."
+      "beyond_cell": {
+        "source": "Table 4 (tab:release-components), paper §2.6",
+        "note": "The cell names the Croissant annotations, the identifier, and the versioned release. Repository choice appears in the paper as a release component, outside the matrix cells. It is required here because the target repository constrains formats, consent wording, and access tier."
+      },
+      "remediation": "The options are scoped to your pathway and, in Pathway C, to your sub-domain — a domain repository is preferred over a generalist one, and any target recommended for your sub-domain is listed first. Record the repository you will deposit in and the access tier it will carry (open, registered, restricted, controlled, or embargoed). If the right repository is not listed, use Custom.",
+      "verification_hint": "You declare this; the evidence is the repository's own submission policy, which states the access tiers it supports and the formats it accepts."
     },
     {
       "id": "provenance.l1.source_documented",
@@ -165,7 +223,8 @@
       "lifecycle_stage": "acquisition",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026"],
-      "remediation": "Add a 'Sources' section to the README or datasheet listing every upstream source and how it was obtained."
+      "remediation": "Add a 'Sources' section to the README or datasheet listing every upstream source and how it was obtained.",
+      "verification_hint": "The data engineer confirms that every upstream source named is one the project can account for, and that none used in practice is missing."
     },
     {
       "id": "provenance.l1.collection_window",
@@ -177,7 +236,8 @@
       "lifecycle_stage": "acquisition",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "KidwaiKhan2024"],
-      "remediation": "State the inclusive collection dates and any geographic/cohort constraints. This is what downstream users need to judge fit."
+      "remediation": "State the inclusive collection dates and any geographic/cohort constraints. This is what downstream users need to judge fit.",
+      "verification_hint": "The domain expert confirms the stated window and geography against what was collected. Only someone who was there catches a wrong date."
     },
     {
       "id": "provenance.l2.transformations_documented",
@@ -189,7 +249,8 @@
       "lifecycle_stage": "curation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "KidwaiKhan2024"],
-      "remediation": "List each step with inputs, outputs, and rationale. The PROV-O generator produces a structured version of this — write the prose first, encode it second."
+      "remediation": "List each step with inputs, outputs, and rationale. The PROV-O generator produces a structured version of this — write the prose first, encode it second.",
+      "verification_hint": "The data engineer confirms this by walking the pipeline and checking that every step which touched the data appears in the list."
     },
     {
       "id": "provenance.l2.software_versions",
@@ -201,7 +262,8 @@
       "lifecycle_stage": "curation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "W3CPROVO2013"],
-      "remediation": "Capture interpreter version, library pins (requirements.txt or environment.yml), and a Git commit hash for in-house code."
+      "remediation": "Capture interpreter version, library pins (requirements.txt or environment.yml), and a Git commit hash for in-house code.",
+      "verification_hint": "The data engineer confirms these against the environment that produced the release \u2014 a lock file, an image digest, a commit hash \u2014 rather than from memory."
     },
     {
       "id": "provenance.l3.prov_record_present",
@@ -214,7 +276,8 @@
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Knublauch2017", "Clark2026"],
       "collection_hint": "Keep the run log the record is built from: for every processing step, its inputs, its outputs, and when it ran.",
-      "remediation": "Use the in-app PROV-O generator for short pipelines, or export from CWL / Snakemake / Nextflow / Galaxy for long ones. The record is an RDF graph, so it is checked with SHACL shape constraints, not just parsed."
+      "remediation": "Use the in-app PROV-O generator for short pipelines, or export from CWL / Snakemake / Nextflow / Galaxy for long ones. The record is an RDF graph, so SHACL shape constraints check it beyond parsing.",
+      "verification_hint": "The tool checks that the record parses as JSON-LD with a prov namespace, a graph, and at least one Entity. Run Deep validate on the Provenance tab to check the SHACL shapes."
     },
     {
       "id": "provenance.l3.entity_per_variable",
@@ -227,7 +290,8 @@
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
       "collection_hint": "List every variable you will release; for derived ones, note which variables they were computed from.",
-      "remediation": "Variable-level Entities enable feature-lineage queries downstream. The in-app generator emits one Entity per variable when the variable list is populated."
+      "remediation": "Variable-level Entities enable feature-lineage queries downstream. The in-app generator emits one Entity per variable when the variable list is populated.",
+      "verification_hint": "The tool counts Entities carrying kind: variable. It cannot know which variables you left out, so completeness is yours to confirm."
     },
     {
       "id": "provenance.l3.activity_per_step",
@@ -240,7 +304,8 @@
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
       "collection_hint": "At run time, record the parameters used and the exact software version. Version numbers are the first thing to become unrecoverable.",
-      "remediation": "Each Activity records `prov:used` (inputs), `prov:wasGeneratedBy` (outputs), parameters, and the software Agent that ran it."
+      "remediation": "Each Activity records `prov:used` (inputs), `prov:wasGeneratedBy` (outputs), parameters, and the software Agent that ran it.",
+      "verification_hint": "The tool checks that at least one Activity records its software or its inputs. That every processing step has one is yours to confirm."
     },
     {
       "id": "provenance.l3.agents_with_roles",
@@ -254,7 +319,8 @@
       "required_in_pathways": ["C"],
       "references": ["W3CPROVO2013", "Clark2026"],
       "collection_hint": "Note who ran each step, by ORCID, and in what role.",
-      "remediation": "Name a data steward, domain expert, data engineer, ML practitioner, and governance officer — even if the same person holds multiple roles in a small team."
+      "remediation": "Name a data steward, domain expert, data engineer, ML practitioner, and governance officer — even if the same person holds multiple roles in a small team.",
+      "verification_hint": "The tool checks that at least one Agent carries a role drawn from the stakeholder-role vocabulary."
     },
     {
       "id": "characterization.l1.schema_declared",
@@ -266,7 +332,9 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Wilkinson2016"],
-      "remediation": "Ship a data dictionary (CSV, Markdown, or DDI XML) listing every variable with its type, units, and value set."
+      "remediation": "Ship a data dictionary (CSV, Markdown, or DDI XML) listing every variable with its type, units, and value set.",
+      "verification_hint": "The domain expert confirms every variable has a type, a unit where one applies, and a value set. Frictionless can check a declared table schema against the released data.",
+      "validators": ["frictionless"]
     },
     {
       "id": "characterization.l1.record_count",
@@ -278,7 +346,12 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026"],
-      "remediation": "One sentence in the README. Trivial to provide and always missed."
+      "beyond_cell": {
+        "source": "Figure 7 (fig:data-card-example), Composition row; Table 8 (tab:characterization-record)",
+        "note": "The cell names the declared schema. Record count is the other half of the composition summary a data card carries, and is the cheapest characterisation evidence there is."
+      },
+      "remediation": "One sentence in the README. Trivial to provide and always missed.",
+      "verification_hint": "The data engineer confirms the stated count against the released files. It is a one-line check, and the one most often skipped."
     },
     {
       "id": "characterization.l2.missingness_reported",
@@ -290,7 +363,9 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "KidwaiKhan2024"],
-      "remediation": "Report % missing per variable. Default missingness handling encodes fairness properties — disclose what was applied."
+      "remediation": "Report % missing per variable. Default missingness handling encodes fairness properties — disclose what was applied.",
+      "verification_hint": "The data engineer confirms the rates were computed from the released files, not from an earlier cut. Great Expectations or Pandera produce them as a profiling report.",
+      "validators": ["great-expectations", "pandera"]
     },
     {
       "id": "characterization.l2.distributions_reported",
@@ -302,7 +377,9 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
-      "remediation": "A one-page summary or a Great-Expectations / Pandera profiling report. Include in the documentation bundle."
+      "remediation": "A one-page summary or a Great-Expectations / Pandera profiling report. Include in the documentation bundle.",
+      "verification_hint": "The data engineer confirms the summaries match the released data. A profiling report from Great Expectations, Pandera, or Deequ is the usual source.",
+      "validators": ["great-expectations", "pandera", "deequ"]
     },
     {
       "id": "characterization.l2.errors_known",
@@ -314,7 +391,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
-      "remediation": "Explicit disclosure beats silent correction. List known issues even if you chose not to fix them."
+      "remediation": "Explicit disclosure beats silent correction. List known issues even if you chose not to fix them.",
+      "verification_hint": "The domain expert confirms the list reflects what is known, including issues nobody fixed. Only someone close to the data can say what is missing from it."
     },
     {
       "id": "characterization.l2.class_balance",
@@ -326,7 +404,9 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
-      "remediation": "Report counts per class. Heavy imbalance affects evaluation metrics — surfacing it lets reviewers judge fit."
+      "remediation": "Report counts per class. Heavy imbalance affects evaluation metrics — surfacing it lets reviewers judge fit.",
+      "verification_hint": "The ML practitioner confirms the counts per class, or that the dataset carries no classification target and the row is marked N/A.",
+      "validators": ["great-expectations", "pandera"]
     },
     {
       "id": "characterization.l3.bias_audit",
@@ -338,8 +418,10 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "KidwaiKhan2024", "Aldoseri2023"],
-      "collection_hint": "Record the attributes you will need to audit representation on — site, instrument, batch, demographic group — as columns, not as prose. You cannot audit what was never captured.",
-      "remediation": "Use Aequitas, Fairlearn, or an equivalent tool. Compare distributions before and after curation to detect introduced skew, not just released-state parity."
+      "collection_hint": "Record the attributes you will need to audit representation on — site, instrument, batch, demographic group — as structured columns in the data. You cannot audit what was never captured.",
+      "remediation": "Use Aequitas, Fairlearn, or an equivalent tool. Compare distributions before and after curation, so introduced skew surfaces alongside released-state parity.",
+      "verification_hint": "You declare this; the evidence is the audit report itself. Aequitas or Fairlearn produce one \u2014 link it in the note field, and cover both the pre-curation and released distributions.",
+      "validators": ["aequitas", "fairlearn"]
     },
     {
       "id": "characterization.l3.coverage_analysis",
@@ -352,7 +434,8 @@
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "collection_hint": "Note the span the data actually covers: dates, sites, instruments, populations, modalities. Also note what you intended to cover and did not.",
-      "remediation": "List subgroups represented and subgroups missing. Coverage gaps constrain valid downstream uses."
+      "remediation": "List subgroups represented and subgroups missing. Coverage gaps constrain valid downstream uses.",
+      "verification_hint": "The domain expert confirms the stated coverage against the sampling design, and names the subgroups that are absent as well as those present."
     },
     {
       "id": "characterization.l3.scope_declared",
@@ -365,7 +448,8 @@
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "Gebru2021"],
       "collection_hint": "Write down the question this data was collected to answer. That sentence becomes the intended-use statement.",
-      "remediation": "State both: tasks the dataset should support, and tasks it should not (e.g., 'not for clinical decision support')."
+      "remediation": "State both: tasks the dataset should support, and tasks it should not (e.g., 'not for clinical decision support').",
+      "verification_hint": "The domain expert and the ML practitioner agree on both halves: the tasks this data supports, and the tasks it should not be used for."
     },
     {
       "id": "characterization.l3.limitations_declared",
@@ -378,7 +462,12 @@
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "KidwaiKhan2024"],
       "collection_hint": "Keep a running note of anything that went wrong or changed mid-stream: a failed batch, a recalibration, an amended protocol, a site that dropped out.",
-      "remediation": "Healthcare-utilisation proxies, exclusion windows, instrument quirks — name them. Downstream users need them to judge transferability."
+      "beyond_cell": {
+        "source": "Table 8 (tab:characterization-record), Limitations row",
+        "note": "The cell names the bias audit, the coverage analysis, and the scope declaration. Known selection effects, measurement error, and confounders are the fourth row of the characterization record the paper prescribes."
+      },
+      "remediation": "Healthcare-utilisation proxies, exclusion windows, instrument quirks — name them. Downstream users need them to judge transferability.",
+      "verification_hint": "The domain expert confirms this. A limitation that nobody involved in collection names is unlikely to be discoverable afterwards."
     },
     {
       "id": "ethics.l1.consent_basis_recorded",
@@ -391,7 +480,8 @@
       "lifecycle_stage": "acquisition",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Aldoseri2023"],
-      "remediation": "Document what consent covers — including 'not applicable' for non-human-subjects or already-public data."
+      "remediation": "Document what consent covers — including 'not applicable' for non-human-subjects or already-public data.",
+      "verification_hint": "You declare this; the evidence is the consent form or the IRB waiver that establishes the basis. Nothing mechanical can confirm the basis covers the use you intend."
     },
     {
       "id": "ethics.l1.de_identification_applied",
@@ -403,7 +493,8 @@
       "lifecycle_stage": "curation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Aldoseri2023"],
-      "remediation": "Names, contact details, MRNs, exact addresses, exact dates of service. Indirect identifiers come at L2."
+      "remediation": "Names, contact details, MRNs, exact addresses, exact dates of service. Indirect identifiers come at L2.",
+      "verification_hint": "You declare this; the evidence is the de-identification run \u2014 the script, the tool's report, or a reviewer's sign-off on the released files."
     },
     {
       "id": "ethics.l2.de_identification_method",
@@ -416,7 +507,8 @@
       "lifecycle_stage": "curation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "Rostamzadeh2022"],
-      "remediation": "'Stripped names' is not a method. Record HIPAA Safe Harbor / Expert Determination / k-anonymity (with k) / differential privacy (with ε), etc."
+      "remediation": "Record the method and its parameters: HIPAA Safe Harbor, Expert Determination, k-anonymity (with k), differential privacy (with ε). A phrase like 'stripped names' leaves a reviewer to guess which of these you did.",
+      "verification_hint": "You declare the method; the evidence is the report that names it with its parameters \u2014 k for k-anonymity, epsilon for differential privacy, or the Safe Harbor checklist."
     },
     {
       "id": "ethics.l3.oversight_documented",
@@ -428,8 +520,9 @@
       "lifecycle_stage": "governance",
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "Rostamzadeh2022"],
-      "collection_hint": "Record the approving body, protocol number, and approval date when approval is granted, not when you write the paper.",
-      "remediation": "The review itself happens before/during acquisition. What travels with the dataset at L3 is structured evidence of that review — that is the L3 requirement."
+      "collection_hint": "Record the approving body, protocol number, and approval date at the moment approval is granted; by writing-up time the letter is usually filed away.",
+      "remediation": "The review itself happens before/during acquisition. What travels with the dataset at L3 is structured evidence of that review — that is the L3 requirement.",
+      "verification_hint": "The governance officer confirms the recorded approval matches the letter on file: body, protocol number, date, scope of permitted use, and current status."
     },
     {
       "id": "ethics.l3.access_governance",
@@ -443,7 +536,8 @@
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "collection_hint": "Decide before collection who will be allowed access and under what conditions — consent wording usually has to match the access tier you intend.",
-      "remediation": "Match the access tier to the sensitivity of the data and the consent basis recorded at L1."
+      "remediation": "Match the access tier to the sensitivity of the data and the consent basis recorded at L1.",
+      "verification_hint": "You declare the tier; the evidence is the repository's access configuration, which a reviewer can see from the landing page without asking you."
     },
     {
       "id": "ethics.l3.dua_referenced",
@@ -456,7 +550,22 @@
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "collection_hint": "If access will be restricted, note which data-use agreement applies, or that one still has to be drafted.",
-      "remediation": "Link to the DUA template the requester signs. Repositories like PhysioNet ship one; institutional Dataverse instances often do too."
+      "remediation": "Link to the DUA template the requester signs. Repositories like PhysioNet ship one; institutional Dataverse instances often do too.",
+      "verification_hint": "The governance officer confirms the referenced agreement is the one a requester actually signs, or that open access makes it inapplicable."
+    },
+    {
+      "id": "ethics.l3.data_access_contact",
+      "dimension": "Ethics",
+      "level": "L3",
+      "label": "Current data access contact named (person, role, or committee, with a durable address)",
+      "evidence_type": "text",
+      "verification": "manual",
+      "lifecycle_stage": "governance",
+      "required_in_pathways": ["C"],
+      "references": ["Clark2026", "Rostamzadeh2022"],
+      "collection_hint": "Decide who fields access requests, and give the role a durable address. Individuals move institutions; the dataset outlives them.",
+      "remediation": "The ethics evidence at L3 is only actionable if a requester can reach someone. Name the data access committee, the steward's role, or the study contact, and give an address that survives staff turnover: a role alias, or the contact route your repository provides.",
+      "verification_hint": "The governance officer confirms the address reaches someone today. This is the one row that decays without anybody editing it."
     },
     {
       "id": "ethics.l3.secondary_use_declared",
@@ -469,7 +578,8 @@
       "required_in_pathways": ["C"],
       "references": ["Clark2026"],
       "collection_hint": "Record what the consent or licence actually permits beyond this study, in the words the document uses.",
-      "remediation": "Bound by what consent basis at L1 supports. Be explicit — silence here defaults reviewers to 'not permitted'."
+      "remediation": "Bound by what consent basis at L1 supports. Be explicit — silence here defaults reviewers to 'not permitted'.",
+      "verification_hint": "The governance officer confirms the stated permission is bounded by the consent basis recorded at L1. Claiming more here than the consent supports is the failure mode."
     },
     {
       "id": "explainability.l1.variable_definitions",
@@ -481,7 +591,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026"],
-      "remediation": "A column name is not a definition. Each variable needs a sentence explaining what it measures and how."
+      "remediation": "Give each variable a sentence explaining what it measures and how it was measured. A column name abbreviates; a definition tells a stranger what was captured.",
+      "verification_hint": "The domain expert confirms each definition would let a stranger interpret the column without asking a question."
     },
     {
       "id": "explainability.l1.units_documented",
@@ -493,7 +604,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Blatter2022"],
-      "remediation": "Use UCUM where applicable. Untyped numerics are a frequent cause of merge errors across cohorts."
+      "remediation": "Use UCUM where applicable. Untyped numerics are a frequent cause of merge errors across cohorts.",
+      "verification_hint": "The domain expert confirms the units against the instrument or the protocol, in UCUM where a code exists."
     },
     {
       "id": "explainability.l2.variables_traceable",
@@ -505,7 +617,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
-      "remediation": "BMI = mass / height² is a source-and-operation. Record both, not just the derived value."
+      "remediation": "BMI = mass / height² is a source-and-operation. Record the source variables and the operation alongside the derived value.",
+      "verification_hint": "The data engineer confirms each derived variable names its sources and its operation closely enough to recompute it."
     },
     {
       "id": "explainability.l2.encoding_documented",
@@ -517,7 +630,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
-      "remediation": "If the released artefact is post-encoding, ship the encoder configuration / tokenizer alongside it."
+      "remediation": "If the released artefact is post-encoding, ship the encoder configuration / tokenizer alongside it.",
+      "verification_hint": "The ML practitioner confirms the shipped encoder or tokenizer configuration reproduces the encoded values in the release."
     },
     {
       "id": "explainability.l3.feature_lineage_intact",
@@ -530,7 +644,8 @@
       "required_in_pathways": ["C"],
       "references": ["Clark2026", "W3CPROVO2013"],
       "collection_hint": "As you create each derived variable, note its source variables and the operation that produced it.",
-      "remediation": "Every released feature can be reconstructed from raw inputs by following the PROV record's `wasDerivedFrom` chain."
+      "remediation": "Every released feature can be reconstructed from raw inputs by following the PROV record's `wasDerivedFrom` chain.",
+      "verification_hint": "The tool checks that every variable Entity in the PROV record has a wasDerivedFrom edge, so no released feature is an orphan."
     },
     {
       "id": "explainability.l3.model_card_linkage",
@@ -543,7 +658,8 @@
       "required_in_pathways": ["C"],
       "references": ["Mitchell2019", "Ravi2022", "Clark2026"],
       "collection_hint": "If a model will be trained on this data, note where its model card will live.",
-      "remediation": "Triangular linkage: dataset DOI ↔ model DOI/HF ID ↔ results DOI. Link bidirectionally so each artefact resolves to the others."
+      "remediation": "Triangular linkage: dataset DOI ↔ model DOI/HF ID ↔ results DOI. Link bidirectionally so each artefact resolves to the others.",
+      "verification_hint": "You declare this; the evidence is the model card resolving at the URL you give, with a link back to this dataset so the pair can be traced from either end."
     },
     {
       "id": "sustainability.l1.open_format",
@@ -556,7 +672,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Ravi2022"],
-      "remediation": "Parquet / CSV for tabular; HDF5 / NetCDF / Zarr for arrays; DICOM / NIfTI for imaging. Avoid Excel, SAS, or vendor formats as the canonical release."
+      "remediation": "Parquet / CSV for tabular; HDF5 / NetCDF / Zarr for arrays; DICOM / NIfTI for imaging. Avoid Excel, SAS, or vendor formats as the canonical release.",
+      "verification_hint": "The tool checks the declared format against the bundled open-format lists for tabular, array, and imaging data."
     },
     {
       "id": "sustainability.l2.storage_footprint",
@@ -568,19 +685,45 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026", "SalehiSchmeink2024"],
-      "remediation": "One line in the README. Lets downstream users plan downloads and storage."
+      "remediation": "One line in the README. Lets downstream users plan downloads and storage.",
+      "verification_hint": "The data engineer confirms the stated sizes against the deposited files."
     },
     {
       "id": "sustainability.l2.long_term_access_plan",
       "dimension": "Sustainability",
       "level": "L2",
+      "datasheet_section": "Maintenance",
       "label": "Long-term access plan (institutional commitment, repository SLA, or migration strategy)",
       "evidence_type": "text",
       "verification": "manual",
       "lifecycle_stage": "governance",
       "required_in_pathways": ["B", "C"],
       "references": ["LawrenceMontgomery2024", "Clark2026"],
-      "remediation": "Use a repository with an institutional commitment (Zenodo's CERN backing, institutional Dataverse, etc.). 'Hosted on a personal server' is not a long-term plan."
+      "beyond_cell": {
+        "source": "Paper §2.7 (Maintenance, versioning and long-term stewardship)",
+        "note": "The cell names the storage footprint. Long-term access is the stewardship layer the paper argues is the rate-limiting factor for AI adoption in science, and it is a property of the deposit, which no inspection of the file can reveal."
+      },
+      "remediation": "Use a repository with an institutional commitment (Zenodo's CERN backing, institutional Dataverse, etc.), which outlives a personal server or a lab machine.",
+      "verification_hint": "The data steward confirms the commitment exists outside this project \u2014 a repository policy or an institutional undertaking \u2014 rather than an intention held by the team."
+    },
+    {
+      "id": "sustainability.l2.maintenance_plan",
+      "dimension": "Sustainability",
+      "level": "L2",
+      "datasheet_section": "Maintenance",
+      "label": "Maintenance stated: update cadence, how superseded versions are deprecated, and a channel for errata",
+      "evidence_type": "text",
+      "verification": "manual",
+      "lifecycle_stage": "governance",
+      "required_in_pathways": ["B", "C"],
+      "references": ["LawrenceMontgomery2024", "Clark2026", "Gebru2021"],
+      "beyond_cell": {
+        "source": "Paper §2.7 (Maintenance, versioning and long-term stewardship); Figure 7 (fig:data-card-example), Maintenance row",
+        "note": "The cell names the storage footprint. Post-release obligations are the other half of a release target: a dataset offered as a community asset with no stated cadence, no deprecation of superseded versions, and no way to report an error resets the lifecycle with every project instead of accumulating. Set at L2 because that is the threshold the paper ties to publication as a community asset."
+      },
+      "collection_hint": "Write down now what would make you cut a new version, and who would announce it. Both are cheap to decide before release and awkward to invent after a user reports an error.",
+      "remediation": "Three sentences: how often the dataset is expected to change, what happens to a superseded version (kept and marked deprecated, or withdrawn), and where a user reports a suspected error. Keep superseded versions resolvable and marked deprecated: a model trained on v1 stays reproducible only while v1 resolves.",
+      "verification_hint": "The data steward confirms all three are stated: the cadence, what happens to a superseded version, and where a user reports an error."
     },
     {
       "id": "sustainability.l3.data_centric_intervention",
@@ -594,7 +737,8 @@
       "required_in_pathways": ["C"],
       "references": ["SalehiSchmeink2024", "Clark2026"],
       "collection_hint": "If you curate, distil, or subsample before release, record what you removed and why. That decision is invisible in the released file.",
-      "remediation": "Document which intervention was applied and the metric it improved (records removed, accuracy at matched compute, etc.)."
+      "remediation": "Document which intervention was applied and the metric it improved (records removed, accuracy at matched compute, etc.).",
+      "verification_hint": "You declare the intervention; the evidence is the measurement that motivated it \u2014 records removed, compression ratio, or accuracy at a matched compute budget."
     },
     {
       "id": "sustainability.l3.compute_cost_reported",
@@ -607,7 +751,8 @@
       "required_in_pathways": ["C"],
       "references": ["SalehiSchmeink2024", "Clark2026"],
       "collection_hint": "Note the compute this release consumed as you go: core-hours or instance-hours, the machine, and how many runs. Schedulers report it, and queue history rolls over.",
-      "remediation": "Bind these figures to the same release bundle as the datasheet and PROV record. Without disclosure, efficiency claims are unverifiable."
+      "remediation": "Bind these figures to the same release bundle as the datasheet and PROV record. Without disclosure, efficiency claims are unverifiable.",
+      "verification_hint": "The data engineer confirms the figures against the scheduler's accounting, while the queue history still holds them."
     },
     {
       "id": "computability.l1.loadable_standard_env",
@@ -619,7 +764,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Lawrence2017"],
-      "remediation": "If a reviewer can't `pd.read_parquet(path)` or its domain equivalent, the format is wrong."
+      "remediation": "If a reviewer can't `pd.read_parquet(path)` or its domain equivalent, the format is wrong.",
+      "verification_hint": "The tool infers this from the declared format: a recognised open format is loadable in a standard environment. It does not open your files."
     },
     {
       "id": "computability.l1.codebook_present",
@@ -631,7 +777,13 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["A", "B", "C"],
       "references": ["Clark2026", "Gebru2021"],
-      "remediation": "Variable name, type, units, value set, and a one-sentence description per field. Markdown, CSV, or DDI all work."
+      "beyond_cell": {
+        "source": "Table 4 (tab:release-components), documentation bundle",
+        "note": "The cell names loadability in a standard environment. A codebook is what makes the loaded table interpretable, and the paper lists it in the release bundle alongside the README and the validation report."
+      },
+      "remediation": "Variable name, type, units, value set, and a one-sentence description per field. Markdown, CSV, or DDI all work.",
+      "verification_hint": "You declare this; the evidence is the codebook in the release bundle. Frictionless can check a declared table schema against the data it describes.",
+      "validators": ["frictionless"]
     },
     {
       "id": "computability.l2.controlled_vocab_used",
@@ -643,7 +795,8 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Blatter2022", "Clark2026"],
-      "remediation": "Without controlled vocabularies, two correctly-documented datasets still cannot be aligned. Record the vocabulary version, not just its name."
+      "remediation": "Without controlled vocabularies, two correctly-documented datasets still cannot be aligned. Record the vocabulary version alongside its name.",
+      "verification_hint": "You declare this; the evidence is the mapping itself \u2014 each field to its vocabulary term, with the vocabulary version. A domain validator checks it where one exists for your field."
     },
     {
       "id": "computability.l2.linked_schemas",
@@ -655,7 +808,9 @@
       "lifecycle_stage": "documentation",
       "required_in_pathways": ["B", "C"],
       "references": ["Clark2026"],
-      "remediation": "Reference the schema by URL inside the Croissant descriptor's `conformsTo` field."
+      "remediation": "Reference the schema by URL inside the Croissant descriptor's `conformsTo` field.",
+      "verification_hint": "You declare this; the evidence is the conformsTo reference in the descriptor resolving to the schema you name.",
+      "validators": ["frictionless"]
     },
     {
       "id": "computability.l3.direct_ml_load",
@@ -668,7 +823,8 @@
       "required_in_pathways": ["C"],
       "references": ["Akhtar2024", "Clark2026"],
       "collection_hint": "As files are produced, list them and the columns inside them, with types and units.",
-      "remediation": "Verify with `mlcroissant` reference library: a four-line load (see Code Block 2 in the source paper) should yield records."
+      "remediation": "Verify with `mlcroissant` reference library: a four-line load (see Code Block 2 in the source paper) should yield records.",
+      "verification_hint": "The tool checks that the descriptor declares at least one file and one record set with fields, which is what a loader needs. Round-trip it through mlcroissant to certify the executable rung."
     },
     {
       "id": "computability.l3.example_load_snippet",
@@ -681,7 +837,8 @@
       "required_in_pathways": ["C"],
       "references": ["Akhtar2024", "Clark2026"],
       "collection_hint": "Keep the few lines you yourself used to load the data. That is the snippet.",
-      "remediation": "Five lines of Python in the README that load the dataset and print one record. Removes ambiguity that prose cannot."
+      "remediation": "Five lines of Python in the README that load the dataset and print one record. Removes ambiguity that prose cannot.",
+      "verification_hint": "The ML practitioner confirms the snippet by running it against the released files from a clean environment."
     }
   ]
 }
