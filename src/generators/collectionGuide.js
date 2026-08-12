@@ -158,6 +158,7 @@ export function buildCollectionGuide(record, opts = {}) {
       total,
       recorded,
     },
+    workflow: guidance.workflow,
     ladder: guidance.ladder,
     ladderRefs: resolve(guidance.ladder_references),
     automation: { ...guidance.automation, refs: resolve(guidance.automation.references) },
@@ -225,6 +226,15 @@ export function generateCollectionGuide(record, opts = {}) {
   p();
   p('> A worksheet for the observations behind the assessment: what to write down, and when.');
   p(`> Implements the framework of ${citeThisWorkShort()}`);
+  p();
+
+  p('## The shape of the work');
+  p();
+  p(g.workflow.lead);
+  p();
+  for (const [i, ph] of g.workflow.phases.entries()) {
+    p(`${i + 1}. **${ph.name}.** ${ph.what}`);
+  }
   p();
 
   p('## From notes to machine-actionable');
@@ -298,6 +308,8 @@ export function generateCollectionGuide(record, opts = {}) {
   }
   p(g.validation.report_note);
   p();
+  p(g.validation.pipeline_note);
+  p();
   p(g.validation.lookup_note);
   p();
   if (g.validation.refs.length) {
@@ -335,6 +347,14 @@ export function generateCollectionGuide(record, opts = {}) {
     p(`**${l.layer}** is built from:`);
     p();
     for (const src of l.sources) p(`- ${src}`);
+    p();
+    if (l.checked_by) {
+      p(`_Checked by: ${l.checked_by}_`);
+      p();
+    }
+  }
+  if (g.documentationInputs.verification_note) {
+    p(g.documentationInputs.verification_note);
     p();
   }
   p(
@@ -381,7 +401,7 @@ export function generateCollectionGuide(record, opts = {}) {
   if (g.ontology.applies) {
     p('## Binding terms to shared vocabularies');
     p();
-    p('At L3 a field name is not enough: a consumer has to know what your column *means*, not just what you called it. Three worked examples.');
+    p('At L3 the consumer needs the meaning of your column, which a field name alone cannot carry. Three worked examples.');
     p();
     for (const ex of g.ontology.examples) {
       p(`### ${ex.title}`);

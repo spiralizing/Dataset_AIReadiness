@@ -13,6 +13,7 @@ import {
   templateForRecord,
   requiredCriteria,
   isCriterionSatisfied,
+  dimensionProfile,
 } from '../lib/pathway.js';
 import { validationResults } from '../lib/validation.js';
 import { isLocked, isUpcoming } from '../lib/stages.js';
@@ -59,6 +60,9 @@ const BASIS_LABEL = {
 };
 
 const basisOf = (criterion, answer, results, satisfied) => {
+  // Declared non-applicability is its own basis. A reader needs to tell "no human
+  // subjects, so no consent to record" from "consent recorded".
+  if (answer?.not_applicable === true) return 'not applicable to this dataset';
   // An unmet criterion has no basis: nothing was validated, declared, or judged.
   // Printing the mode here would assert a judgement nobody made.
   if (!satisfied) {
@@ -125,6 +129,9 @@ export function generateDatasheet(record, opts = {}) {
     lines.push(`- ${named} — ${m.definition}`);
   }
   lines.push(
+    '- **not applicable to this dataset** — the criterion does not apply here, and that is recorded as the answer.',
+  );
+  lines.push(
     '- **not yet recorded** — the criterion is unmet: nothing has been validated, declared, or judged for it.',
   );
   lines.push('');
@@ -135,13 +142,43 @@ export function generateDatasheet(record, opts = {}) {
     const answer = answers[c.id];
     const note = String(answer?.notes ?? '').trim();
     const satisfied = isCriterionSatisfied(c, answer, results);
-    let line = `- **${c.label}:** ${formatValue(c, answer)}`;
+    // "not provided — not applicable" reads as a gap with an excuse. Where the criterion
+    // does not apply there is nothing to provide, and the basis carries the meaning.
+    const shown = answer?.not_applicable === true ? '_n/a_' : formatValue(c, answer);
+    let line = `- **${c.label}:** ${shown}`;
     line += ` — _${basisOf(c, answer, results, satisfied)}_`;
     // For an attested criterion the note *is* the evidence and already appears in
     // the basis; for the other two it is a separate remark.
     if (note && c.verification !== 'attested') line += ` _(note: ${note})_`;
     return line;
   };
+
+  // Readiness is a per-dimension property, and the tier verdict in the header answers a
+  // narrower question: whether every dimension cleared the target. A deposit can be L3 on
+  // four dimensions and L1 on two, which is the case the framework exists to describe and
+  // a single verdict cannot. A reader wants this before the answers, not after them.
+  const profile = dimensionProfile(pathway, answers, subDomain, results, record.stage);
+  const CELL_MARK = {
+    met: 'met',
+    'not-applicable': 'n/a',
+    unmet: 'unmet',
+    upcoming: 'not due',
+    'not-required': '—',
+  };
+  lines.push('## Readiness profile');
+  lines.push('');
+  lines.push(
+    'The level each dimension reaches, capped by what this pathway assessed. A dash means the level was not asked about at this tier.',
+  );
+  lines.push('');
+  lines.push('| Dimension | Reaches | L1 | L2 | L3 | Not applicable |');
+  lines.push('|---|---|---|---|---|---|');
+  for (const d of profile) {
+    const cells = ['L1', 'L2', 'L3'].map((l) => CELL_MARK[d.levels[l]] ?? d.levels[l]);
+    const na = d.notApplicableCount > 0 ? `${d.notApplicableCount} of ${d.criteriaCount}` : '—';
+    lines.push(`| ${d.dimension} | ${d.attained ?? '—'} | ${cells.join(' | ')} | ${na} |`);
+  }
+  lines.push('');
 
   for (const dimension of SECTION_ORDER) {
     const criteria = criteriaForDimension(dimension, pathway, subDomain).filter(
@@ -166,6 +203,21 @@ export function generateDatasheet(record, opts = {}) {
       lines.push('');
     }
     for (const c of criteria) lines.push(criterionLine(c));
+    lines.push('');
+  }
+
+  // A reviewer arrives with Gebru's seven groups in mind and finds seven dimensions.
+  // The crosswalk says where each group is answered, rather than reordering the document
+  // and printing criteria that answer two groups twice.
+  const crosswalk = guidance.datasheet_crosswalk;
+  if (crosswalk?.groups?.length) {
+    lines.push('## Where each datasheet question is answered');
+    lines.push('');
+    lines.push(crosswalk.lead);
+    lines.push('');
+    for (const g of crosswalk.groups) {
+      lines.push(`- **${g.group}** — _${g.question}_ → ${g.sections.join(', ')}`);
+    }
     lines.push('');
   }
 

@@ -68,7 +68,7 @@ export default function AudienceSelector() {
           human-subjects sub-domains, encoding, interoperability, and provenance for
           Materials science — and selects the documentation template. Each added
           criterion carries its own level, so it becomes required at the tier that
-          matches it rather than only at Task-ready. Defaults to General.
+          matches it. Defaults to General.
         </p>
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
           {subDomains().map((s) => (

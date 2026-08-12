@@ -189,3 +189,83 @@ test('an attested note is the evidence and is not also printed as a remark', () 
   assert.match(line, /evidence: report\.pdf/);
   assert.ok(!line.includes('(note: report.pdf)'), 'the note is printed twice');
 });
+
+test('the datasheet maps Gebru\'s seven groups onto its own sections', () => {
+  // A reviewer arrives with the template's headings in mind and finds seven dimensions.
+  // The generator deliberately orders by dimension so one criterion is never printed
+  // under two headings; the crosswalk is what keeps that navigable rather than opaque.
+  const md = generateDatasheet({ pathway: 'C', sub_domain: 'general', answers: {} }, { now: FIXED });
+
+  assert.match(md, /## Where each datasheet question is answered/);
+  for (const group of [
+    'Motivation',
+    'Composition',
+    'Collection process',
+    'Preprocessing, cleaning, labelling',
+    'Uses',
+    'Distribution',
+    'Maintenance',
+  ]) {
+    assert.ok(md.includes(`**${group}**`), `missing crosswalk group: ${group}`);
+  }
+  // Every group points at sections the document actually has.
+  const headings = new Set((md.match(/^## (.+)$/gm) ?? []).map((h) => h.slice(3)));
+  const crosswalk = md.slice(md.indexOf('## Where each datasheet question is answered')).split('\n## ')[0];
+  for (const line of crosswalk.split('\n').filter((l) => l.startsWith('- **'))) {
+    for (const section of line.split('→')[1].split(',').map((x) => x.trim())) {
+      assert.ok(headings.has(section), `crosswalk points at a section that is not there: ${section}`);
+    }
+  }
+  // And it comes after the content it maps, not before.
+  assert.ok(md.indexOf('## Where each datasheet question is answered') > md.indexOf('## Ethics'));
+});
+
+test('a declared non-applicability is recorded as such, not as a gap', () => {
+  // The route a boolean criterion needs: "no human subjects, so nothing to
+  // de-identify" has no checkbox state, and answering "yes" would be a false claim.
+  const md = generateDatasheet(
+    {
+      pathway: 'C',
+      sub_domain: 'materials',
+      stage: 'upgrade',
+      answers: {
+        'ethics.l1.de_identification_applied': { not_applicable: true },
+        'ethics.l1.consent_basis_recorded': { not_applicable: true },
+      },
+    },
+    { now: FIXED },
+  );
+
+  assert.match(md, /Direct identifiers removed or transformed:\*\* _n\/a_ — _not applicable to this dataset_/);
+  assert.ok(!md.includes('Direct identifiers removed or transformed:** _not provided_'));
+  assert.match(md, /\*\*not applicable to this dataset\*\* — the criterion does not apply here/);
+});
+
+test('the datasheet leads with the per-dimension profile', () => {
+  // The tier verdict in the header answers whether *every* dimension cleared the target.
+  // A deposit can be L3 on four dimensions and L1 on two, which is the case the framework
+  // exists to describe, and the artifact a downstream reader opens should say so.
+  const md = generateDatasheet(
+    {
+      pathway: 'C',
+      sub_domain: 'materials',
+      stage: 'upgrade',
+      answers: { 'ethics.l2.de_identification_method': { not_applicable: true } },
+    },
+    { now: FIXED },
+  );
+
+  assert.match(md, /## Readiness profile/);
+  assert.match(md, /\| Dimension \| Reaches \| L1 \| L2 \| L3 \| Not applicable \|/);
+  for (const dimension of ['FAIRness', 'Provenance', 'Ethics', 'Computability']) {
+    assert.ok(md.includes(`| ${dimension} |`), `profile is missing ${dimension}`);
+  }
+  // The Ethics L2 cell is the whole-cell non-applicability case: its only criterion is
+  // the de-identification method, so declaring it inapplicable makes the cell n/a.
+  const ethicsRow = md.split('\n').find((l) => l.startsWith('| Ethics |'));
+  assert.match(ethicsRow, /n\/a/);
+  assert.match(ethicsRow, /1 of \d+/, 'the count of non-applicable criteria is not shown');
+
+  // And it comes before the answers it summarises.
+  assert.ok(md.indexOf('## Readiness profile') < md.indexOf('## Characterization'));
+});

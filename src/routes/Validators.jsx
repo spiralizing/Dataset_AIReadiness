@@ -89,8 +89,8 @@ export default function Validators() {
         An attested criterion is a declaration that can be accompanied by an external
         validator&rsquo;s report. This is where to find the validator. The tool runs the
         general checks itself &mdash; Croissant structure, PROV-O shapes, identifier
-        grounding &mdash; and references discipline validators rather than reimplementing
-        them.
+        grounding &mdash; and references discipline validators, which stay with the
+        communities that maintain them.
       </p>
 
       <h3 className="mt-8 border-b border-line pb-2 text-base font-semibold">
@@ -129,8 +129,8 @@ export default function Validators() {
             {hasContext ? 'The rest of the registry' : 'The bundled registry'}
           </h3>
           <p className="mt-2 text-xs text-muted">
-            {ALL_VALIDATORS.length} validators ship with the tool. They are a seeded set, not a
-            survey: the registries below are the authoritative lookup for anything absent.
+            {ALL_VALIDATORS.length} validators ship with the tool. They are a seeded set, and the
+            registries below are the authoritative lookup for anything absent.
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {rest.map((v) => (
@@ -146,7 +146,7 @@ export default function Validators() {
       <p className="mt-2 max-w-[70ch] text-xs text-muted">
         Which validator applies is field-dependent, and these registries map a discipline to
         its accepted standards and the tools that check them. They turn the choice of a domain
-        validator into a lookup rather than a guess.
+        validator into a lookup.
       </p>
       <div className="mt-3 grid gap-2">
         {REGISTRIES.map((r) => (

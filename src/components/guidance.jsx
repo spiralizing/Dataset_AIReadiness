@@ -9,6 +9,32 @@
 import { Fragment } from 'react';
 import guidance from '../schema/guidance.json';
 
+// The five phases of the work, as a strip of anchors into the sections below. It exists
+// because the guide had a section for each phase and never said they were a sequence — a
+// reader could finish it without noticing that verification sits between documenting and
+// depositing rather than after.
+export function WorkflowStrip({ className = '' }) {
+  const { lead, phases } = guidance.workflow;
+  return (
+    <div className={className}>
+      <p className="text-sm text-muted">{lead}</p>
+      <ol className="mt-3 grid gap-2 sm:grid-cols-5">
+        {phases.map((ph, i) => (
+          <li
+            key={ph.id}
+            className={`border p-3 ${ph.id === 'verify' ? 'border-info-line bg-info-bg' : 'border-line bg-surface-2'}`}
+          >
+            <a href={`#${ph.anchor}`} className="text-xs font-semibold text-ink hover:underline">
+              {i + 1}. {ph.name}
+            </a>
+            <p className="mt-1 text-[0.7rem] leading-tight text-muted">{ph.what}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 // The four forms an experimental record passes through, as a horizontal strip
 // with the intervention that reaches each one. Scrolls rather than wraps: the
 // left-to-right progression is the content, so wrapping would misrepresent it.
@@ -167,6 +193,7 @@ export function ValidationChecks({ className = '' }) {
         ))}
       </div>
       <p className="mt-3 border-l-2 border-accent pl-3 text-xs text-muted">{v.report_note}</p>
+      <p className="mt-2 text-xs text-muted">{v.pipeline_note}</p>
       <p className="mt-2 text-xs text-muted">{v.lookup_note}</p>
     </div>
   );
@@ -210,8 +237,12 @@ export function WhQuestions({ className = '' }) {
 
 // What already exists in a lab or a repo, mapped onto the layer it populates,
 // over a band of the identifier and vocabulary schemes that ground all three.
-export function DocumentationInputs({ className = '' }) {
-  const { layers, grounding } = guidance.documentation_inputs;
+// `compact` is for the start-page card, where this block sits under three numbered steps
+// and the full per-layer reasoning made that slide the tallest in the carousel — which
+// stretches every other card to match. Same content, two densities, one source: the card
+// shows what checks each layer, the guide says why it is checked that way.
+export function DocumentationInputs({ className = '', compact = false }) {
+  const { layers, grounding, verification_note: verificationNote } = guidance.documentation_inputs;
   return (
     <div className={className}>
       <div className="grid gap-3 sm:grid-cols-3">
@@ -228,9 +259,25 @@ export function DocumentationInputs({ className = '' }) {
                 </li>
               ))}
             </ul>
+            {/* What checks this layer. Producing the three artifacts is not the same as
+                having three a consumer can act on, and one of them is not checked
+                mechanically at all — saying so per layer is more honest than a single
+                band implying they are verified alike. */}
+            {(compact ? l.checked_by_short : l.checked_by) && (
+              <p className="mt-2 border-t border-line pt-2 text-[0.7rem] text-muted">
+                <span className="font-medium text-ink">Checked by:</span>{' '}
+                {compact ? l.checked_by_short : l.checked_by}
+              </p>
+            )}
           </div>
         ))}
       </div>
+
+      {/* One line, not a block: the per-layer lines above already name what verifies each
+          artifact, so this only has to say where the discipline verifiers live. */}
+      {!compact && verificationNote && (
+        <p className="mt-3 text-[0.7rem] text-muted">{verificationNote}</p>
+      )}
 
       <div className="mt-3 flex justify-center gap-16 text-lg leading-none text-accent" aria-hidden="true">
         <span>↑</span>

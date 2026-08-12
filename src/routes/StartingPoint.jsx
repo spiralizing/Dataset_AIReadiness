@@ -71,39 +71,83 @@ function SlideHead({ title }) {
   );
 }
 
+// A transition with the process that effects it named on the arrow — the same grammar
+// LadderStrip uses for "adopt an ELN; record at the time", and the manuscript's own
+// figures use for their boxed edge labels.
+function Step({ label, sub }) {
+  return (
+    <div className="flex w-24 shrink-0 flex-col items-center justify-center px-1 sm:w-32">
+      {/* Name of the process, then the arrow it labels, then the checks it consists of.
+          The arrow sits between them so the caption above reads as what the transition is
+          and the line below as what it involves. */}
+      <span className="border border-info-line bg-info-bg px-1.5 py-0.5 text-center text-[0.7rem] font-medium leading-tight text-ink">
+        {label}
+      </span>
+      {/* Drawn as a rule plus a head rather than set as a glyph: an arrow character is
+          only as long as its font metrics allow, and this one has to read as the span
+          between two states. The line flexes, so the arrow's length follows the column
+          width instead of the type size. */}
+      <div className="mt-1.5 flex w-full items-center" aria-hidden="true">
+        <span className="h-[2px] flex-1 bg-accent" />
+        <span className="border-y-[5px] border-l-[9px] border-y-transparent border-l-accent" />
+      </div>
+      {sub && <span className="mt-1.5 text-center text-[0.6rem] leading-tight text-faint">{sub}</span>}
+    </div>
+  );
+}
+
 function Node({ tone, icon, label, sub }) {
   const tones = {
     closed: 'border-warn-line bg-warn-bg',
     ready: 'border-ok-line bg-ok-bg',
     docs: 'border-dashed border-line bg-surface-2',
   };
+  // `sm:flex-1 sm:basis-0 sm:min-w-0` makes the four nodes share whatever width the row
+  // has, in equal parts. Fixed widths were a pixel budget against an unknown container,
+  // which is why the row kept wrapping; equal flex basis cannot overflow, and equal parts
+  // is also what stops the band looking lopsided. `h-full` under an items-stretch parent
+  // squares the heights, so a two-line label no longer makes its box taller than the rest.
   return (
-    <div className={`w-44 border p-4 text-center ${tones[tone]}`}>
-      <div className="text-2xl leading-none" aria-hidden="true">
+    <div
+      className={`flex h-full w-36 flex-col items-center justify-center border p-3 text-center sm:w-auto sm:flex-1 sm:basis-0 sm:min-w-0 ${tones[tone]}`}
+    >
+      <div className="text-xl leading-none" aria-hidden="true">
         {icon}
       </div>
-      <div className="mt-2 text-sm font-semibold text-ink">{label}</div>
-      <div className="text-[0.7rem] text-muted">{sub}</div>
+      <div className="mt-1.5 text-[0.8rem] font-semibold leading-tight text-ink">{label}</div>
+      <div className="mt-0.5 text-[0.65rem] leading-tight text-muted">{sub}</div>
     </div>
   );
 }
 
-// The "FAIR-published + docs -> machine-learning-ready" node diagram, on the
-// overview slide.
+// The "FAIR-published + docs -> checked -> machine-learning-ready" node diagram, on
+// the overview slide.
+//
+// Verification is named on the arrow rather than drawn as a box, because the boxes are
+// states a dataset is in and verification is something done to it. Until it appeared at
+// all, this diagram said that producing the documentation is what makes a dataset
+// consumable — the claim §3.5 exists to refute, since machine-readable and
+// machine-actionable are not the same property and checking is the distance between them.
+// A fourth box also made the row wrap and left the band looking lopsided; an edge label
+// carries the same content and costs no width.
+//
+// At sm and above the nodes take equal flex basis and share the row, so the line holds
+// whatever the container width. Below sm they fall back to a fixed width and wrap.
+//
 // "Three steps" used to reuse it; it now carries DocumentationInputs, which
 // says something the numbered steps do not.
 function ReadinessDiagram({ className = '' }) {
   return (
     <div className={`border-t border-line pt-6 ${className}`}>
       <div
-        className="flex flex-wrap items-center justify-center gap-3"
+        className="flex flex-wrap items-stretch justify-center gap-x-1.5 gap-y-2 sm:flex-nowrap sm:gap-x-2"
         role="img"
-        aria-label="A FAIR-published but ML-closed dataset, plus documentation layers, becomes machine-learning-ready: reusable by people and pipelines"
+        aria-label="A FAIR-published but ML-closed dataset, plus documentation layers, once verified, becomes machine-learning-ready: reusable by people and pipelines"
       >
         <Node tone="closed" icon="🔒" label="FAIR-published" sub="findable & accessible, but ML-closed" />
-        <span className="shrink-0 text-2xl font-light leading-none text-accent" aria-hidden="true">+</span>
+        <span className="flex shrink-0 items-center text-2xl font-light leading-none text-accent" aria-hidden="true">+</span>
         <Node tone="docs" icon="📑" label="Documentation layers" sub="datasheet · Croissant · PROV-O" />
-        <span className="shrink-0 text-2xl leading-none text-accent" aria-hidden="true">→</span>
+        <Step label="verified" sub="schema · references · grounding" />
         <Node tone="ready" icon="✓" label="ML-ready" sub="reusable by people & pipelines" />
       </div>
     </div>
@@ -148,9 +192,10 @@ export default function StartingPoint() {
             a collected dataset to publish, or to <span className="font-medium text-ink">upgrade</span> one that
             is already published. A dataset can be fully{' '}
             <a href="https://doi.org/10.1038/sdata.2016.18" target="_blank" rel="noreferrer" className="text-link underline">FAIR</a>{' '}
-            and still be unfit to train a model on. This tool runs a tiered assessment and generates the
-            machine-readable documentation needed for reuse by people and pipelines. Not publishing yet? It also
-            exports a to-do plan of what to set up.
+            and still be unfit to train a model on. This tool runs a tiered assessment, generates the
+            machine-readable documentation needed for reuse by people and pipelines, and checks that
+            documentation in place &mdash; writing a descriptor and having one a pipeline can act on are
+            different things. Not publishing yet? It also exports a to-do plan of what to set up.
           </p>
 
           <ReadinessDiagram className="mt-8" />
@@ -187,17 +232,20 @@ export default function StartingPoint() {
         {/* Three levels — the assessment matrix (paper §6) */}
         <Slide>
           <SlideHead title="The three readiness levels" />
+          {/* Deliberately short. Each level is defined by its consumer, which the column
+              headers below carry, and the full per-level meaning lives in the collection
+              guide — restating all three here made this the tallest card in the carousel,
+              and the carousel stretches every other card to match. The two sentences kept
+              are the ones the table cannot say: what the levels measure, and what they do
+              not. */}
           <p className="mt-4 text-xs text-muted">
-            AI-readiness is a graded property. Each dimension progresses through three levels,
-            aligned to the Data Readiness Level bands (
+            AI-readiness is a graded property, and each level is defined by what consumes the
+            dataset: a person at L1, a person working with a pipeline at L2, an automated or
+            semi-automated workflow at L3. The level measures machine-actionability, not
+            sensitivity &mdash; data needing strict access control carries it at every level.
+            Bands follow the Data Readiness Levels (
             <a href="https://doi.org/10.48550/arXiv.1705.02245" target="_blank" rel="noreferrer" className="text-link underline">Lawrence, 2017</a>
-            ). Each level is defined by what consumes the dataset. L1 suits local or niche
-            use, where a person finds it and reads it. L2 is expected for broad reuse through
-            discovery platforms, where a pipeline can load it once someone has prepared the
-            load. L3 is where an automated or semi-automated workflow consumes it unattended
-            &mdash; some steps, or in an instrumented laboratory the whole chain. The level
-            measures machine-actionability, not sensitivity: data needing strict access
-            control carries it at every level.
+            ).
           </p>
 
           {/* Wide screens: the full matrix as a table */}
@@ -359,7 +407,7 @@ export default function StartingPoint() {
             ))}
           </div>
 
-          <DocumentationInputs className="mt-8 border-t border-line pt-6" />
+          <DocumentationInputs compact className="mt-8 border-t border-line pt-6" />
         </Slide>
 
         {/* Documentation layers — last slide, so it carries the Start here cue */}

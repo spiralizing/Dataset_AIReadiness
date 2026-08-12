@@ -104,6 +104,10 @@ export const recommendedForPathway = (pathway) =>
 // answer shape: { value, notes }. `results` (optional) is the map from
 // validationResults(); automated criteria without a result fall back to claimed.
 export const isCriterionSatisfied = (criterion, answer, results) => {
+  // A declared non-applicability satisfies the criterion whatever its mode: there is
+  // nothing left to validate, declare, or judge. Checked before the validator so an
+  // automated criterion marked N/A is not failed by a check on an empty field.
+  if (answer?.not_applicable === true) return true;
   if (criterion.verification === 'automated' && results && results[criterion.id]) {
     return Boolean(results[criterion.id].ok);
   }
@@ -125,6 +129,11 @@ export const isCriterionSatisfied = (criterion, answer, results) => {
 // permits it takes "N/A" as free text. A boolean criterion cannot express it — there is
 // no third checkbox state — which is a known limit of the schema rather than a rule.
 export const isCriterionNotApplicable = (criterion, answer) => {
+  // An explicit declaration, set by the control on criteria that carry
+  // `may_not_apply`. It comes first because it is the only route open to a boolean
+  // criterion, which has no third checkbox state, and to an automated one, whose
+  // validator has to be bypassed rather than failed.
+  if (answer?.not_applicable === true) return true;
   const v = answer?.value;
   if (v === null || v === undefined || v === true || v === false) return false;
   if (criterion?.evidence_type === 'controlled_vocabulary') {

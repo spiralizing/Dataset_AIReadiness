@@ -74,9 +74,10 @@ function StatusPill({ pending, result }) {
 export default function CriterionField({ criterion, answer, onChange, requirement = 'required', result, stage, extra, pathway, subDomain }) {
   const value = answer?.value ?? '';
   const notes = answer?.notes ?? '';
+  const notApplicable = answer?.not_applicable === true;
   const badge = VERIFICATION_BADGE[criterion.verification] ?? VERIFICATION_BADGE.manual;
   const automated = criterion.verification === 'automated';
-  const pending = automated && !result;
+  const pending = automated && !result && !notApplicable;
   const [descriptorArtifact, descriptorTab] = DESCRIPTOR_DRIVEN[criterion.id] ?? [];
   const locked = isLocked(criterion, stage);
   const validators = validatorsFor(criterion);
@@ -103,7 +104,12 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
               locked
             </span>
           )}
-          {automated && <StatusPill pending={pending} result={result} />}
+          {automated && !notApplicable && <StatusPill pending={pending} result={result} />}
+          {notApplicable && (
+            <span className="rounded-none bg-idle-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-muted">
+              ⊘ not applicable
+            </span>
+          )}
           <span
             title={badge.definition}
             className={`rounded-none px-1.5 py-0.5 text-[0.65rem] font-medium ${badge.cls}`}
@@ -113,7 +119,23 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
         </div>
       </div>
 
-      <div className="mt-3">
+      {/* Criteria that may genuinely not apply — no human subjects to de-identify, no
+          classification target to balance, no model trained on this yet — get an explicit
+          declaration. It is the only route open to a checkbox, which has no third state,
+          and to an automated criterion, whose validator would otherwise fail an empty
+          field the user was right to leave empty. */}
+      {criterion.may_not_apply && (
+        <label className="mt-3 flex items-center gap-2 text-xs text-muted">
+          <input
+            type="checkbox"
+            checked={notApplicable}
+            onChange={(e) => onChange({ not_applicable: e.target.checked })}
+          />
+          Not applicable to this dataset
+        </label>
+      )}
+
+      <div className={`mt-3 ${notApplicable ? 'opacity-50' : ''}`}>
         {descriptorArtifact ? (
           <p className="text-xs text-muted">
             Validated from the {descriptorArtifact}; complete and check it on the{' '}
@@ -135,7 +157,7 @@ export default function CriterionField({ criterion, answer, onChange, requiremen
 
       {extra && <div className="mt-3">{extra}</div>}
 
-      {automated && result && !result.ok && (
+      {automated && !notApplicable && result && !result.ok && (
         <p className="mt-1 text-xs text-bad">{result.message}</p>
       )}
 

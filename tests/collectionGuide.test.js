@@ -270,10 +270,10 @@ test('the guide carries the validation categories and the post-release obligatio
   assert.ok(md.includes('Great Expectations'), 'statistical tools not named');
   assert.ok(md.includes('No validator settles this'), 'domain review is not flagged as human-judged');
   // Validation produces an artifact, and a failure blocks rather than annotates.
-  assert.match(md, /Failures should block the release/);
+  assert.match(md, /A failure should block the release/);
 
   assert.ok(md.includes('## After release'));
-  for (const practice of ['Version, and cite the version', 'Deprecate rather than withdraw', 'Publish a route for errata']) {
+  for (const practice of ['Version, and cite the version', 'Keep superseded versions resolvable', 'Publish a route for errata']) {
     assert.ok(md.includes(practice), `missing stewardship practice: ${practice}`);
   }
 });
@@ -309,4 +309,41 @@ test('no vocabulary ships unreachable', () => {
   for (const key of ['ethics_oversight', 'formats_clinical']) {
     assert.ok(referenced.has(key), `${key} is still unreachable from any criterion`);
   }
+});
+
+test('verification is a phase of the work, not an implication', () => {
+  // The guide had a section for each phase and never said they were a sequence, so a
+  // reader could finish it without noticing that verification sits between documenting
+  // and depositing. The tool's own top-level picture said documentation → ready, which is
+  // the claim §3.5 of the paper exists to refute.
+  const md = generateCollectionGuide(rec('C', 'general'), { now: FIXED });
+
+  assert.ok(md.includes('## The shape of the work'));
+  const shape = md.slice(md.indexOf('## The shape of the work')).split('\n## ')[0];
+  const order = ['Capture', 'Document', 'Verify', 'Release', 'Steward'];
+  let last = -1;
+  for (const phase of order) {
+    const at = shape.indexOf(`**${phase}.**`);
+    assert.ok(at > last, `${phase} is out of sequence`);
+    last = at;
+  }
+  // Verify is third, before release — the placement is the point.
+  assert.ok(shape.indexOf('**Verify.**') < shape.indexOf('**Release.**'));
+  assert.match(shape, /machine-readable from machine-actionable/);
+
+  // Each layer names the verifier that checks it — and the one for which no official
+  // verifier exists, which is why that layer's rows are attested or human-judged.
+  assert.match(md, /Checked by: No official verifier exists for prose/);
+  assert.match(md, /Checked by: Verified against the MLCommons Croissant schema/);
+  assert.match(md, /Checked by: Verified with SHACL, the W3C shape-constraint language/);
+  // And a pointer to the discipline verifiers for the data itself, rather than a block
+  // restating what the per-layer lines already say.
+  assert.match(md, /checkCIF for a CIF, CF-checker for NetCDF/);
+});
+
+test('the L3 level meaning states that verification is not optional', () => {
+  const g = buildCollectionGuide(rec('C', 'general'), { now: FIXED });
+  const l3 = g.levels.rows.find((r) => r.id === 'L3');
+  assert.match(l3.meaning, /Verification is not optional/);
+  assert.match(l3.meaning, /bounded by how far the released artifacts climb/);
 });

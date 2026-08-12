@@ -65,6 +65,10 @@ export function reducer(state, action) {
       const next = { ...prev };
       if ('value' in action) next.value = action.value;
       if ('notes' in action) next.notes = action.notes;
+      // A declared non-applicability is an answer in its own right, not a value: it has
+      // to work for a checkbox (which has no third state) and for an automated criterion
+      // (whose validator must be bypassed rather than failed).
+      if ('not_applicable' in action) next.not_applicable = action.not_applicable;
       return { ...state, answers: { ...state.answers, [action.id]: next } };
     }
     case 'SET_DATASET':

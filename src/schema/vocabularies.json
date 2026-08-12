@@ -1,6 +1,6 @@
 {
   "$comment": "Controlled vocabularies referenced from matrix.json criteria and pathways.json sub-domain overlays via 'vocabulary_key'. Sourced from Tables 4, 7, 9, 11, and 14 of González-Espinoza et al. (2026); each 'source' below names the table number in the current draft together with its LaTeX label, because float numbers move whenever a section is inserted and the label does not; the materials-science entries added in 0.2.0 come from the CMU Libraries materials RDM guidance and the sources it cites. A value carrying 'not_applicable': true declares that the criterion does not apply to this dataset rather than answering it — a documented not-applicable attestation, which the assessment reports as its own cell state instead of as a satisfied requirement. 'Custom' is an implicit option in every list — the UI exposes a free-text fallback so the schema stays open-world.",
-  "version": "0.7.0",
+  "version": "0.9.0",
   "vocabularies": {
     "licenses": {
       "label": "License",
@@ -186,13 +186,13 @@
         { "id": "granular_per_use", "label": "Granular per-use consent", "note": "Participants chose which uses they permit, use by use. The strongest basis, and the one that most constrains what a downstream user may do without checking." },
         { "id": "broad_research_use", "label": "Broad consent for research use", "note": "Consent to unspecified future research, usually within a stated domain. Common in biobanking; check whether your intended use falls inside the stated scope." },
         { "id": "waiver_of_consent", "label": "IRB-approved waiver of consent", "note": "An IRB determined that consent was not required, typically for minimal-risk secondary use of existing records. The waiver is the evidence, so record its identifier." },
-        { "id": "NA_non_human_subjects", "label": "Not applicable — non-human-subjects data", "not_applicable": true, "note": "No human subjects, so there is no consent to obtain. A documented non-applicability, not an omission." },
+        { "id": "NA_non_human_subjects", "label": "Not applicable — non-human-subjects data", "not_applicable": true, "note": "No human subjects, so there is no consent to obtain. The assessment records this as a statement, and reports it as one." },
         { "id": "NA_public_data", "label": "Not applicable — already-public data", "not_applicable": true, "note": "Already public at the point of collection. Note that public does not mean unrestricted: the source's licence still governs redistribution." }
       ]
     },
     "de_id_methods": {
       "label": "De-identification methods",
-      "guidance": "Naming the method, with its parameters, is the requirement \u2014 not the fact that something was done. Removal or transformation of direct *and* indirect identifiers, with the method recorded (Table 9).",
+      "guidance": "Naming the method, with its parameters, is the requirement — not the fact that something was done. Removal or transformation of direct *and* indirect identifiers, with the method recorded (Table 9).",
       "source": "Table 9 (tab:ethics-requirements), paper §§4.3, 6.4",
       "values": [
         { "id": "HIPAA-Safe-Harbor", "label": "HIPAA Safe Harbor", "note": "Remove the eighteen identifier categories HIPAA enumerates. Mechanical and auditable, and it does not reason about re-identification risk from what remains." },
@@ -201,25 +201,25 @@
         { "id": "l-diversity", "label": "l-diversity", "note": "Extends k-anonymity so each equivalence class holds at least l distinct sensitive values, closing the case where all k records share the same diagnosis." },
         { "id": "t-closeness", "label": "t-closeness", "note": "Extends l-diversity so the distribution of the sensitive attribute within a class is close to its distribution overall. Record the t." },
         { "id": "differential-privacy", "label": "Differential privacy", "note": "A formal bound on what any single record contributes to a released statistic. Record the epsilon, and whether the budget is per query or total." },
-        { "id": "pseudonymization", "label": "Pseudonymization with key escrow", "note": "Direct identifiers replaced by keys held separately. Re-identification remains possible by design, so this is a control on access rather than a de-identification." },
-        { "id": "none-needed", "label": "None needed (non-personal data)", "not_applicable": true, "note": "No personal data, so nothing to de-identify. A documented non-applicability rather than a skipped step." }
+        { "id": "pseudonymization", "label": "Pseudonymization with key escrow", "note": "Direct identifiers replaced by keys held separately. Re-identification remains possible by design, so it functions as an access control." },
+        { "id": "none-needed", "label": "None needed (non-personal data)", "not_applicable": true, "note": "No personal data, so nothing to de-identify. Recorded as an answer in its own right." }
       ]
     },
     "access_governance": {
       "label": "Access governance tier",
-      "guidance": "The controls on who may use the data and under what terms. This is a separate axis from the readiness level: sensitive data carries controls at L1 as much as at L3, and clearing them does not raise the level (Table 9, \u00a76.2).",
+      "guidance": "The controls on who may use the data and under what terms. This is a separate axis from the readiness level: sensitive data carries controls at L1 as much as at L3, and clearing them does not raise the level (Table 9, §6.2).",
       "source": "Table 9 (tab:ethics-requirements), paper",
       "values": [
         { "id": "open", "label": "Open access", "note": "Anyone can download without identifying themselves. The only tier that imposes no cost on a downstream user, and the only one available where consent did not anticipate access control." },
         { "id": "registered", "label": "Registered (account-gated, no review)", "note": "An account, but no review. Deters bulk scraping and gives a contactable audit trail without gatekeeping the science." },
-        { "id": "restricted", "label": "Restricted (DUA required)", "note": "A data-use agreement must be signed before access. The agreement, not the tier, is what binds the user, so name it." },
+        { "id": "restricted", "label": "Restricted (DUA required)", "note": "A data-use agreement must be signed before access. The agreement is what binds the user, so name it." },
         { "id": "controlled", "label": "Controlled (DAC review required)", "note": "A committee reviews each request against the permitted scope. Appropriate where consent is narrow or the re-identification risk is real, and the slowest for legitimate reuse." },
         { "id": "embargoed", "label": "Embargoed (open after a fixed date)", "note": "Open, later. State the date and what happens on it, or an embargo becomes indefinite by inattention." }
       ]
     },
     "ethics_oversight": {
       "label": "Ethics oversight",
-      "guidance": "Candidate phrasings for the oversight evidence that travels with the dataset. Suggestions rather than a closed list: the criterion asks for the approving body, the protocol identifier, the date, the scope of permitted use, and the current status, which no single term captures.",
+      "guidance": "Candidate phrasings for the oversight evidence that travels with the dataset. Suggestions, and the list is open: the criterion asks for the approving body, the protocol identifier, the date, the scope of permitted use, and the current status, which no single term captures.",
       "source": "Table 9 (tab:ethics-requirements), paper",
       "values": [
         { "id": "IRB-approved", "label": "IRB approved" },
@@ -231,14 +231,14 @@
     },
     "stakeholder_roles": {
       "label": "Stakeholder roles (CRediT-style)",
-      "guidance": "Readiness is a multi-role activity, and the roles map to dimensions. In a small team one person carries several \u2014 sometimes all of them \u2014 and what matters is that every dimension has a named owner before acquisition begins, not that the roles divide one to one (Table 14, \u00a76.3).",
+      "guidance": "Readiness is a multi-role activity, and the roles map to dimensions. In a small team one person carries several — sometimes all of them — and what matters is that every dimension has a named owner before acquisition begins; the roles need not divide one to one (Table 14, §6.3).",
       "source": "Table 14 (tab:stakeholder-roles), paper",
       "values": [
-        { "id": "data_steward", "label": "Data steward — FAIRness, Computability", "note": "Owns FAIRness and Computability. Metadata standards, repository workflows, identifier assignment \u2014 the person who knows what the deposit will be asked for." },
+        { "id": "data_steward", "label": "Data steward — FAIRness, Computability", "note": "Owns FAIRness and Computability. Metadata standards, repository workflows, identifier assignment — the person who knows what the deposit will be asked for." },
         { "id": "domain_expert", "label": "Domain expert — Characterization, Ethics", "note": "Owns Characterization and Ethics. Subject-matter knowledge, controlled vocabularies, and the edge cases only someone close to the data can judge." },
-        { "id": "data_engineer", "label": "Data engineer — Provenance, Sustainability", "note": "Owns Provenance and Sustainability. Pipelines, workflow systems, storage and compute accounting \u2014 the person whose run log becomes the PROV record." },
+        { "id": "data_engineer", "label": "Data engineer — Provenance, Sustainability", "note": "Owns Provenance and Sustainability. Pipelines, workflow systems, storage and compute accounting — the person whose run log becomes the PROV record." },
         { "id": "ml_practitioner", "label": "ML practitioner — Pre-model Explainability, downstream fit", "note": "Owns Pre-model Explainability and downstream fit. Feature engineering, bias auditing, and consuming provenance from the model side." },
-        { "id": "governance_officer", "label": "Governance officer — Ethics, ongoing oversight", "note": "Owns Ethics and ongoing oversight. Consent and licensing, access committees, regulatory compliance \u2014 the role that answers a request years later." }
+        { "id": "governance_officer", "label": "Governance officer — Ethics, ongoing oversight", "note": "Owns Ethics and ongoing oversight. Consent and licensing, access committees, regulatory compliance — the role that answers a request years later." }
       ]
     },
     "data_centric_interventions": {

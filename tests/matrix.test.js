@@ -396,6 +396,36 @@ test('a criterion the cell text does not name is attributed to the paper', () =>
   }
 });
 
+test('every citation in the paper bibliography is actually cited by the tool', () => {
+  // The registry mirrors the paper's bibliography, which makes it easy for an entry to
+  // be renumbered and maintained while nothing in the tool ever refers to it. Three
+  // sat that way — the Data Cards Playbook, the GPT-5.5 system card, and Raza et al. —
+  // numbered, resolvable, and pointing at nothing.
+  const cited = new Set();
+  const overlays = pathways.sub_domains.flatMap((s) => s.overlay ?? []);
+  for (const c of [...matrix.criteria, ...overlays]) {
+    for (const r of c.references ?? []) cited.add(r);
+  }
+  for (const p of pathways.pathways) for (const r of p.references ?? []) cited.add(r);
+
+  // guidance.json carries references on several blocks, under two naming conventions.
+  const walk = (node) => {
+    if (Array.isArray(node)) return node.forEach(walk);
+    if (!node || typeof node !== 'object') return;
+    for (const [k, v] of Object.entries(node)) {
+      if ((k === 'references' || k.endsWith('_references')) && Array.isArray(v)) v.forEach((r) => cited.add(r));
+      else walk(v);
+    }
+  };
+  walk(guidanceDoc);
+
+  const uncited = Object.entries(references.citations)
+    .filter(([, c]) => c.ref !== undefined)
+    .map(([key]) => key)
+    .filter((key) => !cited.has(key));
+  assert.deepEqual(uncited, [], `numbered but cited by nothing: ${uncited.join(', ')}`);
+});
+
 test('reference numbering is contiguous and mirrors the paper bibliography', () => {
   // The References page sorts on `ref`, and the rendered <ol> markers only agree
   // with the paper's bracketed numbers while these are 1..N with no gaps. They

@@ -21,6 +21,7 @@ import {
   VerificationModes,
   ValidationChecks,
   Stewardship,
+  WorkflowStrip,
   WhQuestions,
   DocumentationInputs,
 } from './guidance.jsx';
@@ -85,6 +86,12 @@ export default function CollectionGuide({ record, showPathwayPicker = false }) {
           for; each row is tagged with the level it belongs to.
         </p>
       )}
+
+      {/* No lead here: WorkflowStrip opens with the paragraph from guidance.json, and a
+          second sentence above it said the same thing twice. */}
+      <Section id="workflow" title="The shape of the work">
+        <WorkflowStrip className="mt-4" />
+      </Section>
 
       <Section
         id="ladder"

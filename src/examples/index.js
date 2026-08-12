@@ -124,7 +124,7 @@ export const EXAMPLES = [
     pathway: 'C',
     subDomain: 'materials',
     description:
-      'A crystallography and computational materials record: CIF encoding, EMMO/OPTIMADE mapping, and provenance captured a priori by AiiDA. The only example built through the Croissant builder rather than a hand-written descriptor.',
+      'A crystallography and computational materials record: CIF encoding, EMMO/OPTIMADE mapping, and provenance captured a priori by AiiDA. The only example built through the Croissant builder.',
     expectMet: true,
     record: completeRecord({
       pathway: 'C',
@@ -148,7 +148,7 @@ export const EXAMPLES = [
         'characterization.l3.materials.acquisition_parameters':
           'XRD: Rigaku SmartLab (inst-0217), Cu Kα, 40 kV / 30 mA, 2θ 10–80°, room temperature, powder mount, operator ORCID 0000-0002-1825-0097, 2024-10-09. DFT: Quantum ESPRESSO 7.2, PBE, SSSP-efficiency pseudopotentials, k-points 6×6×6, ecutwfc 60 Ry, ecutrho 480 Ry, force threshold 1e-4 Ry/bohr.',
         'ethics.l1.materials.source_data_licensing':
-          'No third-party database content is redistributed: the structure was refined in-house, not drawn from ICSD. Released under CC-BY-4.0 (SPDX: CC-BY-4.0). No export-control or dual-use restriction applies; no industrial embargo.',
+          'No third-party database content is redistributed: the structure was refined in-house. Released under CC-BY-4.0 (SPDX: CC-BY-4.0). No export-control or dual-use restriction applies; no industrial embargo.',
         // Reworded for this sub-domain via label_overrides — answered in kind.
         'sustainability.l3.compute_cost_reported':
           '412 core-hours total on the institutional cluster (Intel Xeon Gold 6248, 40-core nodes): 1 SCF + 1 variable-cell relaxation, Quantum ESPRESSO 7.2.',

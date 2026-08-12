@@ -6,6 +6,7 @@ import {
   pathwayVerdict,
   requiredCriteria,
   isCriterionSatisfied,
+  isCriterionNotApplicable,
   dimensionProfile,
 } from './pathway.js';
 import { validationResults, AUTOMATED_WITH_VALIDATOR } from './validation.js';
@@ -106,6 +107,15 @@ export function buildConformanceReport(record, opts = {}) {
     };
     if (c.validators?.length) entry.validators = c.validators;
 
+    // A declared non-applicability outranks every other status: there is nothing to
+    // validate, declare, or judge, and reporting it as 'pass' or 'declared' would make a
+    // dataset with no human subjects look like one that answered the question.
+    if (isCriterionNotApplicable(c, answers[c.id])) {
+      entry.status = 'not-applicable';
+      entry.message = 'Declared not applicable to this dataset.';
+      return entry;
+    }
+
     if (isUpcoming(c, record.stage)) {
       entry.status = 'upcoming';
       entry.message = `Not due at this stage; belongs to ${c.lifecycle_stage}.`;
@@ -170,9 +180,10 @@ export function buildConformanceReport(record, opts = {}) {
     summary: {
       total: criteria.length,
       upcoming: criteria.filter((c) => c.status === 'upcoming').length,
-      automated: tallyFor('automated', ['pass', 'fail', 'pending', 'upcoming']),
-      attested: tallyFor('attested', ['declared', 'undeclared', 'upcoming']),
-      manual: tallyFor('manual', ['recorded', 'unrecorded', 'upcoming']),
+      not_applicable: criteria.filter((c) => c.status === 'not-applicable').length,
+      automated: tallyFor('automated', ['pass', 'fail', 'pending', 'upcoming', 'not-applicable']),
+      attested: tallyFor('attested', ['declared', 'undeclared', 'upcoming', 'not-applicable']),
+      manual: tallyFor('manual', ['recorded', 'unrecorded', 'upcoming', 'not-applicable']),
     },
   };
 }

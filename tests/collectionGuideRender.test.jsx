@@ -107,7 +107,12 @@ test('the printed document is structured as a report, not a page', () => {
   // page found on its own still says what it is.
   assert.ok(print.includes('gp-masthead') && print.includes('gp-colophon'));
   assert.ok(print.includes('<nav class="gp-contents"'), 'no contents list');
-  assert.ok(/>1\. The four forms of a record</.test(print), 'sections are not numbered');
+  // Numbering is positional, so assert the scheme rather than pinning a title to a
+  // number: inserting a section ahead of another is a content decision, not a regression.
+  const numbered = [...print.matchAll(/>(\d+)\.\s[A-Z][^<]*</g)].map((m) => Number(m[1]));
+  assert.ok(numbered.length >= 8, `expected numbered sections, found ${numbered.length}`);
+  assert.equal(numbered[0], 1, 'numbering does not start at 1');
+  assert.ok(/>\d+\. The four forms of a record</.test(print), 'the four forms section is unnumbered');
   assert.ok(print.includes('Implements the framework of González-Espinoza, A. et al.'));
 
   // Tables and rules rather than the screen version's coloured chips.

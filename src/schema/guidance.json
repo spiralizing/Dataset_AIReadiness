@@ -1,6 +1,41 @@
 {
   "$comment": "Standing guidance content for the collection guide and the intro cards: the notes-to-actionable ladder, the wh-questions crosswalk, the per-run log template, worked ontology examples, and the burden-reduction landscape. Held here rather than inline in components so the cards on the start page and the generated guide cannot drift apart. Prose, not criteria — nothing here affects a verdict. Citation keys in any 'references' array resolve in references.json, the same registry the matrix uses; matrix.test.js enforces it.",
-  "version": "0.7.0",
+  "version": "0.9.0",
+  "workflow": {
+    "lead": "The guide has a section for each phase of the work. Read in order they are a sequence, and the third one is the one most easily skipped: a dataset can pass through capture and documentation and still arrive at deposit with a descriptor nothing can load. Verification sits between writing the documents and releasing them.",
+    "phases": [
+      {
+        "id": "capture",
+        "name": "Capture",
+        "what": "Write the observation down while it is still available. Instrument settings, operator, consent wording — the rows that stop existing once the run is over.",
+        "anchor": "ladder"
+      },
+      {
+        "id": "document",
+        "name": "Document",
+        "what": "Route what you captured into the three released artifacts: the datasheet a person reads, the descriptor a pipeline loads, the provenance record that says how it came to be.",
+        "anchor": "inputs"
+      },
+      {
+        "id": "verify",
+        "name": "Verify",
+        "what": "Check that what you wrote is what a consumer can act on. This is the phase that separates machine-readable from machine-actionable, and the last point at which a defect from an earlier phase is still catchable.",
+        "anchor": "validation"
+      },
+      {
+        "id": "release",
+        "name": "Release",
+        "what": "Deposit the bundle with an identifier that resolves, a licence a machine can read, and an access tier that matches the consent.",
+        "anchor": "worksheet"
+      },
+      {
+        "id": "steward",
+        "name": "Steward",
+        "what": "Keep it: versions, deprecations, a route for errata. The phase that decides whether the work accumulates or resets with the next project.",
+        "anchor": "stewardship"
+      }
+    ]
+  },
   "ladder": [
     {
       "rung": "Paper notebook",
@@ -95,7 +130,7 @@
         "label": "Grounded",
         "check": "Values are resolvable identifiers, not free text",
         "tone": "border-ok-line bg-ok-bg",
-        "means": "The values a consumer has to dereference are identifiers instead of labels: an SPDX licence, a DOI, an ORCID, a media type, a real checksum. A grounded file lets a stranger's tool act on it without asking you anything."
+        "means": "The values a consumer has to dereference resolve on their own: an SPDX licence, a DOI, an ORCID, a media type, a real checksum. A grounded file lets a stranger's tool act on it without asking you anything."
       },
       {
         "id": "executable",
@@ -112,7 +147,7 @@
         "level": "L3",
         "artifact": "croissant",
         "min_degree": "grounded",
-        "why": "The descriptor is what a consumer dereferences. A licence, a dataset URL, a file URL, and a checksum that are labels rather than resolvable values leave a pipeline with nothing to fetch."
+        "why": "The descriptor is what a consumer dereferences. A pipeline can only fetch what resolves, so the licence, the dataset URL, the file URLs, and the checksums all have to be values it can dereference."
       },
       {
         "dimension": "Computability",
@@ -168,6 +203,50 @@
       "Clark2026"
     ]
   },
+  "datasheet_crosswalk": {
+    "lead": "Gebru et al. group a datasheet's questions by lifecycle stage; this document is ordered by assessment dimension, because one criterion answers one question and splitting it across stage headings would print the same answer twice. Where each of the template's groups is answered here:",
+    "groups": [
+      {
+        "group": "Motivation",
+        "question": "Why does this dataset exist, and who made it?",
+        "sections": ["Characterization", "Provenance"]
+      },
+      {
+        "group": "Composition",
+        "question": "What is in it, what does a record represent, and what is missing?",
+        "sections": ["Characterization", "Pre-model Explainability"]
+      },
+      {
+        "group": "Collection process",
+        "question": "How was it gathered, from whom, and on what basis?",
+        "sections": ["Provenance", "Ethics"]
+      },
+      {
+        "group": "Preprocessing, cleaning, labelling",
+        "question": "What was done to the raw data before release, and can it be undone?",
+        "sections": ["Provenance", "Pre-model Explainability"]
+      },
+      {
+        "group": "Uses",
+        "question": "What has it been used for, and what should it not be used for?",
+        "sections": ["Characterization", "Pre-model Explainability"]
+      },
+      {
+        "group": "Distribution",
+        "question": "How is it obtained, and under what licence and access conditions?",
+        "sections": ["FAIRness", "Computability", "Ethics"]
+      },
+      {
+        "group": "Maintenance",
+        "question": "Who keeps it, and what happens to superseded versions?",
+        "sections": ["Maintenance"]
+      }
+    ],
+    "references": [
+      "Gebru2021",
+      "DataCardsGoogle"
+    ]
+  },
   "validation": {
     "lead": "Validation is the last point at which a defect introduced earlier is still catchable. After release it is a correction, an erratum, and a model somebody already trained. The five categories below are what to check before you deposit; the tool runs the structural and grounding checks itself and references discipline validators for the rest.",
     "categories": [
@@ -207,15 +286,17 @@
         "tone": "border-ok-line bg-ok-bg"
       }
     ],
-    "report_note": "The output of validation is an artifact, not a feeling: a machine-readable report (JSON or RDF) bundled with the release and referenced from the dataset's metadata record. Failures should block the release rather than annotate it.",
+    "report_note": "The output of validation is an artifact: a machine-readable report (JSON or RDF) bundled with the release and referenced from the dataset's metadata record. A failure should block the release.",
+    "pipeline_note": "Treat these as continuous obligations that run alongside the work. A responsible-AI pipeline binds each item to an artifact produced during the lifecycle — a datasheet entry, a PROV-O record, a validation report, a model card — so that the release bundle is itself the evidence of compliance.",
     "lookup_note": "Which validator applies is field-dependent. The tool ships a seeded registry and suggests from it, and the three community registries are the authoritative lookup for everything it does not carry.",
     "references": [
       "Sansone2019",
-      "Knublauch2017"
+      "Knublauch2017",
+      "Raza2024"
     ]
   },
   "stewardship": {
-    "lead": "Release is not the end of the obligation. Versioning binds a change to a citable reference, so a model trained on one version stays reproducible after the dataset moves on; long-term stewardship extends that into infrastructure. This layer, rather than model innovation, is the rate-limiting factor for AI adoption in science: without it the lifecycle resets with every project instead of accumulating into reusable assets.",
+    "lead": "The obligation continues after release. Versioning binds a change to a citable reference, so a model trained on one version stays reproducible after the dataset moves on; long-term stewardship extends that into infrastructure. This layer is the rate-limiting factor for AI adoption in science, ahead of model innovation: without it every project starts the lifecycle over, and none of the work accumulates into a reusable asset.",
     "practices": [
       {
         "id": "version",
@@ -224,7 +305,7 @@
       },
       {
         "id": "deprecate",
-        "name": "Deprecate rather than withdraw",
+        "name": "Keep superseded versions resolvable",
         "what": "Keep a superseded version resolvable and marked as superseded. A model trained on v1 stays reproducible only while v1 still resolves, so removing it breaks work that was correct when it was done."
       },
       {
@@ -287,7 +368,9 @@
     "layers": [
       {
         "layer": "Datasheet / data card",
+        "checked_by_short": "a person reads it — no verifier",
         "tone": "border-line bg-surface-2",
+        "checked_by": "No official verifier exists for prose: a person reads it. That is why most of this layer’s rows are attested or human-judged — nothing mechanical settles whether a disclosure is adequate.",
         "sources": [
           "Protocol or README",
           "Consent form, ethics approval",
@@ -298,7 +381,9 @@
       },
       {
         "layer": "Croissant descriptor",
+        "checked_by_short": "MLCommons Croissant schema · mlcroissant",
         "tone": "border-info-line bg-info-bg",
+        "checked_by": "Verified against the MLCommons Croissant schema, then for referential soundness — every field source resolving to a declared file — then for grounding. `mlcroissant` is the reference implementation, and running the descriptor through it is what certifies a loader can act on it.",
         "sources": [
           "File list, formats, checksums",
           "Codebook: variables, types, units",
@@ -308,7 +393,9 @@
       },
       {
         "layer": "PROV-O record",
+        "checked_by_short": "W3C SHACL shapes · PROV-O profile",
         "tone": "border-ok-line bg-ok-bg",
+        "checked_by": "Verified with SHACL, the W3C shape-constraint language, against a PROV-O profile. The shapes assert what presence checks cannot — an activity with no inputs, a derivation edge pointing at an undeclared node. Deep validate on the Provenance tab runs them.",
         "sources": [
           "Run log or ELN entries",
           "Inputs and outputs per step",
@@ -317,6 +404,7 @@
         ]
       }
     ],
+    "verification_note": "Two of the three layers have an official verifier and one does not, which is why the assessment marks each row automated, attested, or human-judged, so the standard of proof is stated per row. Verifiers for the data itself are discipline-specific — checkCIF for a CIF, CF-checker for NetCDF, the BIDS Validator for an imaging tree — and the Validators page suggests them from what you declare.",
     "grounding": {
       "label": "Grounded by",
       "schemes": [
@@ -334,6 +422,7 @@
     },
     "references": [
       "Gebru2021",
+      "DataCardsGoogle",
       "Akhtar2024",
       "W3CPROVO2013"
     ]
@@ -343,7 +432,7 @@
     "meaning": {
       "L1": "A person can find the dataset, obtain it, and know what they are allowed to do with it. The consumer is a reader.",
       "L2": "A pipeline can load it once someone has prepared the load: schema, distributions, and transformations are all declared, and a person still mediates the final step.",
-      "L3": "An automated or semi-automated machine-learning workflow can consume it without anyone preparing the data first — a workflow engine, an AutoML system, or an instrumented laboratory. Some pipelines automate a few steps and some run end to end; either way, the dataset is not what stops them."
+      "L3": "An automated or semi-automated machine-learning workflow can consume it without anyone preparing the data first — a workflow engine, an AutoML system, or an instrumented laboratory. Some pipelines automate a few steps and some run end to end; either way, the dataset is not what stops them. Verification is not optional at this tier: an unchecked descriptor cannot support an unattended load whatever it claims, so the L3 claims on FAIRness, Provenance, Pre-model Explainability, and Computability are bounded by how far the released artifacts climb the ladder above."
     }
   },
   "run_log_fields": [
@@ -398,7 +487,7 @@
     {
       "effect": "removes",
       "title": "Use a format that carries its own metadata",
-      "what": "Disciplinary containers store acquisition parameters inside the file, so the metadata travels with the data instead of being re-entered somewhere else.",
+      "what": "Disciplinary containers store acquisition parameters inside the file, so the metadata travels with the data.",
       "examples": "NeXus · DICOM · CIF · mzML · FITS",
       "references": [
         "Hall1991",
@@ -444,7 +533,7 @@
     },
     {
       "effect": "reduces",
-      "title": "Look terms up instead of inventing them",
+      "title": "Look the term up first",
       "what": "Before coining a field name or a code, search the vocabularies. A term that already exists comes with a definition, a URI, and everyone who already uses it.",
       "examples": "EBI OLS · BioPortal · ZOOMA · TIB Terminology Service · EMMO · OPTIMADE · LOINC / SNOMED / UCUM",
       "references": [

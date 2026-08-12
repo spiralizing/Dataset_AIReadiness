@@ -1,6 +1,6 @@
 {
   "$comment": "Discipline-specific validator registry (app_design.md §7.4). The tool's core validation (Croissant structural+referential, SHACL for PROV-O, identifier grounding) is general; this registry catalogues field-specific validators surfaced by declared format / Pathway-C sub-domain. 'execution' controls integration: 'in-browser' validators can run in place and mark a criterion automated; 'cli'/'web-service' validators are referenced and their outcome recorded as attested evidence. 'applies_to' is open-world (free tags: format names and/or sub-domain ids), not validated against vocabularies.json. For disciplines outside this seeded set, the 'registries' below are the authoritative lookup.",
-  "version": "0.7.0",
+  "version": "0.9.0",
   "validators": [
     {
       "id": "bids-validator",
@@ -78,7 +78,7 @@
       "validator_name": "Aequitas",
       "validator_url": "https://github.com/dssg/aequitas",
       "execution": "cli",
-      "note": "Representation and parity metrics across protected attributes. Produces the report that is the evidence for the L3 bias-audit row; compare before and after curation, not only the released state."
+      "note": "Representation and parity metrics across protected attributes. Produces the report that is the evidence for the L3 bias-audit row; compare before and after curation, so introduced skew shows alongside released-state parity."
     },
     {
       "id": "fairlearn",

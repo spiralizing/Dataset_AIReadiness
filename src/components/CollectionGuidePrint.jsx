@@ -23,6 +23,7 @@ import { citeThisWork } from '../lib/thisWork.js';
 // the numbers are assigned at render time rather than hard-coded.
 const useSections = (g) =>
   [
+    { id: 'workflow', title: 'The shape of the work' },
     { id: 'forms', title: 'The four forms of a record' },
     { id: 'degrees', title: 'Degrees of machine-actionability' },
     { id: 'verification', title: 'How each row is confirmed' },
@@ -88,6 +89,19 @@ export default function CollectionGuidePrint({ record }) {
           ))}
         </ol>
       </nav>
+
+      {/* the five phases, so the sections below read as a sequence */}
+      <section className="gp-section">
+        <h2>{n('workflow')}. The shape of the work</h2>
+        <p>{g.workflow.lead}</p>
+        <ol className="gp-sources">
+          {g.workflow.phases.map((ph) => (
+            <li key={ph.id}>
+              <b>{ph.name}.</b> {ph.what}
+            </li>
+          ))}
+        </ol>
+      </section>
 
       {/* 1 — the ladder */}
       <section className="gp-section">
@@ -202,6 +216,7 @@ export default function CollectionGuidePrint({ record }) {
           ))}
         </dl>
         <p>{g.validation.report_note}</p>
+        <p>{g.validation.pipeline_note}</p>
         <p>{g.validation.lookup_note}</p>
         <p className="gp-note">
           Sources: {g.validation.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
@@ -266,7 +281,10 @@ export default function CollectionGuidePrint({ record }) {
           {g.documentationInputs.layers.map((l) => (
             <div key={l.layer}>
               <dt>{l.layer}</dt>
-              <dd>{l.sources.join(' · ')}</dd>
+              <dd>
+                {l.sources.join(' · ')}
+                {l.checked_by ? <> &mdash; <em>checked by:</em> {l.checked_by}</> : null}
+              </dd>
             </div>
           ))}
           <div>
@@ -277,6 +295,7 @@ export default function CollectionGuidePrint({ record }) {
             </dd>
           </div>
         </dl>
+        {g.documentationInputs.verification_note && <p>{g.documentationInputs.verification_note}</p>}
         <p className="gp-note">
           Sources: {g.documentationInputs.refs.map((c) => `${c.authors} (${c.year})`).join('; ')}.
         </p>
@@ -360,8 +379,8 @@ export default function CollectionGuidePrint({ record }) {
         <section className="gp-section gp-break">
           <h2>{n('ontology')}. Binding terms to shared vocabularies</h2>
           <p>
-            At L3 a field name is not enough: a consumer has to know what a column means, not only
-            what it was called.
+            At L3 the consumer needs the meaning of a column, which a field name alone cannot
+            carry.
           </p>
           {g.ontology.examples.map((ex) => (
             <div key={ex.title} className="gp-example">
